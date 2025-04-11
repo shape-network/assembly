@@ -1,7 +1,7 @@
-import '@rainbow-me/rainbowkit/styles.css';
 import { getDefaultConfig } from '@rainbow-me/rainbowkit';
-import { shape, shapeSepolia } from 'viem/chains';
+import '@rainbow-me/rainbowkit/styles.css';
 import { http } from 'viem';
+import { shape, shapeSepolia } from 'viem/chains';
 
 const transports = {
   [shape.id]: http(
