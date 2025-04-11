@@ -15,7 +15,6 @@ export function abbreviateHash(
   if (Buffer.isBuffer(hash)) {
     hashString = hash.toString('hex');
   } else if (typeof hash === 'string') {
-    // Remove '0x' prefix if present
     hashString = hash.startsWith('0x') ? hash.slice(2) : hash;
   } else {
     throw new Error('Invalid hash format. Expected string or Buffer.');
