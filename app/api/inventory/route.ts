@@ -86,7 +86,7 @@ export async function POST(request: Request) {
       molecules: filteredNfts
         .filter((nft) => molecules.some((molecule) => molecule.tokenId === nft.tokenId))
         .flatMap((nft) => {
-          const balance = Number(nft.balance);
+          const balance = nft.balance ? Number(nft.balance) : 1;
           return Array.from({ length: balance }, (_, i) => {
             const moleculeData = molecules.find((m) => m.tokenId === nft.tokenId);
 

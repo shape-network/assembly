@@ -47,7 +47,10 @@ export async function getMoleculesByIds(tokenIds: string[]) {
   const anyErrors = atoms.some((r) => r.error);
 
   if (anyErrors) {
-    throw new Error(`Error fetching molecules`);
+    console.error(
+      'Errors fetching molecules for tokenIds:',
+      atoms.map((r) => r.error)
+    );
   }
 
   const results = atoms.map((r) => {
