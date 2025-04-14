@@ -5,7 +5,7 @@ type SolidityCompatibleBond = {
   bondType: string;
 };
 
-type SolidityCompatibleAtom = {
+export type SolidityCompatibleAtom = {
   name: string;
   series: string;
   structure: {
