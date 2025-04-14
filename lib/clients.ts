@@ -5,7 +5,7 @@ import { createPublicClient, http } from 'viem';
 import { shape, shapeSepolia } from 'viem/chains';
 
 export const alchemy = new Alchemy({
-  apiKey: process.env.NEXT_PUBLIC_ALCHEMY_KEY,
+  apiKey: process.env.ALCHEMY_KEY,
   network: config.chainId === shape.id ? Network.SHAPE_MAINNET : Network.SHAPE_SEPOLIA,
 });
 
