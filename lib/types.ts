@@ -1,3 +1,4 @@
+import { OwnedNft } from 'alchemy-sdk';
 import { Hex } from 'viem';
 
 type SolidityCompatibleBond = {
@@ -99,6 +100,33 @@ export type Molecule = {
   bond: Bond;
   activation_energy: number;
   radius: number;
+  electrical_conductivity: number;
+  thermal_conductivity: number;
+  toughness: number;
+  hardness: number;
+  ductility: number;
+};
+
+export type CraftableMolecule = {
+  id: string;
+  nft: OwnedNft;
+  molecule: (BareMolecule & { image: string }) | null;
+};
+
+export type InventoryResponse = {
+  molecules: Array<CraftableMolecule>;
+  cursor?: string;
+};
+
+export type BareMolecule = {
+  identifier: string;
+  name: string;
+  giving_atoms: Atom[];
+  receiving_atoms: Atom[];
+  bond: Bond;
+  activation_energy: number;
+  radius: number;
+  tokenId: string;
   electrical_conductivity: number;
   thermal_conductivity: number;
   toughness: number;
