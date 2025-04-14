@@ -91,3 +91,9 @@
     @apply bg-background text-foreground;
   }
 }
+
+@utility debug {
+  outline-width: 2px;
+  outline-style: solid;
+  outline-color: rgba(255, 0, 0, 0.5);
+}
