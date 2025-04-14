@@ -29,3 +29,7 @@ export function abbreviateHash(
 
   return `0x${prefix}...${suffix}`;
 }
+
+export function universeHashToSeed(universeHash: string): string {
+  return universeHash.slice(2);
+}
