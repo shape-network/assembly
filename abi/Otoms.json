@@ -1,0 +1,2241 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "ECDSAInvalidSignature",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "length",
+          "type": "uint256"
+        }
+      ],
+      "name": "ECDSAInvalidSignatureLength",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "s",
+          "type": "bytes32"
+        }
+      ],
+      "name": "ECDSAInvalidSignatureS",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "balance",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "needed",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "ERC1155InsufficientBalance",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "approver",
+          "type": "address"
+        }
+      ],
+      "name": "ERC1155InvalidApprover",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "idsLength",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "valuesLength",
+          "type": "uint256"
+        }
+      ],
+      "name": "ERC1155InvalidArrayLength",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        }
+      ],
+      "name": "ERC1155InvalidOperator",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "receiver",
+          "type": "address"
+        }
+      ],
+      "name": "ERC1155InvalidReceiver",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        }
+      ],
+      "name": "ERC1155InvalidSender",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "ERC1155MissingApprovalForAll",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidInitialization",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidMiningHash",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidSignature",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidUniverseHash",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "MinesDepleted",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "MiningLimitExceeded",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotAnAtom",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotInitializing",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotOperator",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotSeeded",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnableInvalidOwner",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "OwnableUnauthorizedAccount",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ReentrancyGuardReentrantCall",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "UniverseSeedingClosed",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "UsedSignature",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "approved",
+          "type": "bool"
+        }
+      ],
+      "name": "ApprovalForAll",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "encoder",
+          "type": "address"
+        }
+      ],
+      "name": "EncoderUpdated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "version",
+          "type": "uint64"
+        }
+      ],
+      "name": "Initialized",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bool",
+          "name": "minesDepleted",
+          "type": "bool"
+        }
+      ],
+      "name": "MinesDepletedSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "miningLimit",
+          "type": "uint256"
+        }
+      ],
+      "name": "MiningLimitSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "bool",
+          "name": "isActive",
+          "type": "bool"
+        }
+      ],
+      "name": "OperatorToggled",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "minedBy",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "universeHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "atomId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "creationHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "OtomMined",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferStarted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "signer",
+          "type": "address"
+        }
+      ],
+      "name": "SignerSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256[]",
+          "name": "ids",
+          "type": "uint256[]"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256[]",
+          "name": "values",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "TransferBatch",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        }
+      ],
+      "name": "TransferSingle",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "value",
+          "type": "string"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        }
+      ],
+      "name": "URI",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "acceptOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_atomId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "_chemist",
+          "type": "address"
+        }
+      ],
+      "name": "annihilate",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        }
+      ],
+      "name": "balanceOf",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address[]",
+          "name": "accounts",
+          "type": "address[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "ids",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "balanceOfBatch",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "database",
+      "outputs": [
+        {
+          "internalType": "contract IOtomsDatabase",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "encoder",
+      "outputs": [
+        {
+          "internalType": "contract IOtomsEncoder",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        }
+      ],
+      "name": "exists",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "_universeHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "_chemist",
+          "type": "address"
+        }
+      ],
+      "name": "getMiningNonce",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "universeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "reactionOutputId",
+              "type": "uint256"
+            },
+            {
+              "components": [
+                {
+                  "components": [
+                    {
+                      "internalType": "string",
+                      "name": "id",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "name",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "bytes32",
+                      "name": "universeHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "activationEnergy",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "radius",
+                      "type": "uint256"
+                    },
+                    {
+                      "components": [
+                        {
+                          "internalType": "uint256",
+                          "name": "strength",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "string",
+                          "name": "bondType",
+                          "type": "string"
+                        }
+                      ],
+                      "internalType": "struct Bond",
+                      "name": "bond",
+                      "type": "tuple"
+                    },
+                    {
+                      "components": [
+                        {
+                          "internalType": "uint256",
+                          "name": "radius",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "volume",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "mass",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "density",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "electronegativity",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "bool",
+                          "name": "metallic",
+                          "type": "bool"
+                        },
+                        {
+                          "internalType": "string",
+                          "name": "name",
+                          "type": "string"
+                        },
+                        {
+                          "internalType": "string",
+                          "name": "series",
+                          "type": "string"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "periodicTableX",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "periodicTableY",
+                          "type": "uint256"
+                        },
+                        {
+                          "components": [
+                            {
+                              "internalType": "bytes32",
+                              "name": "universeHash",
+                              "type": "bytes32"
+                            },
+                            {
+                              "internalType": "uint256",
+                              "name": "depth",
+                              "type": "uint256"
+                            },
+                            {
+                              "internalType": "uint256",
+                              "name": "distance",
+                              "type": "uint256"
+                            },
+                            {
+                              "internalType": "uint256",
+                              "name": "distanceIndex",
+                              "type": "uint256"
+                            },
+                            {
+                              "internalType": "uint256",
+                              "name": "shell",
+                              "type": "uint256"
+                            },
+                            {
+                              "internalType": "uint256[]",
+                              "name": "totalInOuter",
+                              "type": "uint256[]"
+                            },
+                            {
+                              "internalType": "uint256[]",
+                              "name": "emptyInOuter",
+                              "type": "uint256[]"
+                            },
+                            {
+                              "internalType": "uint256[]",
+                              "name": "filledInOuter",
+                              "type": "uint256[]"
+                            },
+                            {
+                              "internalType": "uint256[]",
+                              "name": "ancestors",
+                              "type": "uint256[]"
+                            }
+                          ],
+                          "internalType": "struct AtomStructure",
+                          "name": "structure",
+                          "type": "tuple"
+                        },
+                        {
+                          "components": [
+                            {
+                              "internalType": "uint256",
+                              "name": "protons",
+                              "type": "uint256"
+                            },
+                            {
+                              "internalType": "uint256",
+                              "name": "neutrons",
+                              "type": "uint256"
+                            },
+                            {
+                              "internalType": "uint256",
+                              "name": "nucleons",
+                              "type": "uint256"
+                            },
+                            {
+                              "internalType": "uint256",
+                              "name": "stability",
+                              "type": "uint256"
+                            },
+                            {
+                              "internalType": "string",
+                              "name": "decayType",
+                              "type": "string"
+                            }
+                          ],
+                          "internalType": "struct Nucleus",
+                          "name": "nucleus",
+                          "type": "tuple"
+                        }
+                      ],
+                      "internalType": "struct Atom[]",
+                      "name": "givingAtoms",
+                      "type": "tuple[]"
+                    },
+                    {
+                      "components": [
+                        {
+                          "internalType": "uint256",
+                          "name": "radius",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "volume",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "mass",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "density",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "electronegativity",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "bool",
+                          "name": "metallic",
+                          "type": "bool"
+                        },
+                        {
+                          "internalType": "string",
+                          "name": "name",
+                          "type": "string"
+                        },
+                        {
+                          "internalType": "string",
+                          "name": "series",
+                          "type": "string"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "periodicTableX",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "periodicTableY",
+                          "type": "uint256"
+                        },
+                        {
+                          "components": [
+                            {
+                              "internalType": "bytes32",
+                              "name": "universeHash",
+                              "type": "bytes32"
+                            },
+                            {
+                              "internalType": "uint256",
+                              "name": "depth",
+                              "type": "uint256"
+                            },
+                            {
+                              "internalType": "uint256",
+                              "name": "distance",
+                              "type": "uint256"
+                            },
+                            {
+                              "internalType": "uint256",
+                              "name": "distanceIndex",
+                              "type": "uint256"
+                            },
+                            {
+                              "internalType": "uint256",
+                              "name": "shell",
+                              "type": "uint256"
+                            },
+                            {
+                              "internalType": "uint256[]",
+                              "name": "totalInOuter",
+                              "type": "uint256[]"
+                            },
+                            {
+                              "internalType": "uint256[]",
+                              "name": "emptyInOuter",
+                              "type": "uint256[]"
+                            },
+                            {
+                              "internalType": "uint256[]",
+                              "name": "filledInOuter",
+                              "type": "uint256[]"
+                            },
+                            {
+                              "internalType": "uint256[]",
+                              "name": "ancestors",
+                              "type": "uint256[]"
+                            }
+                          ],
+                          "internalType": "struct AtomStructure",
+                          "name": "structure",
+                          "type": "tuple"
+                        },
+                        {
+                          "components": [
+                            {
+                              "internalType": "uint256",
+                              "name": "protons",
+                              "type": "uint256"
+                            },
+                            {
+                              "internalType": "uint256",
+                              "name": "neutrons",
+                              "type": "uint256"
+                            },
+                            {
+                              "internalType": "uint256",
+                              "name": "nucleons",
+                              "type": "uint256"
+                            },
+                            {
+                              "internalType": "uint256",
+                              "name": "stability",
+                              "type": "uint256"
+                            },
+                            {
+                              "internalType": "string",
+                              "name": "decayType",
+                              "type": "string"
+                            }
+                          ],
+                          "internalType": "struct Nucleus",
+                          "name": "nucleus",
+                          "type": "tuple"
+                        }
+                      ],
+                      "internalType": "struct Atom[]",
+                      "name": "receivingAtoms",
+                      "type": "tuple[]"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "electricalConductivity",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "thermalConductivity",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "toughness",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "hardness",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "ductility",
+                      "type": "uint256"
+                    }
+                  ],
+                  "internalType": "struct Molecule",
+                  "name": "molecule",
+                  "type": "tuple"
+                },
+                {
+                  "internalType": "string",
+                  "name": "tokenUri",
+                  "type": "string"
+                }
+              ],
+              "internalType": "struct MoleculeWithUri[]",
+              "name": "outputMolecules",
+              "type": "tuple[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "inputAtomIds",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256",
+              "name": "remainingEnergy",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string[]",
+              "name": "reactionTypes",
+              "type": "string[]"
+            },
+            {
+              "internalType": "bool",
+              "name": "success",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct ReactionResult",
+          "name": "_reactionResult",
+          "type": "tuple"
+        },
+        {
+          "internalType": "address",
+          "name": "_chemist",
+          "type": "address"
+        }
+      ],
+      "name": "handleReactionResult",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address[]",
+          "name": "_operators",
+          "type": "address[]"
+        },
+        {
+          "internalType": "address",
+          "name": "signerAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "encoderAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "databaseAddress",
+          "type": "address"
+        }
+      ],
+      "name": "initialize",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        }
+      ],
+      "name": "isApprovedForAll",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "components": [
+                {
+                  "internalType": "string",
+                  "name": "id",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "name",
+                  "type": "string"
+                },
+                {
+                  "internalType": "bytes32",
+                  "name": "universeHash",
+                  "type": "bytes32"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "activationEnergy",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "radius",
+                  "type": "uint256"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "strength",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "bondType",
+                      "type": "string"
+                    }
+                  ],
+                  "internalType": "struct Bond",
+                  "name": "bond",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "radius",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "volume",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "mass",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "density",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "electronegativity",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bool",
+                      "name": "metallic",
+                      "type": "bool"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "name",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "series",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "periodicTableX",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "periodicTableY",
+                      "type": "uint256"
+                    },
+                    {
+                      "components": [
+                        {
+                          "internalType": "bytes32",
+                          "name": "universeHash",
+                          "type": "bytes32"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "depth",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "distance",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "distanceIndex",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "shell",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256[]",
+                          "name": "totalInOuter",
+                          "type": "uint256[]"
+                        },
+                        {
+                          "internalType": "uint256[]",
+                          "name": "emptyInOuter",
+                          "type": "uint256[]"
+                        },
+                        {
+                          "internalType": "uint256[]",
+                          "name": "filledInOuter",
+                          "type": "uint256[]"
+                        },
+                        {
+                          "internalType": "uint256[]",
+                          "name": "ancestors",
+                          "type": "uint256[]"
+                        }
+                      ],
+                      "internalType": "struct AtomStructure",
+                      "name": "structure",
+                      "type": "tuple"
+                    },
+                    {
+                      "components": [
+                        {
+                          "internalType": "uint256",
+                          "name": "protons",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "neutrons",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "nucleons",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "stability",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "string",
+                          "name": "decayType",
+                          "type": "string"
+                        }
+                      ],
+                      "internalType": "struct Nucleus",
+                      "name": "nucleus",
+                      "type": "tuple"
+                    }
+                  ],
+                  "internalType": "struct Atom[]",
+                  "name": "givingAtoms",
+                  "type": "tuple[]"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "radius",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "volume",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "mass",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "density",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "electronegativity",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "bool",
+                      "name": "metallic",
+                      "type": "bool"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "name",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "series",
+                      "type": "string"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "periodicTableX",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "periodicTableY",
+                      "type": "uint256"
+                    },
+                    {
+                      "components": [
+                        {
+                          "internalType": "bytes32",
+                          "name": "universeHash",
+                          "type": "bytes32"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "depth",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "distance",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "distanceIndex",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "shell",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256[]",
+                          "name": "totalInOuter",
+                          "type": "uint256[]"
+                        },
+                        {
+                          "internalType": "uint256[]",
+                          "name": "emptyInOuter",
+                          "type": "uint256[]"
+                        },
+                        {
+                          "internalType": "uint256[]",
+                          "name": "filledInOuter",
+                          "type": "uint256[]"
+                        },
+                        {
+                          "internalType": "uint256[]",
+                          "name": "ancestors",
+                          "type": "uint256[]"
+                        }
+                      ],
+                      "internalType": "struct AtomStructure",
+                      "name": "structure",
+                      "type": "tuple"
+                    },
+                    {
+                      "components": [
+                        {
+                          "internalType": "uint256",
+                          "name": "protons",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "neutrons",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "nucleons",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "uint256",
+                          "name": "stability",
+                          "type": "uint256"
+                        },
+                        {
+                          "internalType": "string",
+                          "name": "decayType",
+                          "type": "string"
+                        }
+                      ],
+                      "internalType": "struct Nucleus",
+                      "name": "nucleus",
+                      "type": "tuple"
+                    }
+                  ],
+                  "internalType": "struct Atom[]",
+                  "name": "receivingAtoms",
+                  "type": "tuple[]"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "electricalConductivity",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "thermalConductivity",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "toughness",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "hardness",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "ductility",
+                  "type": "uint256"
+                }
+              ],
+              "internalType": "struct Molecule",
+              "name": "minedMolecule",
+              "type": "tuple"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "miningHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "tokenUri",
+              "type": "string"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "universeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "expiry",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes",
+              "name": "signature",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct MiningPayload[]",
+          "name": "_payloads",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "mine",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "minesDepleted",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "miningLimit",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "id",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "universeHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint256",
+              "name": "activationEnergy",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "radius",
+              "type": "uint256"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "uint256",
+                  "name": "strength",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "string",
+                  "name": "bondType",
+                  "type": "string"
+                }
+              ],
+              "internalType": "struct Bond",
+              "name": "bond",
+              "type": "tuple"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "uint256",
+                  "name": "radius",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "volume",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "mass",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "density",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "electronegativity",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "metallic",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "string",
+                  "name": "name",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "series",
+                  "type": "string"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "periodicTableX",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "periodicTableY",
+                  "type": "uint256"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "bytes32",
+                      "name": "universeHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "depth",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "distance",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "distanceIndex",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "shell",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256[]",
+                      "name": "totalInOuter",
+                      "type": "uint256[]"
+                    },
+                    {
+                      "internalType": "uint256[]",
+                      "name": "emptyInOuter",
+                      "type": "uint256[]"
+                    },
+                    {
+                      "internalType": "uint256[]",
+                      "name": "filledInOuter",
+                      "type": "uint256[]"
+                    },
+                    {
+                      "internalType": "uint256[]",
+                      "name": "ancestors",
+                      "type": "uint256[]"
+                    }
+                  ],
+                  "internalType": "struct AtomStructure",
+                  "name": "structure",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "protons",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "neutrons",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "nucleons",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "stability",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "decayType",
+                      "type": "string"
+                    }
+                  ],
+                  "internalType": "struct Nucleus",
+                  "name": "nucleus",
+                  "type": "tuple"
+                }
+              ],
+              "internalType": "struct Atom[]",
+              "name": "givingAtoms",
+              "type": "tuple[]"
+            },
+            {
+              "components": [
+                {
+                  "internalType": "uint256",
+                  "name": "radius",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "volume",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "mass",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "density",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "electronegativity",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "bool",
+                  "name": "metallic",
+                  "type": "bool"
+                },
+                {
+                  "internalType": "string",
+                  "name": "name",
+                  "type": "string"
+                },
+                {
+                  "internalType": "string",
+                  "name": "series",
+                  "type": "string"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "periodicTableX",
+                  "type": "uint256"
+                },
+                {
+                  "internalType": "uint256",
+                  "name": "periodicTableY",
+                  "type": "uint256"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "bytes32",
+                      "name": "universeHash",
+                      "type": "bytes32"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "depth",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "distance",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "distanceIndex",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "shell",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256[]",
+                      "name": "totalInOuter",
+                      "type": "uint256[]"
+                    },
+                    {
+                      "internalType": "uint256[]",
+                      "name": "emptyInOuter",
+                      "type": "uint256[]"
+                    },
+                    {
+                      "internalType": "uint256[]",
+                      "name": "filledInOuter",
+                      "type": "uint256[]"
+                    },
+                    {
+                      "internalType": "uint256[]",
+                      "name": "ancestors",
+                      "type": "uint256[]"
+                    }
+                  ],
+                  "internalType": "struct AtomStructure",
+                  "name": "structure",
+                  "type": "tuple"
+                },
+                {
+                  "components": [
+                    {
+                      "internalType": "uint256",
+                      "name": "protons",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "neutrons",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "nucleons",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "uint256",
+                      "name": "stability",
+                      "type": "uint256"
+                    },
+                    {
+                      "internalType": "string",
+                      "name": "decayType",
+                      "type": "string"
+                    }
+                  ],
+                  "internalType": "struct Nucleus",
+                  "name": "nucleus",
+                  "type": "tuple"
+                }
+              ],
+              "internalType": "struct Atom[]",
+              "name": "receivingAtoms",
+              "type": "tuple[]"
+            },
+            {
+              "internalType": "uint256",
+              "name": "electricalConductivity",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "thermalConductivity",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "toughness",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "hardness",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "ductility",
+              "type": "uint256"
+            }
+          ],
+          "internalType": "struct Molecule",
+          "name": "_molecule",
+          "type": "tuple"
+        }
+      ],
+      "name": "moleculeIsAtom",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "operators",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "pendingOwner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "ids",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "values",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
+        }
+      ],
+      "name": "safeBatchTransferFrom",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
+        }
+      ],
+      "name": "safeTransferFrom",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "energyFactorBps",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "active",
+              "type": "bool"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "seedHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            }
+          ],
+          "internalType": "struct UniverseInformation",
+          "name": "_universeInformation",
+          "type": "tuple"
+        },
+        {
+          "internalType": "uint256",
+          "name": "expiry",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "signature",
+          "type": "bytes"
+        }
+      ],
+      "name": "seedUniverse",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "operator",
+          "type": "address"
+        },
+        {
+          "internalType": "bool",
+          "name": "approved",
+          "type": "bool"
+        }
+      ],
+      "name": "setApprovalForAll",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_newEncoder",
+          "type": "address"
+        }
+      ],
+      "name": "setEncoder",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bool",
+          "name": "_minesDepleted",
+          "type": "bool"
+        }
+      ],
+      "name": "setMinesDepleted",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_miningLimit",
+          "type": "uint256"
+        }
+      ],
+      "name": "setMiningLimit",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newSigner",
+          "type": "address"
+        }
+      ],
+      "name": "setSigner",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_operator",
+          "type": "address"
+        }
+      ],
+      "name": "toggleOperator",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalSupply",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "id",
+          "type": "uint256"
+        }
+      ],
+      "name": "totalSupply",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "name": "uri",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ]
+}
