@@ -14,7 +14,7 @@ export type BlueprintComponent = {
   id: string;
   name: string;
   description: string;
-  properties: Trait[];
+  traits: Trait[];
   blueprint: BlueprintComponent[];
 };
 
