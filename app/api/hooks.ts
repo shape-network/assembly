@@ -37,6 +37,27 @@ export function useGetCraftableItems() {
 const MOCK_ITEMS: CraftableItem[] = [
   {
     id: 'item-1',
+    name: 'Diamond Pickaxe',
+    description: 'An extremely hard and durable pickaxe for mining operations',
+    properties: [
+      {
+        'activation-energy': 14.75,
+        radius: 1.29,
+        'bond-type': 'covalent',
+        'bond-strength': 42.9,
+        'giving-atoms': ['C', 'Ti'],
+        'receiving-atoms': ['C', 'Ti', 'N'],
+        'electrical-conductivity': 0.1,
+        'thermal-conductivity': 0.89,
+        toughness: 1.82,
+        hardness: 3.65,
+        ductility: 0.02,
+      },
+    ],
+    recipe: ['C₃', 'TiN', 'TiC'],
+  },
+  {
+    id: 'item-2',
     name: 'Tungsten Blade',
     description: 'A sharp blade with high thermal conductivity',
     properties: [
@@ -55,10 +76,9 @@ const MOCK_ITEMS: CraftableItem[] = [
       },
     ],
     recipe: ['WAf₂', 'Fe₃C'],
-    image: '/images/blade.png',
   },
   {
-    id: 'item-2',
+    id: 'item-3',
     name: 'Crystal Shield',
     description: 'A transparent shield with high durability',
     properties: [
@@ -77,10 +97,9 @@ const MOCK_ITEMS: CraftableItem[] = [
       },
     ],
     recipe: ['SiO₂', 'Al₂O₃'],
-    image: '/images/shield.png',
   },
   {
-    id: 'item-3',
+    id: 'item-4',
     name: 'Conductive Wire',
     description: 'A flexible wire with excellent electrical conductivity',
     properties: [
@@ -99,6 +118,5 @@ const MOCK_ITEMS: CraftableItem[] = [
       },
     ],
     recipe: ['Cu', 'Ag', 'CuAg'],
-    image: '/images/wire.png',
   },
 ];
