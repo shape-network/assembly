@@ -2,7 +2,7 @@
 
 import { MOCKED_CRAFTABLE_ITEMS, MOCKED_OWNED_ITEMS } from '@/data';
 import { paths } from '@/lib/paths';
-import { BlueprintComponent, CraftableMolecule, InventoryResponse } from '@/lib/types';
+import { BlueprintComponent, InventoryResponse } from '@/lib/types';
 import { useQuery } from '@tanstack/react-query';
 import { useAccount } from 'wagmi';
 
@@ -10,7 +10,7 @@ export function useGetMoleculesForUser() {
   const { address } = useAccount();
 
   // TODO: add pagination, sort by universe
-  return useQuery<CraftableMolecule[]>({
+  return useQuery<BlueprintComponent[]>({
     queryKey: ['molecules', address],
     queryFn: async () => {
       if (!address) return [];

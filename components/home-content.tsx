@@ -147,7 +147,7 @@ const BlueprintComponentCard: FC<{ item: BlueprintComponent; isOwned: boolean }>
 
   function isElementOwned(name: string) {
     if (!inventory) return false;
-    return inventory.some((i) => i.molecule?.name === name);
+    return inventory.some((i) => i.name === name);
   }
 
   function isItemCraftable(item: BlueprintComponent) {
@@ -249,7 +249,7 @@ const MoleculesInventory: FC = () => {
         <ul className="flex flex-wrap items-start gap-2 rounded">
           {data.map((molecule) => (
             <MoleculeBadge key={molecule.id} isOwned>
-              {molecule.molecule?.name ?? 'x'}
+              {molecule.name}
             </MoleculeBadge>
           ))}
         </ul>

@@ -1,4 +1,3 @@
-import { OwnedNft } from 'alchemy-sdk';
 import { Hex } from 'viem';
 
 // Assembly-related types
@@ -13,19 +12,13 @@ export type Trait = {
 export type BlueprintComponent = {
   id: string;
   name: string;
-  description: string;
+  description?: string;
   traits: Trait[];
   blueprint: BlueprintComponent[];
 };
 
-export type CraftableMolecule = {
-  id: string;
-  nft: OwnedNft;
-  molecule: (BareMolecule & { image: string }) | null;
-};
-
 export type InventoryResponse = {
-  molecules: Array<CraftableMolecule>;
+  molecules: Array<BlueprintComponent>;
   cursor?: string;
 };
 
