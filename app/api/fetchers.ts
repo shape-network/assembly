@@ -32,7 +32,7 @@ export async function getMoleculesByIds(tokenIds: string[]) {
   }
 
   const rpc = rpcClient();
-  const atoms = await rpc.multicall({
+  const elements = await rpc.multicall({
     contracts: tokenIds.map(
       (tokenId) =>
         ({
@@ -44,22 +44,24 @@ export async function getMoleculesByIds(tokenIds: string[]) {
     ),
   });
 
-  const anyErrors = atoms.some((r) => r.error);
+  const anyErrors = elements.some((r) => r.error);
 
   if (anyErrors) {
     console.error(
       'Errors fetching molecules for tokenIds:',
-      atoms.map((r) => r.error)
+      elements.map((r) => r.error)
     );
   }
 
-  const results = atoms.map((r) => {
-    const molecule = solidityMoleculeToMolecule(r.result!);
-    return {
-      tokenId: String(moleculeIdToTokenId(molecule.identifier)),
-      molecule,
-    };
-  });
+  const results = elements
+    .filter((r) => r.result && r.result.givingAtoms.length + r.result.receivingAtoms.length > 1) // Only keep elements that are molecules
+    .map((r) => {
+      const molecule = solidityMoleculeToMolecule(r.result!);
+      return {
+        tokenId: String(moleculeIdToTokenId(molecule.identifier)),
+        molecule,
+      };
+    });
 
   return results;
 }
