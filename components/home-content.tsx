@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { WalletConnect } from '@/components/wallet-connect';
-import { formatProperty } from '@/lib/otoms';
+import { formatProperty, formatPropertyValue } from '@/lib/otoms';
 import { FC, ReactNode } from 'react';
 import { useAccount } from 'wagmi';
 
@@ -28,7 +28,7 @@ export const HomeContent: FC = () => {
         <WalletConnect />
       </header>
 
-      <main className="flex flex-col items-center justify-center gap-8">
+      <main className="flex flex-col items-center justify-start gap-8 py-12">
         {address ? (
           <div className="flex flex-col gap-16">
             <div className="flex flex-col gap-2">
@@ -89,12 +89,9 @@ const ItemsToCraft: FC = () => {
                         <div key={key} className="text-primary flex items-center gap-2">
                           <span>{formatProperty(key)}</span>
                           <span className="border-muted-foreground/15 flex-grow border-b border-dotted"></span>
-                          <span className="font-medium">
-                            {Array.isArray(value) ? value.join(', ') : value}
-                          </span>
+                          <span className="font-medium">{formatPropertyValue(value)}</span>
                         </div>
-                      ))
-                      .slice(0, 4)}
+                      ))}
                   </li>
                 ))}
               </ul>
