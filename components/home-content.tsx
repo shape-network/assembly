@@ -14,8 +14,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { WalletConnect } from '@/components/wallet-connect';
 import { formatProperty, formatPropertyValue } from '@/lib/otoms';
 import { paths } from '@/lib/paths';
+import { cn } from '@/lib/utils';
 import Link from 'next/link';
-import { FC, PropsWithChildren, ReactNode } from 'react';
+import { ComponentProps, FC, PropsWithChildren, ReactNode } from 'react';
 import { useAccount } from 'wagmi';
 
 export const HomeContent: FC = () => {
@@ -61,38 +62,17 @@ export const HomeContent: FC = () => {
               <div className="flex flex-col gap-4">
                 <p>
                   Assembly is an open-source item crafting tool on{' '}
-                  <a
-                    className="font-medium underline hover:no-underline"
-                    href={paths.otom}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Shape
-                  </a>
-                  , based on the world of{' '}
-                  <a
-                    className="font-medium underline hover:no-underline"
-                    href={paths.otom}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Otoms
-                  </a>
-                  .
+                  <InlineLink href={paths.otom}>Shape</InlineLink>, based on the world of{' '}
+                  <InlineLink href={paths.otom}>Otoms</InlineLink>.
                 </p>
                 <p>
                   It&apos;s In esse ullamco in mollit mollit irure laboris irure consectetur aliqua
                   cillum velit duis commodo incididunt. Quis anim consectetur fugiat dolore occaecat
                   nulla ipsum enim laborum ut sint ut.
                 </p>
-                <a
-                  className="self-start font-medium underline hover:no-underline"
-                  href={paths.otom}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <InlineLink className="self-start" href={paths.otom}>
                   View source code
-                </a>
+                </InlineLink>
               </div>
 
               <div className="flex w-full flex-col items-center gap-2">
@@ -218,5 +198,18 @@ const ItemsToCraftSkeleton: FC = () => {
         </li>
       ))}
     </ItemsCardsGrid>
+  );
+};
+
+const InlineLink: FC<PropsWithChildren<ComponentProps<'a'>>> = ({ children, href, className }) => {
+  return (
+    <a
+      className={cn('font-medium underline hover:no-underline', className)}
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {children}
+    </a>
   );
 };
