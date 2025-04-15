@@ -24,8 +24,17 @@ export const HomeContent: FC = () => {
       data-connected={address}
       className="group mx-auto grid min-h-screen max-w-7xl gap-4 p-5 data-connected:grid-rows-[auto_1fr]"
     >
-      <header className="hidden justify-end group-data-connected:flex">
-        <WalletConnect />
+      <header className="flex items-center justify-between">
+        <div className="relative">
+          <h1 className="text-primary text-2xl font-semibold tracking-wide uppercase">Assembly</h1>
+          <span className="text-muted-foreground/50 absolute -bottom-5 left-0 text-sm whitespace-nowrap">
+            An otom-based item crafter
+          </span>
+        </div>
+
+        <div className="hidden group-data-connected:flex">
+          <WalletConnect />
+        </div>
       </header>
 
       <main className="flex flex-col items-center justify-start gap-8 py-12">
