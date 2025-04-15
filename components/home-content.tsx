@@ -13,7 +13,9 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { WalletConnect } from '@/components/wallet-connect';
 import { formatProperty, formatPropertyValue } from '@/lib/otoms';
-import { FC, ReactNode } from 'react';
+import { paths } from '@/lib/paths';
+import Link from 'next/link';
+import { FC, PropsWithChildren, ReactNode } from 'react';
 import { useAccount } from 'wagmi';
 
 export const HomeContent: FC = () => {
@@ -26,14 +28,24 @@ export const HomeContent: FC = () => {
     >
       <header className="flex items-center justify-between">
         <div className="relative">
-          <h1 className="text-primary text-2xl font-semibold tracking-wide uppercase">Assembly</h1>
+          <h1 className="text-primary text-2xl font-semibold tracking-wide uppercase">
+            <Link href={paths.home}>Assembly</Link>
+          </h1>
           <span className="text-muted-foreground/50 absolute -bottom-5 left-0 text-sm whitespace-nowrap">
             An otom-based item crafter
           </span>
         </div>
 
-        <div className="hidden group-data-connected:flex">
-          <WalletConnect />
+        <div className="flex items-center gap-2">
+          <Button asChild variant="link">
+            <a href={paths.otom} target="_blank" rel="noopener noreferrer">
+              otom.xyz
+            </a>
+          </Button>
+
+          <div className="hidden group-data-connected:flex">
+            <WalletConnect />
+          </div>
         </div>
       </header>
 
@@ -74,7 +86,7 @@ const ItemsToCraft: FC = () => {
   }
 
   return (
-    <ul className="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-4">
+    <ItemsCardsGrid>
       {data.map((item) => (
         <li key={item.id}>
           <Card>
@@ -115,8 +127,12 @@ const ItemsToCraft: FC = () => {
           </Card>
         </li>
       ))}
-    </ul>
+    </ItemsCardsGrid>
   );
+};
+
+const ItemsCardsGrid: FC<PropsWithChildren> = ({ children }) => {
+  return <ul className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">{children}</ul>;
 };
 
 const Inventory: FC = () => {
@@ -163,10 +179,12 @@ const InventorySkeleton: FC = () => {
 
 const ItemsToCraftSkeleton: FC = () => {
   return (
-    <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">
-      {Array.from({ length: 3 }).map((_, index) => (
-        <Skeleton key={index} className="h-40 w-full" />
+    <ItemsCardsGrid>
+      {Array.from({ length: 4 }).map((_, index) => (
+        <li key={index}>
+          <Skeleton className="h-96 w-full" />
+        </li>
       ))}
-    </div>
+    </ItemsCardsGrid>
   );
 };

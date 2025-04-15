@@ -3,7 +3,7 @@
 import { getDefaultConfig } from '@rainbow-me/rainbowkit';
 import '@rainbow-me/rainbowkit/styles.css';
 import { http } from 'viem';
-import { shape, shapeSepolia } from 'viem/chains';
+import { mainnet, shape, shapeSepolia } from 'viem/chains';
 
 export const wagmiConfig = getDefaultConfig({
   appName: 'Assembly',
@@ -15,6 +15,9 @@ export const wagmiConfig = getDefaultConfig({
       batch: true,
     }),
     [shapeSepolia.id]: http(`https://shape-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_KEY}`, {
+      batch: true,
+    }),
+    [mainnet.id]: http(`https://mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_KEY}`, {
       batch: true,
     }),
   },

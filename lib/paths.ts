@@ -4,6 +4,8 @@ import { shape } from 'viem/chains';
 export const otomsBucket = config.chainId === shape.id ? 'prod-otoms' : 'dev-otoms';
 
 export const paths = {
+  home: '/',
+  otom: 'https://otom.xyz',
   api: {
     inventory: '/api/inventory',
   },
