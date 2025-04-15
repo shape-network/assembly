@@ -14,6 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { WalletConnect } from '@/components/wallet-connect';
 import { formatProperty, formatPropertyValue } from '@/lib/otoms';
 import { paths } from '@/lib/paths';
+import { CraftableItem } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { ExternalLinkIcon } from '@radix-ui/react-icons';
 import Link from 'next/link';
@@ -105,6 +106,7 @@ export const HomeContent: FC = () => {
 
 const ItemsToCraft: FC = () => {
   const { data, isLoading, isError } = useGetCraftableItems();
+  const { data: inventory } = useGetMoleculesForUser();
 
   if (isLoading) {
     return <ItemsToCraftSkeleton />;
@@ -112,6 +114,16 @@ const ItemsToCraft: FC = () => {
 
   if (!data || isError) {
     return <p>Error loading items to craft.</p>;
+  }
+
+  function isElementOwned(id: string) {
+    if (!inventory) return false;
+    return inventory.some((i) => i.molecule?.name === id);
+  }
+
+  function isItemCraftable(item: CraftableItem) {
+    if (!inventory) return false;
+    return item.recipe.every((el) => isElementOwned(el));
   }
 
   return (
@@ -126,7 +138,9 @@ const ItemsToCraft: FC = () => {
             <CardContent className="flex flex-col gap-6">
               <div className="flex flex-wrap gap-1">
                 {item.recipe.map((el, i) => (
-                  <MoleculeBadge key={i}>{el}</MoleculeBadge>
+                  <MoleculeBadge key={i} isOwned={isElementOwned(el)}>
+                    {el}
+                  </MoleculeBadge>
                 ))}
               </div>
 
@@ -147,10 +161,12 @@ const ItemsToCraft: FC = () => {
               </ul>
             </CardContent>
             <CardFooter>
-              {Math.random() > 0.5 ? (
+              {isItemCraftable(item) ? (
                 <Button>Craft</Button>
               ) : (
-                <span className="text-muted-foreground/50 text-xs">Missing elements</span>
+                <Button disabled variant="ghost" className="-ml-4">
+                  Missing {item.recipe.join(', ')}
+                </Button>
               )}
             </CardFooter>
           </Card>
@@ -176,7 +192,18 @@ const Inventory: FC = () => {
   }
 
   if (!data || data.length === 0) {
-    return <p>No items found in your inventory.</p>;
+    return (
+      <Card>
+        <CardContent className="grid place-items-center gap-4 py-12">
+          <p>No molecules found in your wallet.</p>
+          <Button asChild>
+            <a href={paths.otom} target="_blank" rel="noopener noreferrer">
+              Get Molecules
+            </a>
+          </Button>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
@@ -184,7 +211,7 @@ const Inventory: FC = () => {
       <CardContent>
         <ul className="flex flex-wrap items-start gap-2 rounded">
           {data.map((molecule) => (
-            <MoleculeBadge key={molecule.id}>{molecule.molecule?.name}</MoleculeBadge>
+            <MoleculeBadge key={molecule.id}>{molecule.molecule?.name ?? 'x'}</MoleculeBadge>
           ))}
         </ul>
       </CardContent>
@@ -192,8 +219,20 @@ const Inventory: FC = () => {
   );
 };
 
-const MoleculeBadge: FC<{ children: ReactNode }> = ({ children }) => {
-  return <div className="bg-muted text-muted-foreground rounded px-2 py-1">{children}</div>;
+const MoleculeBadge: FC<{ children: ReactNode; isOwned?: boolean }> = ({
+  children,
+  isOwned = false,
+}) => {
+  return (
+    <div
+      className={cn(
+        'rounded px-2 py-1',
+        isOwned ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'
+      )}
+    >
+      {children}
+    </div>
+  );
 };
 
 const InventorySkeleton: FC = () => {
