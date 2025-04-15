@@ -76,3 +76,7 @@ export function formatPropertyValue(value: string | number | string[]) {
 
   return value.toFixed(2);
 }
+
+export function isAtomMolecule(maybeMolecule: Molecule): boolean {
+  return maybeMolecule.giving_atoms.length + maybeMolecule.receiving_atoms.length > 1;
+}
