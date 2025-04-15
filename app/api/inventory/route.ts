@@ -92,14 +92,10 @@ export async function POST(request: Request) {
 
             return {
               id: `${nft.tokenId}-${i}`,
-              nft,
-              molecule: moleculeData
-                ? {
-                    ...moleculeData.molecule,
-                    image: moleculeData.image,
-                    tokenId: moleculeData.tokenId,
-                  }
-                : null,
+              name: moleculeData?.molecule?.name ?? '???',
+              description: nft.description,
+              traits: [],
+              blueprint: [],
             };
           });
         }),
