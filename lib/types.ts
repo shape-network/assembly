@@ -18,7 +18,7 @@ export type BlueprintComponent = {
 };
 
 export type InventoryResponse = {
-  molecules: Array<BlueprintComponent>;
+  molecules: BlueprintComponent[];
   cursor?: string;
 };
 
