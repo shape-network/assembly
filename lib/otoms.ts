@@ -60,3 +60,7 @@ function solidityAtomToAtom(a: SolidityCompatibleAtom): Atom {
     pt_pos: [fromWad(a.periodicTableX), fromWad(a.periodicTableY)],
   };
 }
+
+export function formatProperty(property: string) {
+  return property.replace(/-/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
+}

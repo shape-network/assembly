@@ -12,7 +12,8 @@ import {
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { WalletConnect } from '@/components/wallet-connect';
-import { FC } from 'react';
+import { formatProperty } from '@/lib/otoms';
+import { FC, ReactNode } from 'react';
 import { useAccount } from 'wagmi';
 
 export const HomeContent: FC = () => {
@@ -64,7 +65,7 @@ const ItemsToCraft: FC = () => {
   }
 
   return (
-    <ul className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">
+    <ul className="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-4">
       {data.map((item) => (
         <li key={item.id}>
           <Card>
@@ -75,20 +76,19 @@ const ItemsToCraft: FC = () => {
             <CardContent className="flex flex-col gap-6">
               <div className="flex flex-wrap gap-1">
                 {item.recipe.map((el, i) => (
-                  <span key={i} className="bg-muted text-muted-foreground rounded px-2 py-1">
-                    {el}
-                  </span>
+                  <MoleculeBadge key={i}>{el}</MoleculeBadge>
                 ))}
               </div>
 
-              <ul className="mx-auto max-w-56 text-sm">
+              <ul className="text-sm">
                 {item.properties.map((prop, idx) => (
                   <li key={idx} className="flex flex-col gap-1">
                     {Object.entries(prop)
                       .filter(([, value]) => value !== undefined)
                       .map(([key, value]) => (
-                        <div key={key} className="flex items-center justify-between gap-12 text-xs">
-                          <span className="text-muted-foreground">{key}</span>
+                        <div key={key} className="text-primary flex items-center gap-2">
+                          <span>{formatProperty(key)}</span>
+                          <span className="border-muted-foreground/15 flex-grow border-b border-dotted"></span>
                           <span className="font-medium">
                             {Array.isArray(value) ? value.join(', ') : value}
                           </span>
@@ -129,17 +129,20 @@ const Inventory: FC = () => {
   }
 
   return (
-    <ul className="flex flex-wrap items-start gap-2 rounded">
-      {data.map((molecule) => (
-        <li
-          key={molecule.id}
-          className="border-border bg-primary grid aspect-square w-10 place-items-center border text-white"
-        >
-          {molecule.molecule?.name}
-        </li>
-      ))}
-    </ul>
+    <Card>
+      <CardContent>
+        <ul className="flex flex-wrap items-start gap-2 rounded">
+          {data.map((molecule) => (
+            <MoleculeBadge key={molecule.id}>{molecule.molecule?.name}</MoleculeBadge>
+          ))}
+        </ul>
+      </CardContent>
+    </Card>
   );
+};
+
+const MoleculeBadge: FC<{ children: ReactNode }> = ({ children }) => {
+  return <div className="bg-muted text-muted-foreground rounded px-2 py-1">{children}</div>;
 };
 
 const InventorySkeleton: FC = () => {
