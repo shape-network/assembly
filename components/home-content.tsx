@@ -1,6 +1,16 @@
 'use client';
 
-import { useGetMoleculesForUser } from '@/app/api/hooks';
+import { useGetCraftableItems, useGetMoleculesForUser } from '@/app/api/hooks';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { WalletConnect } from '@/components/wallet-connect';
 import { FC } from 'react';
 import { useAccount } from 'wagmi';
@@ -19,7 +29,17 @@ export const HomeContent: FC = () => {
 
       <main className="flex flex-col items-center justify-center gap-8">
         {address ? (
-          <ItemsToCraft />
+          <div className="flex flex-col gap-16">
+            <div className="flex flex-col gap-2">
+              <h2 className="text-primary font-bold tracking-wide uppercase">Items to craft</h2>
+              <ItemsToCraft />
+            </div>
+
+            <div className="flex w-full flex-col gap-2">
+              <h2 className="text-primary font-bold tracking-wide uppercase">Owned molecules</h2>
+              <Inventory />
+            </div>
+          </div>
         ) : (
           <div className="flex flex-col items-center gap-8">
             <h1 className="text-primary text-4xl font-bold">ASSEMBLY</h1>
@@ -33,10 +53,71 @@ export const HomeContent: FC = () => {
 };
 
 const ItemsToCraft: FC = () => {
+  const { data, isLoading, isError } = useGetCraftableItems();
+
+  if (isLoading) {
+    return <ItemsToCraftSkeleton />;
+  }
+
+  if (!data || isError) {
+    return <p>Error loading items to craft.</p>;
+  }
+
+  return (
+    <ul className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">
+      {data.map((item) => (
+        <li key={item.id}>
+          <Card>
+            <CardHeader>
+              <CardTitle>{item.name}</CardTitle>
+              <CardDescription>{item.description}</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-6">
+              <div className="flex flex-wrap gap-1">
+                {item.recipe.map((el, i) => (
+                  <span key={i} className="bg-muted text-muted-foreground rounded px-2 py-1">
+                    {el}
+                  </span>
+                ))}
+              </div>
+
+              <ul className="mx-auto max-w-56 text-sm">
+                {item.properties.map((prop, idx) => (
+                  <li key={idx} className="flex flex-col gap-1">
+                    {Object.entries(prop)
+                      .filter(([, value]) => value !== undefined)
+                      .map(([key, value]) => (
+                        <div key={key} className="flex items-center justify-between gap-12 text-xs">
+                          <span className="text-muted-foreground">{key}</span>
+                          <span className="font-medium">
+                            {Array.isArray(value) ? value.join(', ') : value}
+                          </span>
+                        </div>
+                      ))
+                      .slice(0, 4)}
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+            <CardFooter>
+              {Math.random() > 0.5 ? (
+                <Button>Craft</Button>
+              ) : (
+                <span className="text-muted-foreground/50 text-xs">Missing elements</span>
+              )}
+            </CardFooter>
+          </Card>
+        </li>
+      ))}
+    </ul>
+  );
+};
+
+const Inventory: FC = () => {
   const { data, isLoading, isError } = useGetMoleculesForUser();
 
   if (isLoading) {
-    return <p>Loading...</p>;
+    return <InventorySkeleton />;
   }
 
   if (isError) {
@@ -48,18 +129,35 @@ const ItemsToCraft: FC = () => {
   }
 
   return (
-    <div className="flex w-full flex-col gap-2">
-      <h2 className="text-primary font-bold tracking-wide uppercase">Owned molecules</h2>
-      <ul className="flex flex-wrap items-start gap-2 rounded">
-        {data.map((molecule) => (
-          <li
-            key={molecule.id}
-            className="border-border bg-primary grid aspect-square w-10 place-items-center border text-white"
-          >
-            {molecule.molecule?.name}
-          </li>
-        ))}
-      </ul>
+    <ul className="flex flex-wrap items-start gap-2 rounded">
+      {data.map((molecule) => (
+        <li
+          key={molecule.id}
+          className="border-border bg-primary grid aspect-square w-10 place-items-center border text-white"
+        >
+          {molecule.molecule?.name}
+        </li>
+      ))}
+    </ul>
+  );
+};
+
+const InventorySkeleton: FC = () => {
+  return (
+    <div className="flex flex-wrap items-start gap-2">
+      {Array.from({ length: 75 }).map((_, index) => (
+        <Skeleton key={index} className="h-10 w-10" />
+      ))}
+    </div>
+  );
+};
+
+const ItemsToCraftSkeleton: FC = () => {
+  return (
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">
+      {Array.from({ length: 3 }).map((_, index) => (
+        <Skeleton key={index} className="h-40 w-full" />
+      ))}
     </div>
   );
 };
