@@ -133,3 +133,26 @@ export type BareMolecule = {
   hardness: number;
   ductility: number;
 };
+
+export type Property = {
+  'activation-energy'?: number;
+  radius?: number;
+  'bond-type'?: string;
+  'bond-strength'?: number;
+  'giving-atoms'?: string[];
+  'receiving-atoms'?: string[];
+  'electrical-conductivity'?: number;
+  'thermal-conductivity'?: number;
+  toughness?: number;
+  hardness?: number;
+  ductility?: number;
+};
+
+export type CraftableItem = {
+  id: string;
+  name: string;
+  description: string;
+  properties: Property[];
+  recipe: string[];
+  image?: string;
+};
