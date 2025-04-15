@@ -174,7 +174,7 @@ const ItemsToCraft: FC = () => {
                   <Button>Craft</Button>
                 ) : (
                   <Button disabled variant="ghost" className="-ml-4">
-                    Missing {item.recipe.join(', ')}
+                    Missing {item.recipe.filter((el) => !isElementOwned(el)).join(', ')}
                   </Button>
                 )}
               </CardFooter>
@@ -221,7 +221,9 @@ const Inventory: FC = () => {
       <CardContent>
         <ul className="flex flex-wrap items-start gap-2 rounded">
           {data.map((molecule) => (
-            <MoleculeBadge key={molecule.id}>{molecule.molecule?.name ?? 'x'}</MoleculeBadge>
+            <MoleculeBadge key={molecule.id} isOwned>
+              {molecule.molecule?.name ?? 'x'}
+            </MoleculeBadge>
           ))}
         </ul>
       </CardContent>
@@ -229,10 +231,7 @@ const Inventory: FC = () => {
   );
 };
 
-const MoleculeBadge: FC<{ children: ReactNode; isOwned?: boolean }> = ({
-  children,
-  isOwned = false,
-}) => {
+const MoleculeBadge: FC<{ children: ReactNode; isOwned: boolean }> = ({ children, isOwned }) => {
   return (
     <div
       className={cn(
