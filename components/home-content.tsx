@@ -128,50 +128,60 @@ const ItemsToCraft: FC = () => {
 
   return (
     <ItemsCardsGrid>
-      {data.map((item) => (
-        <li key={item.id}>
-          <Card>
-            <CardHeader>
-              <CardTitle>{item.name}</CardTitle>
-              <CardDescription>{item.description}</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-6">
-              <div className="flex flex-wrap gap-1">
-                {item.recipe.map((el, i) => (
-                  <MoleculeBadge key={i} isOwned={isElementOwned(el)}>
-                    {el}
-                  </MoleculeBadge>
-                ))}
-              </div>
+      {data.map((item) => {
+        const isCraftable = isItemCraftable(item);
 
-              <ul className="text-sm">
-                {item.properties.map((prop, idx) => (
-                  <li key={idx} className="flex flex-col gap-1">
-                    {Object.entries(prop)
-                      .filter(([, value]) => value !== undefined)
-                      .map(([key, value]) => (
-                        <div key={key} className="text-primary flex items-center gap-2">
-                          <span>{formatProperty(key)}</span>
-                          <span className="border-muted-foreground/15 flex-grow border-b border-dotted"></span>
-                          <span className="font-medium">{formatPropertyValue(value)}</span>
-                        </div>
-                      ))}
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-            <CardFooter>
-              {isItemCraftable(item) ? (
-                <Button>Craft</Button>
-              ) : (
-                <Button disabled variant="ghost" className="-ml-4">
-                  Missing {item.recipe.join(', ')}
-                </Button>
-              )}
-            </CardFooter>
-          </Card>
-        </li>
-      ))}
+        return (
+          <li key={item.id}>
+            <Card>
+              <CardHeader>
+                <CardTitle>{item.name}</CardTitle>
+                <CardDescription>{item.description}</CardDescription>
+              </CardHeader>
+
+              <CardContent className="flex flex-col gap-6">
+                <div className="flex flex-wrap gap-1">
+                  {item.recipe.map((el, i) => {
+                    const isOwned = isElementOwned(el);
+
+                    return (
+                      <MoleculeBadge key={i} isOwned={isOwned}>
+                        {el}
+                      </MoleculeBadge>
+                    );
+                  })}
+                </div>
+
+                <ul className="text-sm">
+                  {item.properties.map((prop, idx) => (
+                    <li key={idx} className="flex flex-col gap-1">
+                      {Object.entries(prop)
+                        .filter(([, value]) => value !== undefined)
+                        .map(([key, value]) => (
+                          <div key={key} className="text-primary flex items-center gap-2">
+                            <span>{formatProperty(key)}</span>
+                            <span className="border-muted-foreground/15 flex-grow border-b border-dotted"></span>
+                            <span className="font-medium">{formatPropertyValue(value)}</span>
+                          </div>
+                        ))}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+
+              <CardFooter>
+                {isCraftable ? (
+                  <Button>Craft</Button>
+                ) : (
+                  <Button disabled variant="ghost" className="-ml-4">
+                    Missing {item.recipe.join(', ')}
+                  </Button>
+                )}
+              </CardFooter>
+            </Card>
+          </li>
+        );
+      })}
     </ItemsCardsGrid>
   );
 };
