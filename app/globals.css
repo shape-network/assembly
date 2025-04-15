@@ -3,22 +3,17 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@theme {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+@theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-foreground: var(--primary); /* default: var(--foreground); */
   --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
+  --color-card-foreground: var(--primary); /* default: var(--foreground); */
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
