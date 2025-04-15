@@ -22,10 +22,7 @@ export const HomeContent: FC = () => {
   const { address } = useAccount();
 
   return (
-    <div
-      data-connected={address}
-      className="group mx-auto grid min-h-screen max-w-7xl gap-4 p-5 data-connected:grid-rows-[auto_1fr]"
-    >
+    <div className="mx-auto grid min-h-screen max-w-7xl grid-rows-[auto_1fr] gap-4 p-5">
       <header className="flex items-center justify-between">
         <div className="relative">
           <h1 className="text-primary text-2xl font-semibold tracking-wide uppercase">
@@ -43,32 +40,67 @@ export const HomeContent: FC = () => {
             </a>
           </Button>
 
-          <div className="hidden group-data-connected:flex">
-            <WalletConnect />
-          </div>
+          <WalletConnect />
         </div>
       </header>
 
-      <main className="flex flex-col items-center justify-start gap-8 py-12">
-        {address ? (
-          <div className="flex flex-col gap-16">
-            <div className="flex flex-col gap-2">
-              <h2 className="text-primary font-bold tracking-wide uppercase">Items to craft</h2>
-              <ItemsToCraft />
-            </div>
+      <main className="flex flex-col justify-start gap-8 py-12">
+        <div className="flex flex-col gap-16">
+          <div className="flex flex-col gap-2">
+            <h2 className="text-primary font-bold tracking-wide uppercase">Items to craft</h2>
+            <ItemsToCraft />
+          </div>
 
+          {address ? (
             <div className="flex w-full flex-col gap-2">
               <h2 className="text-primary font-bold tracking-wide uppercase">Owned molecules</h2>
               <Inventory />
             </div>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center gap-8">
-            <h1 className="text-primary text-4xl font-bold">ASSEMBLY</h1>
-            <p className="text-xl">An otom-based item crafter</p>
-            <WalletConnect />
-          </div>
-        )}
+          ) : (
+            <div className="flex w-full flex-col items-start gap-8">
+              <div className="flex flex-col gap-4">
+                <p>
+                  Assembly is an open-source item crafting tool on{' '}
+                  <a
+                    className="font-medium underline hover:no-underline"
+                    href={paths.otom}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Shape
+                  </a>
+                  , based on the world of{' '}
+                  <a
+                    className="font-medium underline hover:no-underline"
+                    href={paths.otom}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Otoms
+                  </a>
+                  .
+                </p>
+                <p>
+                  It&apos;s In esse ullamco in mollit mollit irure laboris irure consectetur aliqua
+                  cillum velit duis commodo incididunt. Quis anim consectetur fugiat dolore occaecat
+                  nulla ipsum enim laborum ut sint ut.
+                </p>
+                <a
+                  className="self-start font-medium underline hover:no-underline"
+                  href={paths.otom}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  View source code
+                </a>
+              </div>
+
+              <div className="flex w-full flex-col items-center gap-2">
+                <WalletConnect />
+              </div>
+            </div>
+          )}
+        </div>
       </main>
     </div>
   );
