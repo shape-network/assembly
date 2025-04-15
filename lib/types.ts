@@ -1,6 +1,36 @@
 import { OwnedNft } from 'alchemy-sdk';
 import { Hex } from 'viem';
 
+// Assembly-related types
+
+export type Trait = {
+  power: number;
+  toughness?: number;
+  'electrical-conductivity'?: number;
+  speed?: number;
+};
+
+export type BlueprintComponent = {
+  id: string;
+  name: string;
+  description: string;
+  properties: Trait[];
+  blueprint: BlueprintComponent[];
+};
+
+export type CraftableMolecule = {
+  id: string;
+  nft: OwnedNft;
+  molecule: (BareMolecule & { image: string }) | null;
+};
+
+export type InventoryResponse = {
+  molecules: Array<CraftableMolecule>;
+  cursor?: string;
+};
+
+// Otom-related types
+
 type SolidityCompatibleBond = {
   strength: bigint;
   bondType: string;
@@ -107,17 +137,6 @@ export type Molecule = {
   ductility: number;
 };
 
-export type CraftableMolecule = {
-  id: string;
-  nft: OwnedNft;
-  molecule: (BareMolecule & { image: string }) | null;
-};
-
-export type InventoryResponse = {
-  molecules: Array<CraftableMolecule>;
-  cursor?: string;
-};
-
 export type BareMolecule = {
   identifier: string;
   name: string;
@@ -132,27 +151,4 @@ export type BareMolecule = {
   toughness: number;
   hardness: number;
   ductility: number;
-};
-
-export type Property = {
-  'activation-energy'?: number;
-  radius?: number;
-  'bond-type'?: string;
-  'bond-strength'?: number;
-  'giving-atoms'?: string[];
-  'receiving-atoms'?: string[];
-  'electrical-conductivity'?: number;
-  'thermal-conductivity'?: number;
-  toughness?: number;
-  hardness?: number;
-  ductility?: number;
-};
-
-export type CraftableItem = {
-  id: string;
-  name: string;
-  description: string;
-  properties: Property[];
-  recipe: string[];
-  image?: string;
 };

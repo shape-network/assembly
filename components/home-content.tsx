@@ -14,7 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { WalletConnect } from '@/components/wallet-connect';
 import { formatProperty, formatPropertyValue } from '@/lib/otoms';
 import { paths } from '@/lib/paths';
-import { CraftableItem } from '@/lib/types';
+import { BlueprintComponent } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { ExternalLinkIcon } from '@radix-ui/react-icons';
 import Link from 'next/link';
@@ -116,14 +116,14 @@ const ItemsToCraft: FC = () => {
     return <p>Error loading items to craft.</p>;
   }
 
-  function isElementOwned(id: string) {
+  function isElementOwned(name: string) {
     if (!inventory) return false;
-    return inventory.some((i) => i.molecule?.name === id);
+    return inventory.some((i) => i.molecule?.name === name);
   }
 
-  function isItemCraftable(item: CraftableItem) {
+  function isItemCraftable(item: BlueprintComponent) {
     if (!inventory) return false;
-    return item.recipe.every((el) => isElementOwned(el));
+    return item.blueprint.every((el) => isElementOwned(el.name));
   }
 
   return (
@@ -141,12 +141,12 @@ const ItemsToCraft: FC = () => {
 
               <CardContent className="flex flex-col gap-6">
                 <div className="flex flex-wrap gap-1">
-                  {item.recipe.map((el, i) => {
-                    const isOwned = isElementOwned(el);
+                  {item.blueprint.map((el, i) => {
+                    const isOwned = isElementOwned(el.name);
 
                     return (
                       <MoleculeBadge key={i} isOwned={isOwned}>
-                        {el}
+                        {el.name}
                       </MoleculeBadge>
                     );
                   })}
@@ -174,7 +174,11 @@ const ItemsToCraft: FC = () => {
                   <Button>Craft</Button>
                 ) : (
                   <Button disabled variant="ghost" className="-ml-4">
-                    Missing {item.recipe.filter((el) => !isElementOwned(el)).join(', ')}
+                    Missing{' '}
+                    {item.blueprint
+                      .filter((el) => !isElementOwned(el.name))
+                      .map((el) => el.name)
+                      .join(', ')}
                   </Button>
                 )}
               </CardFooter>

@@ -1,7 +1,8 @@
 'use client';
 
+import { MOCKED_ITEMS } from '@/data';
 import { paths } from '@/lib/paths';
-import { CraftableItem, CraftableMolecule, InventoryResponse } from '@/lib/types';
+import { BlueprintComponent, CraftableMolecule, InventoryResponse } from '@/lib/types';
 import { useQuery } from '@tanstack/react-query';
 import { useAccount } from 'wagmi';
 
@@ -26,81 +27,10 @@ export function useGetMoleculesForUser() {
 }
 
 export function useGetCraftableItems() {
-  return useQuery<CraftableItem[]>({
+  return useQuery<BlueprintComponent[]>({
     queryKey: ['craftable-items'],
     queryFn: async () => {
-      return MOCK_ITEMS;
+      return MOCKED_ITEMS;
     },
   });
 }
-
-const MOCK_ITEMS: CraftableItem[] = [
-  {
-    id: 'item-1',
-    name: 'Diamond Pickaxe',
-    description: 'An extremely hard and durable pickaxe',
-    properties: [
-      {
-        'bond-type': 'covalent',
-        'bond-strength': 42.9,
-        'electrical-conductivity': 0.1,
-        'thermal-conductivity': 0.89,
-        toughness: 1.82,
-        hardness: 3.65,
-        ductility: 0.02,
-      },
-    ],
-    recipe: ['Ju₃', 'TiN', 'TiC'],
-  },
-  {
-    id: 'item-2',
-    name: 'Tungsten Blade',
-    description: 'A sharp blade with high thermal conductivity',
-    properties: [
-      {
-        'bond-type': 'covalent',
-        'bond-strength': 36.815,
-        'electrical-conductivity': 0.0,
-        'thermal-conductivity': 0.727,
-        toughness: 0.95,
-        hardness: 1.83,
-        ductility: 0,
-      },
-    ],
-    recipe: ['WAf₂', 'Fe₃C'],
-  },
-  {
-    id: 'item-3',
-    name: 'Crystal Shield',
-    description: 'A transparent shield with high durability',
-    properties: [
-      {
-        'bond-type': 'ionic',
-        'bond-strength': 28.9,
-        'electrical-conductivity': 0.12,
-        'thermal-conductivity': 0.33,
-        toughness: 1.25,
-        hardness: 2.75,
-        ductility: 0,
-      },
-    ],
-    recipe: ['SiO₂', 'Al₂O₃'],
-  },
-  {
-    id: 'item-4',
-    name: 'Conductive Wire',
-    description: 'A flexible wire with excellent electrical conductivity',
-    properties: [
-      {
-        'bond-type': 'metallic',
-        'bond-strength': 22.3,
-        'electrical-conductivity': 0.95,
-        'thermal-conductivity': 0.85,
-        toughness: 0.75,
-        hardness: 0.65,
-        ductility: 0.9,
-      },
-    ],
-    recipe: ['Cu', 'Ag', 'CuAg'],
-  },
-];
