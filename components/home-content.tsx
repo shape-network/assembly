@@ -15,6 +15,7 @@ import { WalletConnect } from '@/components/wallet-connect';
 import { formatProperty, formatPropertyValue } from '@/lib/otoms';
 import { paths } from '@/lib/paths';
 import { cn } from '@/lib/utils';
+import { ExternalLinkIcon } from '@radix-ui/react-icons';
 import Link from 'next/link';
 import { ComponentProps, FC, PropsWithChildren, ReactNode } from 'react';
 import { useAccount } from 'wagmi';
@@ -48,13 +49,29 @@ export const HomeContent: FC = () => {
       <main className="flex flex-col justify-start gap-8 py-12">
         <div className="flex flex-col gap-16">
           <div className="flex flex-col gap-2">
-            <h2 className="text-primary font-bold tracking-wide uppercase">Items to craft</h2>
+            <div className="flex items-baseline justify-between gap-2">
+              <h2 className="text-primary font-bold tracking-wide uppercase">Items to craft</h2>
+              <InlineLink
+                href={paths.repo}
+                className="text-muted-foreground/50 text-sm no-underline hover:underline"
+              >
+                Propose your own <ExternalLinkIcon className="size-4" />
+              </InlineLink>
+            </div>
             <ItemsToCraft />
           </div>
 
           {address ? (
             <div className="flex w-full flex-col gap-2">
-              <h2 className="text-primary font-bold tracking-wide uppercase">Owned molecules</h2>
+              <div className="flex items-baseline justify-between gap-2">
+                <h2 className="text-primary font-bold tracking-wide uppercase">Owned molecules</h2>
+                <InlineLink
+                  href={paths.otom}
+                  className="text-muted-foreground/50 text-sm no-underline hover:underline"
+                >
+                  Mine more otoms <ExternalLinkIcon className="size-4" />
+                </InlineLink>
+              </div>
               <Inventory />
             </div>
           ) : (
@@ -181,11 +198,15 @@ const MoleculeBadge: FC<{ children: ReactNode }> = ({ children }) => {
 
 const InventorySkeleton: FC = () => {
   return (
-    <div className="flex flex-wrap items-start gap-2">
-      {Array.from({ length: 75 }).map((_, index) => (
-        <Skeleton key={index} className="h-10 w-10" />
-      ))}
-    </div>
+    <Card>
+      <CardContent>
+        <div className="flex flex-wrap items-start gap-2">
+          {Array.from({ length: 75 }).map((_, index) => (
+            <Skeleton key={index} className="h-10 w-10" />
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
@@ -204,7 +225,10 @@ const ItemsToCraftSkeleton: FC = () => {
 const InlineLink: FC<PropsWithChildren<ComponentProps<'a'>>> = ({ children, href, className }) => {
   return (
     <a
-      className={cn('font-medium underline hover:no-underline', className)}
+      className={cn(
+        'inline-flex items-center gap-x-2 font-medium underline hover:no-underline',
+        className
+      )}
       href={href}
       target="_blank"
       rel="noopener noreferrer"
