@@ -50,7 +50,7 @@ const MOCK_ITEMS: CraftableItem[] = [
         ductility: 0.02,
       },
     ],
-    recipe: ['C₃', 'TiN', 'TiC'],
+    recipe: ['Ju₃', 'TiN', 'TiC'],
   },
   {
     id: 'item-2',

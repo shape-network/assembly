@@ -20,7 +20,7 @@ export const WalletConnect = () => {
     <ConnectButton.Custom>
       {({ openConnectModal, account }) =>
         account && address ? (
-          <span className="flex items-center gap-x-2 text-sm font-medium">
+          <span className="flex items-center gap-x-2 font-medium">
             <span>{ensName ?? abbreviateHash(address)}</span>
 
             <button onClick={handleDisconnect} type="button" className="cursor-pointer">

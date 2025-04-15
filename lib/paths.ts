@@ -5,6 +5,7 @@ export const otomsBucket = config.chainId === shape.id ? 'prod-otoms' : 'dev-oto
 
 export const paths = {
   home: '/',
+  repo: 'https://github.com/shape-network/assembly',
   shape: 'https://shape.network',
   otom: 'https://otom.xyz',
   api: {

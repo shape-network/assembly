@@ -14,7 +14,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { WalletConnect } from '@/components/wallet-connect';
 import { formatProperty, formatPropertyValue } from '@/lib/otoms';
 import { paths } from '@/lib/paths';
+import { CraftableItem } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { ExternalLinkIcon } from '@radix-ui/react-icons';
 import Link from 'next/link';
 import { ComponentProps, FC, PropsWithChildren, ReactNode } from 'react';
 import { useAccount } from 'wagmi';
@@ -48,13 +50,29 @@ export const HomeContent: FC = () => {
       <main className="flex flex-col justify-start gap-8 py-12">
         <div className="flex flex-col gap-16">
           <div className="flex flex-col gap-2">
-            <h2 className="text-primary font-bold tracking-wide uppercase">Items to craft</h2>
+            <div className="flex items-baseline justify-between gap-2">
+              <h2 className="text-primary font-bold tracking-wide uppercase">Items to craft</h2>
+              <InlineLink
+                href={paths.repo}
+                className="text-muted-foreground/50 text-sm no-underline hover:underline"
+              >
+                Propose your own <ExternalLinkIcon className="size-4" />
+              </InlineLink>
+            </div>
             <ItemsToCraft />
           </div>
 
           {address ? (
             <div className="flex w-full flex-col gap-2">
-              <h2 className="text-primary font-bold tracking-wide uppercase">Owned molecules</h2>
+              <div className="flex items-baseline justify-between gap-2">
+                <h2 className="text-primary font-bold tracking-wide uppercase">Owned molecules</h2>
+                <InlineLink
+                  href={paths.otom}
+                  className="text-muted-foreground/50 text-sm no-underline hover:underline"
+                >
+                  Mine more otoms <ExternalLinkIcon className="size-4" />
+                </InlineLink>
+              </div>
               <Inventory />
             </div>
           ) : (
@@ -88,6 +106,7 @@ export const HomeContent: FC = () => {
 
 const ItemsToCraft: FC = () => {
   const { data, isLoading, isError } = useGetCraftableItems();
+  const { data: inventory } = useGetMoleculesForUser();
 
   if (isLoading) {
     return <ItemsToCraftSkeleton />;
@@ -97,48 +116,72 @@ const ItemsToCraft: FC = () => {
     return <p>Error loading items to craft.</p>;
   }
 
+  function isElementOwned(id: string) {
+    if (!inventory) return false;
+    return inventory.some((i) => i.molecule?.name === id);
+  }
+
+  function isItemCraftable(item: CraftableItem) {
+    if (!inventory) return false;
+    return item.recipe.every((el) => isElementOwned(el));
+  }
+
   return (
     <ItemsCardsGrid>
-      {data.map((item) => (
-        <li key={item.id}>
-          <Card>
-            <CardHeader>
-              <CardTitle>{item.name}</CardTitle>
-              <CardDescription>{item.description}</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-6">
-              <div className="flex flex-wrap gap-1">
-                {item.recipe.map((el, i) => (
-                  <MoleculeBadge key={i}>{el}</MoleculeBadge>
-                ))}
-              </div>
+      {data.map((item) => {
+        const isCraftable = isItemCraftable(item);
 
-              <ul className="text-sm">
-                {item.properties.map((prop, idx) => (
-                  <li key={idx} className="flex flex-col gap-1">
-                    {Object.entries(prop)
-                      .filter(([, value]) => value !== undefined)
-                      .map(([key, value]) => (
-                        <div key={key} className="text-primary flex items-center gap-2">
-                          <span>{formatProperty(key)}</span>
-                          <span className="border-muted-foreground/15 flex-grow border-b border-dotted"></span>
-                          <span className="font-medium">{formatPropertyValue(value)}</span>
-                        </div>
-                      ))}
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-            <CardFooter>
-              {Math.random() > 0.5 ? (
-                <Button>Craft</Button>
-              ) : (
-                <span className="text-muted-foreground/50 text-xs">Missing elements</span>
-              )}
-            </CardFooter>
-          </Card>
-        </li>
-      ))}
+        return (
+          <li key={item.id}>
+            <Card>
+              <CardHeader>
+                <CardTitle>{item.name}</CardTitle>
+                <CardDescription>{item.description}</CardDescription>
+              </CardHeader>
+
+              <CardContent className="flex flex-col gap-6">
+                <div className="flex flex-wrap gap-1">
+                  {item.recipe.map((el, i) => {
+                    const isOwned = isElementOwned(el);
+
+                    return (
+                      <MoleculeBadge key={i} isOwned={isOwned}>
+                        {el}
+                      </MoleculeBadge>
+                    );
+                  })}
+                </div>
+
+                <ul className="text-sm">
+                  {item.properties.map((prop, idx) => (
+                    <li key={idx} className="flex flex-col gap-1">
+                      {Object.entries(prop)
+                        .filter(([, value]) => value !== undefined)
+                        .map(([key, value]) => (
+                          <div key={key} className="text-primary flex items-center gap-2">
+                            <span>{formatProperty(key)}</span>
+                            <span className="border-muted-foreground/15 flex-grow border-b border-dotted"></span>
+                            <span className="font-medium">{formatPropertyValue(value)}</span>
+                          </div>
+                        ))}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+
+              <CardFooter>
+                {isCraftable ? (
+                  <Button>Craft</Button>
+                ) : (
+                  <Button disabled variant="ghost" className="-ml-4">
+                    Missing {item.recipe.filter((el) => !isElementOwned(el)).join(', ')}
+                  </Button>
+                )}
+              </CardFooter>
+            </Card>
+          </li>
+        );
+      })}
     </ItemsCardsGrid>
   );
 };
@@ -159,7 +202,18 @@ const Inventory: FC = () => {
   }
 
   if (!data || data.length === 0) {
-    return <p>No items found in your inventory.</p>;
+    return (
+      <Card>
+        <CardContent className="grid place-items-center gap-4 py-12">
+          <p>No molecules found in your wallet.</p>
+          <Button asChild>
+            <a href={paths.otom} target="_blank" rel="noopener noreferrer">
+              Get Molecules
+            </a>
+          </Button>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
@@ -167,7 +221,9 @@ const Inventory: FC = () => {
       <CardContent>
         <ul className="flex flex-wrap items-start gap-2 rounded">
           {data.map((molecule) => (
-            <MoleculeBadge key={molecule.id}>{molecule.molecule?.name}</MoleculeBadge>
+            <MoleculeBadge key={molecule.id} isOwned>
+              {molecule.molecule?.name ?? 'x'}
+            </MoleculeBadge>
           ))}
         </ul>
       </CardContent>
@@ -175,17 +231,30 @@ const Inventory: FC = () => {
   );
 };
 
-const MoleculeBadge: FC<{ children: ReactNode }> = ({ children }) => {
-  return <div className="bg-muted text-muted-foreground rounded px-2 py-1">{children}</div>;
+const MoleculeBadge: FC<{ children: ReactNode; isOwned: boolean }> = ({ children, isOwned }) => {
+  return (
+    <div
+      className={cn(
+        'rounded px-2 py-1',
+        isOwned ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'
+      )}
+    >
+      {children}
+    </div>
+  );
 };
 
 const InventorySkeleton: FC = () => {
   return (
-    <div className="flex flex-wrap items-start gap-2">
-      {Array.from({ length: 75 }).map((_, index) => (
-        <Skeleton key={index} className="h-10 w-10" />
-      ))}
-    </div>
+    <Card>
+      <CardContent>
+        <div className="flex flex-wrap items-start gap-2">
+          {Array.from({ length: 75 }).map((_, index) => (
+            <Skeleton key={index} className="h-10 w-10" />
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
@@ -204,7 +273,10 @@ const ItemsToCraftSkeleton: FC = () => {
 const InlineLink: FC<PropsWithChildren<ComponentProps<'a'>>> = ({ children, href, className }) => {
   return (
     <a
-      className={cn('font-medium underline hover:no-underline', className)}
+      className={cn(
+        'inline-flex items-center gap-x-2 font-medium underline hover:no-underline',
+        className
+      )}
       href={href}
       target="_blank"
       rel="noopener noreferrer"
