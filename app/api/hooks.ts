@@ -38,15 +38,11 @@ const MOCK_ITEMS: CraftableItem[] = [
   {
     id: 'item-1',
     name: 'Diamond Pickaxe',
-    description: 'An extremely hard and durable pickaxe for mining operations',
+    description: 'An extremely hard and durable pickaxe',
     properties: [
       {
-        'activation-energy': 14.75,
-        radius: 1.29,
         'bond-type': 'covalent',
         'bond-strength': 42.9,
-        'giving-atoms': ['C', 'Ti'],
-        'receiving-atoms': ['C', 'Ti', 'N'],
         'electrical-conductivity': 0.1,
         'thermal-conductivity': 0.89,
         toughness: 1.82,
@@ -62,12 +58,8 @@ const MOCK_ITEMS: CraftableItem[] = [
     description: 'A sharp blade with high thermal conductivity',
     properties: [
       {
-        'activation-energy': 11.181,
-        radius: 1.766,
         'bond-type': 'covalent',
         'bond-strength': 36.815,
-        'giving-atoms': ['W', 'Af'],
-        'receiving-atoms': ['Af'],
         'electrical-conductivity': 0.0,
         'thermal-conductivity': 0.727,
         toughness: 0.95,
@@ -83,12 +75,8 @@ const MOCK_ITEMS: CraftableItem[] = [
     description: 'A transparent shield with high durability',
     properties: [
       {
-        'activation-energy': 8.45,
-        radius: 2.11,
         'bond-type': 'ionic',
         'bond-strength': 28.9,
-        'giving-atoms': ['Si', 'O'],
-        'receiving-atoms': ['O', 'Al'],
         'electrical-conductivity': 0.12,
         'thermal-conductivity': 0.33,
         toughness: 1.25,
@@ -104,12 +92,8 @@ const MOCK_ITEMS: CraftableItem[] = [
     description: 'A flexible wire with excellent electrical conductivity',
     properties: [
       {
-        'activation-energy': 5.62,
-        radius: 1.38,
         'bond-type': 'metallic',
         'bond-strength': 22.3,
-        'giving-atoms': ['Cu', 'Ag'],
-        'receiving-atoms': ['Cu'],
         'electrical-conductivity': 0.95,
         'thermal-conductivity': 0.85,
         toughness: 0.75,
