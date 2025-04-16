@@ -3,8 +3,10 @@ import { DATABASE_ADDRESS } from '@/lib/addresses';
 import { alchemy, rpcClient } from '@/lib/clients';
 import { config } from '@/lib/config';
 import { moleculeIdToTokenId, solidityMoleculeToMolecule } from '@/lib/otoms';
+import { UniverseInfo } from '@/lib/types';
 import { NftOrdering, OwnedNftsResponse } from 'alchemy-sdk';
 import { Address } from 'viem';
+import { readContract } from 'viem/actions';
 
 export async function getPagedNftsForOwner({
   owner,
@@ -64,4 +66,32 @@ export async function getMoleculesByIds(tokenIds: string[]) {
     });
 
   return results;
+}
+
+export async function getUniverses(): Promise<UniverseInfo[]> {
+  const rpc = rpcClient();
+  const universeHashes = await readContract(rpc, {
+    abi: otomsDatabaseContractAbi,
+    address: DATABASE_ADDRESS[config.chainId] as Address,
+    functionName: 'activeUniverses',
+    args: [],
+  });
+
+  const universes: UniverseInfo[] = await Promise.all(
+    universeHashes.map(async (hash) => {
+      const universeInfo = await readContract(rpc, {
+        abi: otomsDatabaseContractAbi,
+        address: DATABASE_ADDRESS[config.chainId] as Address,
+        functionName: 'universeInformation',
+        args: [hash],
+      });
+
+      return {
+        name: universeInfo[3],
+        hash: universeInfo[2],
+      };
+    })
+  );
+
+  return universes;
 }
