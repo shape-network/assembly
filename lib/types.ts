@@ -145,3 +145,8 @@ export type BareMolecule = {
   hardness: number;
   ductility: number;
 };
+
+export type UniverseInfo = {
+  name: string;
+  hash: Hex;
+};
