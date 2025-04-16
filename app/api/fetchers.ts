@@ -5,6 +5,7 @@ import { config } from '@/lib/config';
 import { moleculeIdToTokenId, solidityMoleculeToMolecule } from '@/lib/otoms';
 import { UniverseInfo } from '@/lib/types';
 import { NftOrdering, OwnedNftsResponse } from 'alchemy-sdk';
+import { unstable_cache } from 'next/cache';
 import { Address } from 'viem';
 import { readContract } from 'viem/actions';
 
@@ -68,7 +69,7 @@ export async function getMoleculesByIds(tokenIds: string[]) {
   return results;
 }
 
-export async function getUniverses(): Promise<UniverseInfo[]> {
+async function _getUniverses(): Promise<UniverseInfo[]> {
   const rpc = rpcClient();
   const universeHashes = await readContract(rpc, {
     abi: otomsDatabaseContractAbi,
@@ -95,3 +96,9 @@ export async function getUniverses(): Promise<UniverseInfo[]> {
 
   return universes;
 }
+
+export const getUniverses = unstable_cache(
+  _getUniverses,
+  ['otoms-universes', String(config.chainId)],
+  { tags: ['universes'], revalidate: 60 * 60 * 24 }
+);
