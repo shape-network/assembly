@@ -21,7 +21,7 @@ export const WalletConnect = () => {
       {({ openConnectModal, account }) =>
         account && address ? (
           <span className="flex items-center gap-x-2 font-medium">
-            <span>{ensName ?? abbreviateHash(address)}</span>
+            <span className="hidden md:block">{ensName ?? abbreviateHash(address)}</span>
 
             <button onClick={handleDisconnect} type="button" className="cursor-pointer">
               <ExitIcon className="size-4" />

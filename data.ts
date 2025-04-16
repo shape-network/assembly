@@ -5,70 +5,70 @@ const MOCKED_MOLECULES: BlueprintComponent[] = [
     id: 'ing-1',
     name: 'Ju₃',
     description: 'Pure carbon in crystalline form',
-    traits: [{ power: 20.5, toughness: 3.0, speed: 0.2 }],
+    traits: [],
     blueprint: [],
   },
   {
     id: 'ing-2',
     name: 'TiN',
     description: 'Titanium nitride compound',
-    traits: [{ power: 18.2, toughness: 2.1, speed: 0.4 }],
+    traits: [],
     blueprint: [],
   },
   {
     id: 'ing-3',
     name: 'TiC',
     description: 'Titanium carbide material',
-    traits: [{ power: 17.8, toughness: 2.3, speed: 0.3 }],
+    traits: [],
     blueprint: [],
   },
   {
     id: 'ing-4',
     name: 'WAf₂',
     description: 'Tungsten-based compound',
-    traits: [{ power: 19.1, 'electrical-conductivity': 0.2, speed: 0.5 }],
+    traits: [],
     blueprint: [],
   },
   {
     id: 'ing-5',
     name: 'Fe₃C',
     description: 'Iron carbide structure',
-    traits: [{ power: 16.4, 'electrical-conductivity': 0.6, speed: 0.8 }],
+    traits: [],
     blueprint: [],
   },
   {
     id: 'ing-6',
     name: 'SiO₂',
     description: 'Silicon dioxide crystal',
-    traits: [{ power: 15.0, 'electrical-conductivity': 0.05, speed: 0.3 }],
+    traits: [],
     blueprint: [],
   },
   {
     id: 'ing-7',
     name: 'Al₂O₃',
     description: 'Aluminum oxide material',
-    traits: [{ power: 16.7, 'electrical-conductivity': 0.1, speed: 0.4 }],
+    traits: [],
     blueprint: [],
   },
   {
     id: 'ing-8',
     name: 'Cu',
     description: 'Pure copper element',
-    traits: [{ power: 12.5, 'electrical-conductivity': 0.9, speed: 0.7 }],
+    traits: [],
     blueprint: [],
   },
   {
     id: 'ing-9',
     name: 'Ag',
     description: 'Pure silver element',
-    traits: [{ power: 14.2, 'electrical-conductivity': 0.95, speed: 0.6 }],
+    traits: [],
     blueprint: [],
   },
   {
     id: 'ing-10',
     name: 'CuAg',
     description: 'Copper-silver alloy',
-    traits: [{ power: 13.8, 'electrical-conductivity': 0.93, speed: 0.65 }],
+    traits: [],
     blueprint: [],
   },
 ];
@@ -81,7 +81,7 @@ export const MOCKED_CRAFTABLE_ITEMS: BlueprintComponent[] = [
     traits: [
       {
         power: 42.9,
-        'electrical-conductivity': 0.1,
+        conductivity: 0.1,
         toughness: 1.82,
         speed: 0.5,
       },
@@ -95,7 +95,7 @@ export const MOCKED_CRAFTABLE_ITEMS: BlueprintComponent[] = [
     traits: [
       {
         power: 36.815,
-        'electrical-conductivity': 0.0,
+        conductivity: 0.0,
         toughness: 0.95,
         speed: 1.2,
       },
@@ -109,7 +109,7 @@ export const MOCKED_CRAFTABLE_ITEMS: BlueprintComponent[] = [
     traits: [
       {
         power: 28.9,
-        'electrical-conductivity': 0.12,
+        conductivity: 0.12,
         toughness: 1.25,
         speed: 0.3,
       },
@@ -123,7 +123,7 @@ export const MOCKED_CRAFTABLE_ITEMS: BlueprintComponent[] = [
     traits: [
       {
         power: 22.3,
-        'electrical-conductivity': 0.95,
+        conductivity: 0.95,
         toughness: 0.75,
         speed: 0.8,
       },
@@ -140,7 +140,7 @@ export const MOCKED_OWNED_ITEMS: BlueprintComponent[] = [
     traits: [
       {
         power: 42.9,
-        'electrical-conductivity': 0.1,
+        conductivity: 0.1,
         toughness: 1.82,
         speed: 0.5,
       },
