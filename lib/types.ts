@@ -3,9 +3,9 @@ import { Hex } from 'viem';
 // Assembly-related types
 
 export type Trait = {
-  power: number;
+  power?: number;
   toughness?: number;
-  'electrical-conductivity'?: number;
+  conductivity?: number;
   speed?: number;
 };
 
