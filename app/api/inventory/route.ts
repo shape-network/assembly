@@ -1,8 +1,9 @@
-import { getMoleculesByIds, getPagedNftsForOwner } from '@/app/api/fetchers';
+import { getMoleculesByIds, getPagedNftsForOwner, getUniverses } from '@/app/api/fetchers';
 import { OTOMS_ADDRESS } from '@/lib/addresses';
 import { config } from '@/lib/config';
 import { paths } from '@/lib/paths';
 import { InventoryResponse, Molecule } from '@/lib/types';
+import { universeHashToSeed } from '@/lib/utils';
 import { OwnedNftsResponse } from 'alchemy-sdk';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -66,12 +67,7 @@ export async function POST(request: Request) {
     const { address, cursor } = result.data;
 
     const nfts = await getNftsForUser({ address, cursor });
-
-    const filteredNfts = nfts.ownedNfts.filter(
-      (nft) => nft.contract.address.toLowerCase() === OTOMS_ADDRESS[config.chainId].toLowerCase()
-    );
-
-    const tokenIds = filteredNfts.map((nft) => nft.tokenId);
+    const tokenIds = nfts.ownedNfts.map((nft) => nft.tokenId);
 
     if (tokenIds.length === 0) {
       return NextResponse.json({
@@ -80,25 +76,41 @@ export async function POST(request: Request) {
       });
     }
 
-    const molecules = await getMolecules({ tokenIds });
+    const elements = await getMolecules({ tokenIds });
+
+    const universes = await getUniverses();
+    const universeMap = new Map(universes.map((u) => [universeHashToSeed(u.hash), u.name]));
+
+    const tokenIdToUniverse = new Map<string, string>();
+    for (const element of elements) {
+      const universeSeed = element.molecule.giving_atoms[0].structure.universe_seed;
+      const universeName = universeMap.get(universeSeed) || 'Unknown';
+      tokenIdToUniverse.set(element.tokenId, universeName);
+    }
+
+    const moleculesWithUniverse = nfts.ownedNfts.flatMap((nft) => {
+      const universeName = tokenIdToUniverse.get(nft.tokenId) || 'Unknown';
+      const moleculeData = elements.find((m) => m.tokenId === nft.tokenId);
+
+      if (!moleculeData) return [];
+
+      const balance = nft.balance ? Number(nft.balance) : 1;
+      return Array.from({ length: balance }, (_, i) => ({
+        universe: universeName,
+        molecule: {
+          id: `${nft.tokenId}-${i}`,
+          name: moleculeData.molecule.name ?? '?',
+          description: nft.description,
+          traits: [],
+          blueprint: [],
+        },
+      }));
+    });
 
     const inventory: InventoryResponse = {
-      molecules: filteredNfts
-        .filter((nft) => molecules.some((molecule) => molecule.tokenId === nft.tokenId))
-        .flatMap((nft) => {
-          const balance = nft.balance ? Number(nft.balance) : 1;
-          return Array.from({ length: balance }, (_, i) => {
-            const moleculeData = molecules.find((m) => m.tokenId === nft.tokenId);
-
-            return {
-              id: `${nft.tokenId}-${i}`,
-              name: moleculeData?.molecule?.name ?? '???',
-              description: nft.description,
-              traits: [],
-              blueprint: [],
-            };
-          });
-        }),
+      molecules: moleculesWithUniverse
+        .sort((a, b) => a.universe.localeCompare(b.universe))
+        .map((item) => item.molecule),
       cursor: nfts.pageKey,
     };
 
