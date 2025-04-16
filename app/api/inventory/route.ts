@@ -109,7 +109,7 @@ export async function POST(request: Request) {
 
     const inventory: InventoryResponse = {
       molecules: moleculesWithUniverse
-        .sort((a, b) => a.universe.localeCompare(b.universe))
+        .sort((a, b) => b.universe.localeCompare(a.universe))
         .map((item) => item.molecule),
       cursor: nfts.pageKey,
     };
