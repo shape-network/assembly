@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Skeleton } from '@/components/ui/skeleton';
 import { WalletConnect } from '@/components/wallet-connect';
 import { formatProperty, formatPropertyValue } from '@/lib/otoms';
@@ -18,7 +19,7 @@ import { BlueprintComponent } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { ExternalLinkIcon } from '@radix-ui/react-icons';
 import Link from 'next/link';
-import { ComponentProps, FC, PropsWithChildren, ReactNode } from 'react';
+import { ComponentProps, FC, PropsWithChildren } from 'react';
 import { useAccount } from 'wagmi';
 
 export const HomeContent: FC = () => {
@@ -171,11 +172,7 @@ const BlueprintComponentCard: FC<{ item: BlueprintComponent; isOwned: boolean }>
               {item.blueprint.map((el, i) => {
                 const isOwned = isElementOwned(el.name);
 
-                return (
-                  <MoleculeBadge key={i} isOwned={isOwned}>
-                    {el.name}
-                  </MoleculeBadge>
-                );
+                return <MoleculeBadge key={i} isOwned={isOwned} element={el} />;
               })}
             </div>
           )}
@@ -248,9 +245,7 @@ const MoleculesInventory: FC = () => {
       <CardContent>
         <ul className="flex flex-wrap items-start gap-2 rounded">
           {data.map((molecule) => (
-            <MoleculeBadge key={molecule.id} isOwned>
-              {molecule.name}
-            </MoleculeBadge>
+            <MoleculeBadge key={molecule.id} isOwned element={molecule} />
           ))}
         </ul>
       </CardContent>
@@ -280,16 +275,41 @@ const ItemsInventory: FC = () => {
   );
 };
 
-const MoleculeBadge: FC<{ children: ReactNode; isOwned: boolean }> = ({ children, isOwned }) => {
+const MoleculeBadge: FC<{ element: BlueprintComponent; isOwned: boolean }> = ({
+  element,
+  isOwned,
+}) => {
   return (
-    <div
-      className={cn(
-        'rounded px-2 py-1',
-        isOwned ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'
-      )}
-    >
-      {children}
-    </div>
+    <Popover>
+      <PopoverTrigger
+        className={cn(
+          'cursor-pointer rounded px-2 py-1',
+          isOwned ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'
+        )}
+      >
+        {element.name}
+      </PopoverTrigger>
+
+      <PopoverContent>
+        <ul>
+          {element.traits.length > 0 ? (
+            element.traits.map((trait, idx) => (
+              <li key={idx}>
+                {Object.entries(trait)
+                  .filter(([, value]) => value !== undefined)
+                  .map(([key, value]) => (
+                    <div key={key}>
+                      {formatProperty(key)}: {formatPropertyValue(value)}
+                    </div>
+                  ))}
+              </li>
+            ))
+          ) : (
+            <li>Molecule traits</li>
+          )}
+        </ul>
+      </PopoverContent>
+    </Popover>
   );
 };
 
