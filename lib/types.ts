@@ -1,25 +1,31 @@
-import { Hex } from 'viem';
+import { Address, Hex } from 'viem';
 
 // Assembly-related types
 
-export type Trait = {
-  power?: number;
-  toughness?: number;
-  conductivity?: number;
-  speed?: number;
+export type InventoryResponse = {
+  molecules: Molecule[];
+  cursor?: string;
 };
 
 export type BlueprintComponent = {
+  element: Item | Molecule;
+  amount: number;
+};
+
+export type Item = {
   id: string;
   name: string;
-  description?: string;
+  description: string;
+  creator: Address;
+  defaultImageUri: string;
+  type: 'fungible' | 'non-fungible';
   traits: Trait[];
   blueprint: BlueprintComponent[];
 };
 
-export type InventoryResponse = {
-  molecules: BlueprintComponent[];
-  cursor?: string;
+export type Trait = {
+  name: string;
+  value: string;
 };
 
 // Otom-related types
