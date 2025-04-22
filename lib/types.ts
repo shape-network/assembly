@@ -19,13 +19,8 @@ export type Item = {
   creator: Address;
   defaultImageUri: string;
   type: 'fungible' | 'non-fungible';
-  traits: Trait[];
+  traits: { [key: string]: string }[];
   blueprint: BlueprintComponent[];
-};
-
-export type Trait = {
-  name: string;
-  value: string;
 };
 
 // Otom-related types
