@@ -61,7 +61,7 @@ export async function getMoleculesByIds(tokenIds: string[]) {
     .map((r) => {
       const molecule = solidityMoleculeToMolecule(r.result!);
       return {
-        tokenId: String(moleculeIdToTokenId(molecule.identifier)),
+        tokenId: String(moleculeIdToTokenId(molecule.id)),
         molecule,
       };
     });

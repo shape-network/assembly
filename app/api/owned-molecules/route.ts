@@ -1,7 +1,6 @@
 import { getMoleculesByIds, getPagedNftsForOwner, getUniverses } from '@/app/api/fetchers';
 import { OTOMS_ADDRESS } from '@/lib/addresses';
 import { config } from '@/lib/config';
-import { paths } from '@/lib/paths';
 import { InventoryResponse, Molecule } from '@/lib/types';
 import { universeHashToSeed } from '@/lib/utils';
 import { OwnedNftsResponse } from 'alchemy-sdk';
@@ -28,20 +27,15 @@ async function getNftsForUser({ address, cursor }: GetInventoryInput): Promise<O
   }
 }
 
-async function getMolecules({ tokenIds }: { tokenIds: string[] }): Promise<
-  {
-    tokenId: string;
-    image: string;
-    molecule: Molecule;
-  }[]
-> {
+async function getMolecules({
+  tokenIds,
+}: {
+  tokenIds: string[];
+}): Promise<{ tokenId: string; molecule: Molecule }[]> {
   try {
     const moleculeResults = await getMoleculesByIds(tokenIds);
 
-    return moleculeResults.map((result) => ({
-      ...result,
-      image: paths.images(result.molecule.identifier).chip,
-    }));
+    return moleculeResults;
   } catch (error) {
     console.error('Error fetching molecule data:', error);
     throw new Error(`Failed to fetch molecule data: ${(error as Error).message || String(error)}`);
@@ -98,11 +92,9 @@ export async function POST(request: Request) {
       return Array.from({ length: balance }, (_, i) => ({
         universe: universeName,
         molecule: {
+          ...moleculeData.molecule,
           id: `${nft.tokenId}-${i}`,
           name: moleculeData.molecule.name ?? '?',
-          description: nft.description,
-          traits: [],
-          blueprint: [],
         },
       }));
     });

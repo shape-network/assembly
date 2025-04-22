@@ -122,13 +122,9 @@ export type Bond = {
 };
 
 export type Molecule = {
+  id: string;
   name: string;
-  identifier: string;
   giving_atoms: Atom[];
-  receiving_atoms: Atom[];
-  bond: Bond;
-  activation_energy: number;
-  radius: number;
   electrical_conductivity: number;
   thermal_conductivity: number;
   toughness: number;

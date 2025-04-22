@@ -237,9 +237,9 @@ const MoleculesInventory: FC = () => {
     <Card>
       <CardContent>
         <ul className="flex flex-wrap items-start gap-2 rounded">
-          {data.map((molecule, index) => (
+          {data.map((molecule) => (
             <MoleculeBadge
-              key={molecule.identifier + index}
+              key={molecule.id}
               isOwned
               blueprintComponent={{ element: molecule, amount: 1 }}
             />
