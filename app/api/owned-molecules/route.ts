@@ -1,5 +1,5 @@
 import { getMoleculesByIds, getPagedNftsForOwner, getUniverses } from '@/app/api/fetchers';
-import { OTOMS_ADDRESS } from '@/lib/addresses';
+import { otomsCore } from '@/lib/addresses';
 import { config } from '@/lib/config';
 import { InventoryResponse, Molecule } from '@/lib/types';
 import { universeHashToSeed } from '@/lib/utils';
@@ -16,7 +16,7 @@ async function getNftsForUser({ address, cursor }: GetInventoryInput): Promise<O
   try {
     const response = await getPagedNftsForOwner({
       owner: address,
-      contractAddresses: [OTOMS_ADDRESS[config.chainId]],
+      contractAddresses: [otomsCore[config.chainId]],
       cursor,
     });
 
