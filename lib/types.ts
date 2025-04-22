@@ -1,25 +1,26 @@
-import { Hex } from 'viem';
+import { Address, Hex } from 'viem';
 
 // Assembly-related types
 
-export type Trait = {
-  power?: number;
-  toughness?: number;
-  conductivity?: number;
-  speed?: number;
+export type InventoryResponse = {
+  molecules: Molecule[];
+  cursor?: string;
 };
 
 export type BlueprintComponent = {
-  id: string;
-  name: string;
-  description?: string;
-  traits: Trait[];
-  blueprint: BlueprintComponent[];
+  element: Item | Molecule;
+  amount: number;
 };
 
-export type InventoryResponse = {
-  molecules: BlueprintComponent[];
-  cursor?: string;
+export type Item = {
+  id: string;
+  name: string;
+  description: string;
+  creator: Address;
+  defaultImageUri: string;
+  type: 'fungible' | 'non-fungible';
+  traits: { [key: string]: string }[];
+  blueprint: BlueprintComponent[];
 };
 
 // Otom-related types
@@ -116,13 +117,9 @@ export type Bond = {
 };
 
 export type Molecule = {
+  id: string;
   name: string;
-  identifier: string;
   giving_atoms: Atom[];
-  receiving_atoms: Atom[];
-  bond: Bond;
-  activation_energy: number;
-  radius: number;
   electrical_conductivity: number;
   thermal_conductivity: number;
   toughness: number;

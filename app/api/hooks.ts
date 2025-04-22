@@ -2,7 +2,7 @@
 
 import { MOCKED_CRAFTABLE_ITEMS, MOCKED_OWNED_ITEMS } from '@/data';
 import { paths } from '@/lib/paths';
-import { BlueprintComponent, InventoryResponse } from '@/lib/types';
+import { InventoryResponse, Item, Molecule } from '@/lib/types';
 import { useQuery } from '@tanstack/react-query';
 import { useAccount } from 'wagmi';
 
@@ -10,12 +10,12 @@ export function useGetMoleculesForUser() {
   const { address } = useAccount();
 
   // TODO: add pagination, sort by universe
-  return useQuery<BlueprintComponent[]>({
+  return useQuery<Molecule[]>({
     queryKey: ['molecules', address],
     queryFn: async () => {
       if (!address) return [];
 
-      const response = await fetch(paths.api.inventory, {
+      const response = await fetch(paths.api.ownedMolecules, {
         method: 'POST',
         body: JSON.stringify({ address }),
       });
@@ -28,7 +28,7 @@ export function useGetMoleculesForUser() {
 }
 
 export function useGetCraftableItems() {
-  return useQuery<BlueprintComponent[]>({
+  return useQuery<Item[]>({
     queryKey: ['craftable-items'],
     queryFn: async () => {
       return MOCKED_CRAFTABLE_ITEMS;
@@ -39,7 +39,7 @@ export function useGetCraftableItems() {
 export function useGetItemsForUser() {
   const { address } = useAccount();
 
-  return useQuery<BlueprintComponent[]>({
+  return useQuery<Item[]>({
     queryKey: ['items', address],
     queryFn: async () => {
       return MOCKED_OWNED_ITEMS;

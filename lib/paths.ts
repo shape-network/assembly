@@ -9,7 +9,7 @@ export const paths = {
   shape: 'https://shape.network',
   otom: 'https://otom.xyz',
   api: {
-    inventory: '/api/inventory',
+    ownedMolecules: '/api/owned-molecules',
   },
   images: (identifier: string) => ({
     token: `https://${otomsBucket}.s3.us-east-1.amazonaws.com/otoms/${identifier}-token.png`,

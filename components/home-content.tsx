@@ -10,15 +10,16 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Skeleton } from '@/components/ui/skeleton';
 import { WalletConnect } from '@/components/wallet-connect';
 import { formatProperty, formatPropertyValue } from '@/lib/otoms';
 import { paths } from '@/lib/paths';
-import { BlueprintComponent } from '@/lib/types';
+import { BlueprintComponent, Item, Molecule } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { ExternalLinkIcon } from '@radix-ui/react-icons';
 import Link from 'next/link';
-import { ComponentProps, FC, PropsWithChildren, ReactNode } from 'react';
+import { ComponentProps, FC, PropsWithChildren } from 'react';
 import { useAccount } from 'wagmi';
 
 export const HomeContent: FC = () => {
@@ -139,10 +140,7 @@ const BlueprintComponentsGrid: FC<PropsWithChildren> = ({ children }) => {
   return <ul className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">{children}</ul>;
 };
 
-const BlueprintComponentCard: FC<{ item: BlueprintComponent; isOwned: boolean }> = ({
-  item,
-  isOwned,
-}) => {
+const BlueprintComponentCard: FC<{ item: Item; isOwned: boolean }> = ({ item, isOwned }) => {
   const { data: inventory } = useGetMoleculesForUser();
 
   function isElementOwned(name: string) {
@@ -150,9 +148,9 @@ const BlueprintComponentCard: FC<{ item: BlueprintComponent; isOwned: boolean }>
     return inventory.some((i) => i.name === name);
   }
 
-  function isItemCraftable(item: BlueprintComponent) {
+  function isItemCraftable(item: Item) {
     if (!inventory) return false;
-    return item.blueprint.every((el) => isElementOwned(el.name));
+    return item.blueprint.every((el) => isElementOwned(el.element.name));
   }
 
   const isCraftable = isItemCraftable(item);
@@ -169,29 +167,21 @@ const BlueprintComponentCard: FC<{ item: BlueprintComponent; isOwned: boolean }>
           {!isOwned && (
             <div className="flex flex-wrap gap-1">
               {item.blueprint.map((el, i) => {
-                const isOwned = isElementOwned(el.name);
+                const isOwned = isElementOwned(el.element.name);
 
-                return (
-                  <MoleculeBadge key={i} isOwned={isOwned}>
-                    {el.name}
-                  </MoleculeBadge>
-                );
+                return <MoleculeBadge key={i} isOwned={isOwned} blueprintComponent={el} />;
               })}
             </div>
           )}
 
           <ul className="text-sm">
-            {item.traits.map((prop, idx) => (
+            {item.traits.map((trait, idx) => (
               <li key={idx} className="flex flex-col gap-1">
-                {Object.entries(prop)
-                  .filter(([, value]) => value !== undefined)
-                  .map(([key, value]) => (
-                    <div key={key} className="text-primary flex items-center gap-2">
-                      <span>{formatProperty(key)}</span>
-                      <span className="border-muted-foreground/15 flex-grow border-b border-dotted"></span>
-                      <span className="font-medium">{formatPropertyValue(value)}</span>
-                    </div>
-                  ))}
+                <div className="text-primary flex items-center gap-2">
+                  <span>{formatProperty(trait.name)}</span>
+                  <span className="border-muted-foreground/15 flex-grow border-b border-dotted"></span>
+                  <span className="font-medium">{formatPropertyValue(trait.value)}</span>
+                </div>
               </li>
             ))}
           </ul>
@@ -205,8 +195,8 @@ const BlueprintComponentCard: FC<{ item: BlueprintComponent; isOwned: boolean }>
               <Button disabled variant="ghost" className="-ml-4">
                 Missing{' '}
                 {item.blueprint
-                  .filter((el) => !isElementOwned(el.name))
-                  .map((el) => el.name)
+                  .filter((el) => !isElementOwned(el.element.name))
+                  .map((el) => el.element.name)
                   .join(', ')}
               </Button>
             )}
@@ -248,9 +238,11 @@ const MoleculesInventory: FC = () => {
       <CardContent>
         <ul className="flex flex-wrap items-start gap-2 rounded">
           {data.map((molecule) => (
-            <MoleculeBadge key={molecule.id} isOwned>
-              {molecule.name}
-            </MoleculeBadge>
+            <MoleculeBadge
+              key={molecule.id}
+              isOwned
+              blueprintComponent={{ element: molecule, amount: 1 }}
+            />
           ))}
         </ul>
       </CardContent>
@@ -280,18 +272,43 @@ const ItemsInventory: FC = () => {
   );
 };
 
-const MoleculeBadge: FC<{ children: ReactNode; isOwned: boolean }> = ({ children, isOwned }) => {
+const MoleculeBadge: FC<{ blueprintComponent: BlueprintComponent; isOwned: boolean }> = ({
+  blueprintComponent,
+  isOwned,
+}) => {
   return (
-    <div
-      className={cn(
-        'rounded px-2 py-1',
-        isOwned ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'
-      )}
-    >
-      {children}
-    </div>
+    <Popover>
+      <PopoverTrigger
+        className={cn(
+          'cursor-pointer rounded px-2 py-1',
+          isOwned ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'
+        )}
+      >
+        {blueprintComponent.element.name}
+      </PopoverTrigger>
+
+      <PopoverContent>
+        <ul>
+          {isElementMolecule(blueprintComponent.element) ? (
+            <>
+              <li>Toughness: {blueprintComponent.element.toughness}</li>
+              <li>Hardness: {blueprintComponent.element.hardness}</li>
+              <li>Ductility: {blueprintComponent.element.ductility}</li>
+              <li>Electrical Conductivity: {blueprintComponent.element.electrical_conductivity}</li>
+              <li>Thermal Conductivity: {blueprintComponent.element.thermal_conductivity}</li>
+            </>
+          ) : (
+            <li>item properties</li>
+          )}
+        </ul>
+      </PopoverContent>
+    </Popover>
   );
 };
+
+function isElementMolecule(element: Item | Molecule): element is Molecule {
+  return 'identifier' in element;
+}
 
 const InventorySkeleton: FC = () => {
   return (
