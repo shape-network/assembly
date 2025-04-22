@@ -18,6 +18,7 @@ import { paths } from '@/lib/paths';
 import { BlueprintComponent, Item, Molecule } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { ExternalLinkIcon } from '@radix-ui/react-icons';
+import Image from 'next/image';
 import Link from 'next/link';
 import { ComponentProps, FC, PropsWithChildren } from 'react';
 import { useAccount } from 'wagmi';
@@ -160,10 +161,24 @@ const BlueprintComponentCard: FC<{ item: Item; isOwned: boolean }> = ({ item, is
       <Card>
         <CardHeader>
           <CardTitle>{item.name}</CardTitle>
-          <CardDescription>{item.description}</CardDescription>
         </CardHeader>
 
+        <div className="relative h-40 w-full">
+          {item.defaultImageUri ? (
+            <Image
+              src={item.defaultImageUri}
+              alt={item.name}
+              fill
+              className="object-contain py-2"
+            />
+          ) : (
+            <Skeleton className="h-48 w-full" />
+          )}
+        </div>
+
         <CardContent className="flex flex-col gap-6">
+          <CardDescription className="text-center italic">{item.description}</CardDescription>
+
           {!isOwned && (
             <div className="flex flex-wrap gap-1">
               {item.blueprint.map((el, i) => {
