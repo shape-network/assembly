@@ -110,7 +110,7 @@ export const MOCKED_CRAFTABLE_ITEMS: Item[] = [
     name: 'Diamond Pickaxe',
     description: 'An extremely hard and durable pickaxe',
     creator: zeroAddress,
-    defaultImageUri: '',
+    defaultImageUri: '/pickaxe.webp',
     type: 'non-fungible',
     traits: [
       { name: 'power', value: '42.9' },
@@ -129,7 +129,7 @@ export const MOCKED_CRAFTABLE_ITEMS: Item[] = [
     name: 'Tungsten Blade',
     description: 'A sharp blade with high thermal conductivity',
     creator: zeroAddress,
-    defaultImageUri: '',
+    defaultImageUri: '/blade.webp',
     type: 'fungible',
     traits: [
       { name: 'power', value: '36.815' },
@@ -144,10 +144,10 @@ export const MOCKED_CRAFTABLE_ITEMS: Item[] = [
   },
   {
     id: 'item-3',
-    name: 'Crystal Shield',
-    description: 'A transparent shield with high durability',
+    name: 'Crystal Shovel',
+    description: 'A transparent shovel with high durability',
     creator: zeroAddress,
-    defaultImageUri: '',
+    defaultImageUri: '/shovel.webp',
     type: 'fungible',
     traits: [
       { name: 'power', value: '28.9' },
@@ -158,25 +158,6 @@ export const MOCKED_CRAFTABLE_ITEMS: Item[] = [
     blueprint: [
       { element: MOCKED_MOLECULES[5], amount: 1 },
       { element: MOCKED_MOLECULES[6], amount: 1 },
-    ],
-  },
-  {
-    id: 'item-4',
-    name: 'Conductive Wire',
-    description: 'A flexible wire with excellent electrical conductivity',
-    creator: zeroAddress,
-    defaultImageUri: '',
-    type: 'fungible',
-    traits: [
-      { name: 'power', value: '22.3' },
-      { name: 'conductivity', value: '0.95' },
-      { name: 'toughness', value: '0.75' },
-      { name: 'speed', value: '0.8' },
-    ],
-    blueprint: [
-      { element: MOCKED_MOLECULES[7], amount: 1 },
-      { element: MOCKED_MOLECULES[8], amount: 1 },
-      { element: MOCKED_MOLECULES[9], amount: 1 },
     ],
   },
 ];
