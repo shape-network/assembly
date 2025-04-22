@@ -1,4 +1,5 @@
-import otomsAbi from '@/abi/Otoms.json';
+import itemsCoreAbi from '@/abi/ItemsCore.json';
+import otomsCoreAbi from '@/abi/OtomsCore.json';
 import otomsDatabaseAbi from '@/abi/OtomsDatabase.json';
 import { defineConfig } from '@wagmi/cli';
 import { react } from '@wagmi/cli/plugins';
@@ -8,12 +9,16 @@ export default defineConfig({
   out: 'generated.ts',
   contracts: [
     {
-      name: 'OtomsContract',
-      abi: otomsAbi.abi as Abi,
+      name: 'OtomsCoreContract',
+      abi: otomsCoreAbi.abi as Abi,
     },
     {
       name: 'OtomsDatabaseContract',
       abi: otomsDatabaseAbi.abi as Abi,
+    },
+    {
+      name: 'ItemsCoreContract',
+      abi: itemsCoreAbi.abi as Abi,
     },
   ],
   plugins: [react()],
