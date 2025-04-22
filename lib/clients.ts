@@ -17,5 +17,8 @@ export function rpcClient() {
   return createPublicClient({
     chain,
     transport: http(`https://${rootUrl}.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_KEY}`),
+    batch: {
+      multicall: true,
+    },
   });
 }
