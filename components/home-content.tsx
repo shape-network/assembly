@@ -130,8 +130,8 @@ const ItemsToCraft: FC = () => {
 
   return (
     <BlueprintComponentsGrid>
-      {data.map((item) => (
-        <BlueprintComponentCard key={item.id} item={item} isOwned={false} />
+      {data.map((item, i) => (
+        <BlueprintComponentCard key={item.name + i} item={item} isOwned={false} />
       ))}
     </BlueprintComponentsGrid>
   );
@@ -280,8 +280,8 @@ const ItemsInventory: FC = () => {
 
   return (
     <BlueprintComponentsGrid>
-      {data.map((item) => (
-        <BlueprintComponentCard key={item.id} item={item} isOwned />
+      {data.map((item, i) => (
+        <BlueprintComponentCard key={item.name + i} item={item} isOwned />
       ))}
     </BlueprintComponentsGrid>
   );
