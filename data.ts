@@ -106,7 +106,6 @@ const MOCKED_MOLECULES: Molecule[] = [
 
 export const MOCKED_CRAFTABLE_ITEMS: Item[] = [
   {
-    id: 'item-1',
     name: 'Diamond Pickaxe',
     description: 'An extremely hard and durable pickaxe',
     creator: zeroAddress,
@@ -125,7 +124,6 @@ export const MOCKED_CRAFTABLE_ITEMS: Item[] = [
     ],
   },
   {
-    id: 'item-2',
     name: 'Tungsten Blade',
     description: 'A sharp blade with high thermal conductivity',
     creator: zeroAddress,
@@ -143,7 +141,6 @@ export const MOCKED_CRAFTABLE_ITEMS: Item[] = [
     ],
   },
   {
-    id: 'item-3',
     name: 'Crystal Shovel',
     description: 'A transparent shovel with high durability',
     creator: zeroAddress,
@@ -164,11 +161,10 @@ export const MOCKED_CRAFTABLE_ITEMS: Item[] = [
 
 export const MOCKED_OWNED_ITEMS: Item[] = [
   {
-    id: 'item-1',
     name: 'Diamond Pickaxe',
     description: 'An extremely hard and durable pickaxe',
     creator: zeroAddress,
-    defaultImageUri: '',
+    defaultImageUri: '/pickaxe.webp',
     type: 'non-fungible',
     traits: [
       { name: 'power', value: '42.9' },
