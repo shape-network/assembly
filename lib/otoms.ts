@@ -9,16 +9,9 @@ export const fromWad = (n: bigint) => Number(formatUnits(n, 18));
 
 export function solidityMoleculeToMolecule(molecule: SolidityCompatibleMolecule): Molecule {
   return {
-    identifier: molecule.id,
+    id: molecule.id,
     name: molecule.name,
     giving_atoms: molecule.givingAtoms.map(solidityAtomToAtom),
-    receiving_atoms: molecule.receivingAtoms.map(solidityAtomToAtom),
-    bond: {
-      strength: fromWad(molecule.bond.strength),
-      type: molecule.bond.bondType,
-    },
-    activation_energy: fromWad(molecule.activationEnergy),
-    radius: fromWad(molecule.radius),
     electrical_conductivity: fromWad(molecule.electricalConductivity),
     thermal_conductivity: fromWad(molecule.thermalConductivity),
     toughness: fromWad(molecule.toughness),
