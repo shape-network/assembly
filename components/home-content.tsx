@@ -13,7 +13,6 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Skeleton } from '@/components/ui/skeleton';
 import { WalletConnect } from '@/components/wallet-connect';
-import { formatProperty, formatPropertyValue } from '@/lib/otoms';
 import { paths } from '@/lib/paths';
 import { BlueprintComponent, Item, Molecule } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -130,8 +129,8 @@ const ItemsToCraft: FC = () => {
 
   return (
     <BlueprintComponentsGrid>
-      {data.map((item, i) => (
-        <BlueprintComponentCard key={item.name + i} item={item} isOwned={false} />
+      {data.map((item) => (
+        <BlueprintComponentCard key={item.id} item={item} isOwned={false} />
       ))}
     </BlueprintComponentsGrid>
   );
@@ -193,9 +192,9 @@ const BlueprintComponentCard: FC<{ item: Item; isOwned: boolean }> = ({ item, is
             {item.traits.map((trait, idx) => (
               <li key={idx} className="flex flex-col gap-1">
                 <div className="text-primary flex items-center gap-2">
-                  <span>{formatProperty(trait.name)}</span>
+                  <span>{trait.name}</span>
                   <span className="border-muted-foreground/15 flex-grow border-b border-dotted"></span>
-                  <span className="font-medium">{formatPropertyValue(trait.value)}</span>
+                  <span className="font-medium">{trait.value}</span>
                 </div>
               </li>
             ))}
@@ -280,8 +279,8 @@ const ItemsInventory: FC = () => {
 
   return (
     <BlueprintComponentsGrid>
-      {data.map((item, i) => (
-        <BlueprintComponentCard key={item.name + i} item={item} isOwned />
+      {data.map((item) => (
+        <BlueprintComponentCard key={item.id} item={item} isOwned />
       ))}
     </BlueprintComponentsGrid>
   );
