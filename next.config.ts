@@ -5,6 +5,13 @@ const nextConfig: NextConfig = {
     config.externals.push('pino-pretty');
     return config;
   },
+  images: {
+    remotePatterns: [
+      {
+        hostname: 'oldschool.runescape.wiki',
+      },
+    ],
+  },
 };
 
 export default nextConfig;

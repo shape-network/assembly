@@ -1,9 +1,9 @@
 'use client';
 
-import { MOCKED_CRAFTABLE_ITEMS, MOCKED_OWNED_ITEMS } from '@/data';
 import { paths } from '@/lib/paths';
 import { InventoryResponse, Item, Molecule } from '@/lib/types';
 import { useQuery } from '@tanstack/react-query';
+import superjson from 'superjson';
 import { useAccount } from 'wagmi';
 
 export function useGetMoleculesForUser() {
@@ -31,7 +31,9 @@ export function useGetCraftableItems() {
   return useQuery<Item[]>({
     queryKey: ['craftable-items'],
     queryFn: async () => {
-      return MOCKED_CRAFTABLE_ITEMS;
+      const response = await fetch(paths.api.craftableItems);
+      const data = await response.json();
+      return superjson.parse(data);
     },
   });
 }
@@ -42,7 +44,7 @@ export function useGetItemsForUser() {
   return useQuery<Item[]>({
     queryKey: ['items', address],
     queryFn: async () => {
-      return MOCKED_OWNED_ITEMS;
+      return [];
     },
     enabled: !!address,
   });

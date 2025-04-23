@@ -1,5 +1,5 @@
 import { otomsDatabaseContractAbi } from '@/generated';
-import { DATABASE_ADDRESS } from '@/lib/addresses';
+import { otomsDatabase } from '@/lib/addresses';
 import { alchemy, rpcClient } from '@/lib/clients';
 import { config } from '@/lib/config';
 import { moleculeIdToTokenId, solidityMoleculeToMolecule } from '@/lib/otoms';
@@ -39,7 +39,7 @@ export async function getMoleculesByIds(tokenIds: string[]) {
     contracts: tokenIds.map(
       (tokenId) =>
         ({
-          address: DATABASE_ADDRESS[config.chainId] as Address,
+          address: otomsDatabase[config.chainId] as Address,
           abi: otomsDatabaseContractAbi,
           functionName: 'getMoleculeByTokenId',
           args: [tokenId],
@@ -73,7 +73,7 @@ async function _getUniverses(): Promise<UniverseInfo[]> {
   const rpc = rpcClient();
   const universeHashes = await readContract(rpc, {
     abi: otomsDatabaseContractAbi,
-    address: DATABASE_ADDRESS[config.chainId] as Address,
+    address: otomsDatabase[config.chainId] as Address,
     functionName: 'activeUniverses',
     args: [],
   });
@@ -82,7 +82,7 @@ async function _getUniverses(): Promise<UniverseInfo[]> {
     universeHashes.map(async (hash) => {
       const universeInfo = await readContract(rpc, {
         abi: otomsDatabaseContractAbi,
-        address: DATABASE_ADDRESS[config.chainId] as Address,
+        address: otomsDatabase[config.chainId] as Address,
         functionName: 'universeInformation',
         args: [hash],
       });

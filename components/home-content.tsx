@@ -13,11 +13,11 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Skeleton } from '@/components/ui/skeleton';
 import { WalletConnect } from '@/components/wallet-connect';
-import { formatProperty, formatPropertyValue } from '@/lib/otoms';
 import { paths } from '@/lib/paths';
 import { BlueprintComponent, Item, Molecule } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { ExternalLinkIcon } from '@radix-ui/react-icons';
+import Image from 'next/image';
 import Link from 'next/link';
 import { ComponentProps, FC, PropsWithChildren } from 'react';
 import { useAccount } from 'wagmi';
@@ -160,10 +160,24 @@ const BlueprintComponentCard: FC<{ item: Item; isOwned: boolean }> = ({ item, is
       <Card>
         <CardHeader>
           <CardTitle>{item.name}</CardTitle>
-          <CardDescription>{item.description}</CardDescription>
         </CardHeader>
 
+        <div className="relative h-40 w-full">
+          {item.defaultImageUri ? (
+            <Image
+              src={item.defaultImageUri}
+              alt={item.name}
+              fill
+              className="object-contain py-2"
+            />
+          ) : (
+            <Skeleton className="h-48 w-full" />
+          )}
+        </div>
+
         <CardContent className="flex flex-col gap-6">
+          <CardDescription className="text-center italic">{item.description}</CardDescription>
+
           {!isOwned && (
             <div className="flex flex-wrap gap-1">
               {item.blueprint.map((el, i) => {
@@ -178,9 +192,9 @@ const BlueprintComponentCard: FC<{ item: Item; isOwned: boolean }> = ({ item, is
             {item.traits.map((trait, idx) => (
               <li key={idx} className="flex flex-col gap-1">
                 <div className="text-primary flex items-center gap-2">
-                  <span>{formatProperty(trait.name)}</span>
+                  <span>{trait.name}</span>
                   <span className="border-muted-foreground/15 flex-grow border-b border-dotted"></span>
-                  <span className="font-medium">{formatPropertyValue(trait.value)}</span>
+                  <span className="font-medium">{trait.value}</span>
                 </div>
               </li>
             ))}

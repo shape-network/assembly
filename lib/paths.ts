@@ -10,6 +10,7 @@ export const paths = {
   otom: 'https://otom.xyz',
   api: {
     ownedMolecules: '/api/owned-molecules',
+    craftableItems: '/api/craftable-items',
   },
   images: (identifier: string) => ({
     token: `https://${otomsBucket}.s3.us-east-1.amazonaws.com/otoms/${identifier}-token.png`,
