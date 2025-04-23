@@ -13,16 +13,16 @@ export type BlueprintComponent = {
 };
 
 export type Item = {
+  id: bigint;
   name: string;
   description: string;
   creator: Address;
   defaultImageUri: string;
-  type: 'fungible' | 'non-fungible';
   traits: Trait[];
   blueprint: BlueprintComponent[];
 };
 
-export type Trait = { [key: string]: string };
+export type Trait = { name: string; value: string };
 
 // Otom-related types
 
