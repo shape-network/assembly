@@ -1,9 +1,9 @@
-import { otomsDatabaseContractAbi } from '@/generated';
-import { otomsDatabase } from '@/lib/addresses';
+import { itemsCoreContractAbi, otomsDatabaseContractAbi } from '@/generated';
+import { itemsCore, otomsDatabase } from '@/lib/addresses';
 import { alchemy, rpcClient } from '@/lib/clients';
 import { config } from '@/lib/config';
 import { moleculeIdToTokenId, solidityMoleculeToMolecule } from '@/lib/otoms';
-import { UniverseInfo } from '@/lib/types';
+import { Trait, UniverseInfo } from '@/lib/types';
 import { NftOrdering, OwnedNftsResponse } from 'alchemy-sdk';
 import { unstable_cache } from 'next/cache';
 import { readContract } from 'viem/actions';
@@ -101,3 +101,18 @@ export const getUniverses = unstable_cache(
   ['otoms-universes', String(config.chainId)],
   { tags: ['universes'], revalidate: 60 * 60 * 24 }
 );
+
+export async function getTraitsForItem(itemId: bigint): Promise<Trait[]> {
+  const rpc = rpcClient();
+  const traits = await rpc.readContract({
+    abi: itemsCoreContractAbi,
+    address: itemsCore[config.chainId],
+    functionName: 'getTokenTraits',
+    args: [itemId],
+  });
+
+  return traits.map((t) => ({
+    name: t.typeName,
+    value: t.valueString ?? t.valueNumber.toString(),
+  }));
+}
