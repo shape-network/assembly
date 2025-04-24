@@ -13,14 +13,18 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Skeleton } from '@/components/ui/skeleton';
 import { WalletConnect } from '@/components/wallet-connect';
+import { useWriteItemsCoreContractCraftItem } from '@/generated';
+import { itemsCore } from '@/lib/addresses';
+import { config } from '@/lib/config';
 import { paths } from '@/lib/paths';
 import { BlueprintComponent, Item, Molecule } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { ExternalLinkIcon } from '@radix-ui/react-icons';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ComponentProps, FC, PropsWithChildren } from 'react';
-import { useAccount } from 'wagmi';
+import { ComponentProps, FC, PropsWithChildren, useEffect } from 'react';
+import { toast } from 'sonner';
+import { useAccount, useWaitForTransactionReceipt } from 'wagmi';
 
 export const HomeContent: FC = () => {
   const { address } = useAccount();
@@ -200,7 +204,7 @@ const BlueprintComponentCard: FC<{ item: Item; isOwned: boolean }> = ({ item, is
         {address && !isOwned && (
           <CardFooter>
             {isCraftable ? (
-              <Button>Craft</Button>
+              <CraftItemButton item={item} />
             ) : (
               <Button disabled variant="ghost" className="-ml-4">
                 Missing{' '}
@@ -214,6 +218,56 @@ const BlueprintComponentCard: FC<{ item: Item; isOwned: boolean }> = ({ item, is
         )}
       </Card>
     </li>
+  );
+};
+
+const CraftItemButton: FC<{ item: Item }> = ({ item }) => {
+  const { data: hash, writeContractAsync, isPending } = useWriteItemsCoreContractCraftItem();
+
+  console.log('config.chainId', config.chainId);
+
+  async function handleCraftItem() {
+    try {
+      toast.info('Please confirm the transaction in your wallet.');
+      await writeContractAsync({
+        address: itemsCore[config.chainId],
+        args: [item.id, BigInt(1)],
+      });
+    } catch (error) {
+      toast.error(`An error ocurred while crafting ${item.name}, please try again.`);
+      console.error(error);
+    }
+  }
+
+  const {
+    isLoading: isTxConfirming,
+    isError: isTxError,
+    isSuccess: isTxConfirmed,
+  } = useWaitForTransactionReceipt({
+    hash,
+    query: { enabled: !!hash },
+  });
+
+  useEffect(() => {
+    if (hash && isTxConfirming) {
+      toast.loading('Item is being crafted...');
+    }
+
+    if (isTxConfirmed) {
+      toast.success(`${item.name} crafted successfully!`);
+    }
+
+    if (isTxError) {
+      toast.error(`An error ocurred while crafting ${item.name}, please try again.`);
+    }
+  }, [hash, isTxConfirming, isTxConfirmed, isTxError, item.name]);
+
+  const disabled = isPending || isTxConfirming;
+
+  return (
+    <Button disabled={disabled} onClick={handleCraftItem}>
+      {isPending ? 'Crafting...' : 'Craft'}
+    </Button>
   );
 };
 
