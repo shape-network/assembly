@@ -6,7 +6,6 @@ import { moleculeIdToTokenId, solidityMoleculeToMolecule } from '@/lib/otoms';
 import { UniverseInfo } from '@/lib/types';
 import { NftOrdering, OwnedNftsResponse } from 'alchemy-sdk';
 import { unstable_cache } from 'next/cache';
-import { Address } from 'viem';
 import { readContract } from 'viem/actions';
 
 export async function getPagedNftsForOwner({
@@ -39,7 +38,7 @@ export async function getMoleculesByIds(tokenIds: string[]) {
     contracts: tokenIds.map(
       (tokenId) =>
         ({
-          address: otomsDatabase[config.chainId] as Address,
+          address: otomsDatabase[config.chainId],
           abi: otomsDatabaseContractAbi,
           functionName: 'getMoleculeByTokenId',
           args: [tokenId],
@@ -73,7 +72,7 @@ async function _getUniverses(): Promise<UniverseInfo[]> {
   const rpc = rpcClient();
   const universeHashes = await readContract(rpc, {
     abi: otomsDatabaseContractAbi,
-    address: otomsDatabase[config.chainId] as Address,
+    address: otomsDatabase[config.chainId],
     functionName: 'activeUniverses',
     args: [],
   });
@@ -82,7 +81,7 @@ async function _getUniverses(): Promise<UniverseInfo[]> {
     universeHashes.map(async (hash) => {
       const universeInfo = await readContract(rpc, {
         abi: otomsDatabaseContractAbi,
-        address: otomsDatabase[config.chainId] as Address,
+        address: otomsDatabase[config.chainId],
         functionName: 'universeInformation',
         args: [hash],
       });
