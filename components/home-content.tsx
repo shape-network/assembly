@@ -141,6 +141,7 @@ const BlueprintComponentsGrid: FC<PropsWithChildren> = ({ children }) => {
 };
 
 const BlueprintComponentCard: FC<{ item: Item; isOwned: boolean }> = ({ item, isOwned }) => {
+  const { address } = useAccount();
   const { data: inventory } = useGetMoleculesForUser();
 
   function isElementOwned(name: string) {
@@ -148,12 +149,7 @@ const BlueprintComponentCard: FC<{ item: Item; isOwned: boolean }> = ({ item, is
     return inventory.some((i) => i.name === name);
   }
 
-  function isItemCraftable(item: Item) {
-    if (!inventory) return false;
-    return item.blueprint.every((el) => isElementOwned(el.element.name));
-  }
-
-  const isCraftable = isItemCraftable(item);
+  const isCraftable = inventory && item.blueprint.every((el) => isElementOwned(el.element.name));
 
   return (
     <li>
@@ -201,7 +197,7 @@ const BlueprintComponentCard: FC<{ item: Item; isOwned: boolean }> = ({ item, is
           </ul>
         </CardContent>
 
-        {!isOwned && (
+        {address && !isOwned && (
           <CardFooter>
             {isCraftable ? (
               <Button>Craft</Button>
@@ -275,7 +271,14 @@ const ItemsInventory: FC = () => {
     return <p>Error loading inventory.</p>;
   }
 
-  if (!data || data.length === 0) return null;
+  if (!data || data.length === 0)
+    return (
+      <Card>
+        <CardContent className="grid place-items-center gap-4 py-12">
+          <p>No items found in your wallet.</p>
+        </CardContent>
+      </Card>
+    );
 
   return (
     <BlueprintComponentsGrid>
