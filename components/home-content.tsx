@@ -223,6 +223,7 @@ const BlueprintComponentCard: FC<{ item: Item; isOwned: boolean }> = ({ item, is
 
 const CraftItemButton: FC<{ item: Item }> = ({ item }) => {
   const { data: hash, writeContractAsync, isPending } = useWriteItemsCoreContractCraftItem();
+  const { refetch: refetchMolecules } = useGetMoleculesForUser();
 
   console.log('config.chainId', config.chainId);
 
@@ -255,12 +256,13 @@ const CraftItemButton: FC<{ item: Item }> = ({ item }) => {
 
     if (isTxConfirmed) {
       toast.success(`${item.name} crafted successfully!`);
+      refetchMolecules();
     }
 
     if (isTxError) {
       toast.error(`An error ocurred while crafting ${item.name}, please try again.`);
     }
-  }, [hash, isTxConfirming, isTxConfirmed, isTxError, item.name]);
+  }, [hash, refetchMolecules, isTxConfirming, isTxConfirmed, isTxError, item.name]);
 
   const disabled = isPending || isTxConfirming;
 
