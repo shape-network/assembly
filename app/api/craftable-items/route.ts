@@ -5,14 +5,13 @@ import { config } from '@/lib/config';
 import { Item, Trait } from '@/lib/types';
 import { NextResponse } from 'next/server';
 import superjson from 'superjson';
-import { Address } from 'viem';
 
 async function getCraftItems(): Promise<Item[]> {
   const rpc = rpcClient();
 
   const nextItemId = await rpc.readContract({
     abi: itemsCoreContractAbi,
-    address: itemsCore[config.chainId] as Address,
+    address: itemsCore[config.chainId],
     functionName: 'getNextItemId',
     args: [],
   });
@@ -23,7 +22,7 @@ async function getCraftItems(): Promise<Item[]> {
     Array.from({ length: itemsLength }, async (_, i) => {
       const result = await rpc.readContract({
         abi: itemsCoreContractAbi,
-        address: itemsCore[config.chainId] as Address,
+        address: itemsCore[config.chainId],
         functionName: 'items',
         args: [BigInt(i + 1)],
       });
@@ -47,7 +46,7 @@ async function getTraitsForItem(itemId: bigint): Promise<Trait[]> {
   const rpc = rpcClient();
   const traits = await rpc.readContract({
     abi: itemsCoreContractAbi,
-    address: itemsCore[config.chainId] as Address,
+    address: itemsCore[config.chainId],
     functionName: 'getTokenTraits',
     args: [itemId],
   });
