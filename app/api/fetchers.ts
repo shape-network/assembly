@@ -1,12 +1,11 @@
-import { otomsDatabaseContractAbi } from '@/generated';
-import { otomsDatabase } from '@/lib/addresses';
+import { itemsCoreContractAbi, otomsDatabaseContractAbi } from '@/generated';
+import { itemsCore, otomsDatabase } from '@/lib/addresses';
 import { alchemy, rpcClient } from '@/lib/clients';
 import { config } from '@/lib/config';
 import { moleculeIdToTokenId, solidityMoleculeToMolecule } from '@/lib/otoms';
-import { UniverseInfo } from '@/lib/types';
+import { Trait, UniverseInfo } from '@/lib/types';
 import { NftOrdering, OwnedNftsResponse } from 'alchemy-sdk';
 import { unstable_cache } from 'next/cache';
-import { Address } from 'viem';
 import { readContract } from 'viem/actions';
 
 export async function getPagedNftsForOwner({
@@ -39,7 +38,7 @@ export async function getMoleculesByIds(tokenIds: string[]) {
     contracts: tokenIds.map(
       (tokenId) =>
         ({
-          address: otomsDatabase[config.chainId] as Address,
+          address: otomsDatabase[config.chainId],
           abi: otomsDatabaseContractAbi,
           functionName: 'getMoleculeByTokenId',
           args: [tokenId],
@@ -73,7 +72,7 @@ async function _getUniverses(): Promise<UniverseInfo[]> {
   const rpc = rpcClient();
   const universeHashes = await readContract(rpc, {
     abi: otomsDatabaseContractAbi,
-    address: otomsDatabase[config.chainId] as Address,
+    address: otomsDatabase[config.chainId],
     functionName: 'activeUniverses',
     args: [],
   });
@@ -82,7 +81,7 @@ async function _getUniverses(): Promise<UniverseInfo[]> {
     universeHashes.map(async (hash) => {
       const universeInfo = await readContract(rpc, {
         abi: otomsDatabaseContractAbi,
-        address: otomsDatabase[config.chainId] as Address,
+        address: otomsDatabase[config.chainId],
         functionName: 'universeInformation',
         args: [hash],
       });
@@ -102,3 +101,18 @@ export const getUniverses = unstable_cache(
   ['otoms-universes', String(config.chainId)],
   { tags: ['universes'], revalidate: 60 * 60 * 24 }
 );
+
+export async function getTraitsForItem(itemId: bigint): Promise<Trait[]> {
+  const rpc = rpcClient();
+  const traits = await rpc.readContract({
+    abi: itemsCoreContractAbi,
+    address: itemsCore[config.chainId],
+    functionName: 'getTokenTraits',
+    args: [itemId],
+  });
+
+  return traits.map((t) => ({
+    name: t.typeName,
+    value: t.valueString ?? t.valueNumber.toString(),
+  }));
+}
