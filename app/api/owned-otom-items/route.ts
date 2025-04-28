@@ -1,8 +1,8 @@
-import { getMoleculesByIds, getPagedNftsForOwner, getUniverses } from '@/app/api/fetchers';
+import { getMoleculesByIds, getPagedNftsForOwner } from '@/app/api/fetchers';
 import { otomsCore } from '@/lib/addresses';
 import { config } from '@/lib/config';
 import { InventoryResponse, Molecule } from '@/lib/types';
-import { universeHashToSeed } from '@/lib/utils';
+import { universeSeedToHash } from '@/lib/utils';
 import { OwnedNftsResponse } from 'alchemy-sdk';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -33,6 +33,7 @@ async function getMolecules({
   tokenIds: string[];
 }): Promise<{ tokenId: string; molecule: Molecule }[]> {
   try {
+    console.log('tokenIds', tokenIds);
     const moleculeResults = await getMoleculesByIds(tokenIds);
 
     return moleculeResults;
@@ -72,37 +73,24 @@ export async function POST(request: Request) {
 
     const elements = await getMolecules({ tokenIds });
 
-    const universes = await getUniverses();
-    const universeMap = new Map(universes.map((u) => [universeHashToSeed(u.hash), u.name]));
-
-    const tokenIdToUniverse = new Map<string, string>();
-    for (const element of elements) {
-      const universeSeed = element.molecule.giving_atoms[0].structure.universe_seed;
-      const universeName = universeMap.get(universeSeed) || 'Unknown';
-      tokenIdToUniverse.set(element.tokenId, universeName);
-    }
-
-    const moleculesWithUniverse = nfts.ownedNfts.flatMap((nft) => {
-      const universeName = tokenIdToUniverse.get(nft.tokenId) || 'Unknown';
+    const otomItems = nfts.ownedNfts.flatMap((nft) => {
       const moleculeData = elements.find((m) => m.tokenId === nft.tokenId);
 
       if (!moleculeData) return [];
 
       const balance = nft.balance ? Number(nft.balance) : 1;
       return Array.from({ length: balance }, (_, i) => ({
-        universe: universeName,
-        molecule: {
-          ...moleculeData.molecule,
-          id: `${nft.tokenId}-${i}`,
-          name: moleculeData.molecule.name ?? '?',
-        },
+        ...moleculeData.molecule,
+        id: `${nft.tokenId}-${i}`,
+        name: moleculeData.molecule.name,
+        universeHash: universeSeedToHash(
+          moleculeData.molecule.giving_atoms[0].structure.universe_seed
+        ),
       }));
     });
 
     const inventory: InventoryResponse = {
-      molecules: moleculesWithUniverse
-        .sort((a, b) => b.universe.localeCompare(a.universe))
-        .map((item) => item.molecule),
+      elements: otomItems.sort((a, b) => b.universeHash.localeCompare(a.universeHash)),
       cursor: nfts.pageKey,
     };
 

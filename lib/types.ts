@@ -3,7 +3,7 @@ import { Address, Hex } from 'viem';
 // Assembly-related types
 
 export type InventoryResponse = {
-  molecules: Molecule[];
+  elements: OtomItem[];
   cursor?: string;
 };
 
@@ -23,6 +23,10 @@ export type Item = {
 };
 
 export type Trait = { name: string; value: string };
+
+export type OtomItem = Molecule & {
+  universeHash: Hex;
+};
 
 // Otom-related types
 
