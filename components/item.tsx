@@ -11,10 +11,10 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useWriteItemsCoreContractCraftItem } from '@/generated';
+import { useWriteAssemblyCoreContractCraftItem } from '@/generated';
 import { assemblyCore } from '@/lib/addresses';
 import { config } from '@/lib/config';
-import { BlueprintComponent, Item, Molecule, Trait } from '@/lib/types';
+import { Item, OtomItem, Trait } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import { FC, useEffect } from 'react';
@@ -25,17 +25,15 @@ export const ItemToCraftCard: FC<{ item: Item }> = ({ item }) => {
   const { address } = useAccount();
   const { data: inventory } = useGetOtomItemsForUser();
 
-  function isElementOwned(name: string) {
+  function isElementOwned(itemId: bigint) {
     if (!inventory) return false;
-    return inventory.some((i) => i.name === name);
+    return inventory.some((i) => i.tokenId === itemId);
   }
-
-  console.log('item', item);
 
   const isCraftable =
     inventory &&
     item.blueprint.length > 0 &&
-    item.blueprint.every((el) => isElementOwned(el.element.name));
+    item.blueprint.every((component) => isElementOwned(component.itemIdOrOtomTokenId));
 
   return (
     <li>
@@ -61,15 +59,13 @@ export const ItemToCraftCard: FC<{ item: Item }> = ({ item }) => {
           <CardDescription className="text-center italic">{item.description}</CardDescription>
 
           <div className="flex flex-wrap gap-1">
-            {item.blueprint.map((el, i) => {
-              const isOwned = isElementOwned(el.element.name);
-
-              return <OtomItemCard key={i} isOwned={isOwned} blueprintComponent={el} />;
+            {item.blueprint.map((component, i) => {
+              return <div key={i}>{component.itemIdOrOtomTokenId}</div>;
             })}
           </div>
 
           <ul className="text-sm">
-            {item.traits.map((trait, idx) => (
+            {item.initialTraits.map((trait, idx) => (
               <li key={idx} className="flex flex-col gap-1">
                 <div className="text-primary flex items-center gap-2">
                   <span>{trait.name}</span>
@@ -87,11 +83,7 @@ export const ItemToCraftCard: FC<{ item: Item }> = ({ item }) => {
               <CraftItemButton item={item} />
             ) : (
               <Button disabled variant="ghost" className="-ml-4">
-                Missing{' '}
-                {item.blueprint
-                  .filter((el) => !isElementOwned(el.element.name))
-                  .map((el) => el.element.name)
-                  .join(', ')}
+                Missing elements
               </Button>
             )}
           </CardFooter>
@@ -101,28 +93,20 @@ export const ItemToCraftCard: FC<{ item: Item }> = ({ item }) => {
   );
 };
 
-export const OtomItemCard: FC<{ blueprintComponent: BlueprintComponent; isOwned: boolean }> = ({
-  blueprintComponent,
-  isOwned,
-}) => {
-  console.log('blueprintComponent', blueprintComponent.element.id);
+export const OtomItemCard: FC<{ element: OtomItem }> = ({ element }) => {
   return (
     <div
       className={cn(
         'bg-card border-primary relative grid size-15 cursor-pointer place-items-center rounded border p-2 text-lg font-semibold'
       )}
     >
-      {blueprintComponent.element.name}
+      {element.molecule.name}
     </div>
   );
 };
 
-function isElementMolecule(element: Item | Molecule): element is Molecule {
-  return 'identifier' in element;
-}
-
 const CraftItemButton: FC<{ item: Item }> = ({ item }) => {
-  const { data: hash, writeContractAsync, isPending } = useWriteItemsCoreContractCraftItem();
+  const { data: hash, writeContractAsync, isPending } = useWriteAssemblyCoreContractCraftItem();
   const { refetch: refetchOtomItems } = useGetOtomItemsForUser();
 
   async function handleCraftItem() {
@@ -130,7 +114,7 @@ const CraftItemButton: FC<{ item: Item }> = ({ item }) => {
       toast.info('Please confirm the transaction in your wallet.');
       await writeContractAsync({
         address: assemblyCore[config.chainId],
-        args: [item.id, BigInt(1)],
+        args: [item.id, BigInt(1), [], []],
       });
     } catch (error) {
       toast.error(`An error ocurred while crafting ${item.name}, please try again.`);
@@ -194,7 +178,7 @@ export const OwnedItemCard: FC<{ item: Item }> = ({ item }) => {
 
         <CardContent className="flex flex-col gap-6">
           <CardDescription className="text-center italic">{item.description}</CardDescription>
-          <ItemTraits traits={item.traits} />
+          <ItemTraits traits={item.initialTraits} />
         </CardContent>
       </Card>
     </li>

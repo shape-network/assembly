@@ -1,4 +1,4 @@
-import { itemsCoreContractAbi, otomsDatabaseContractAbi } from '@/generated';
+import { assemblyCoreContractAbi, otomsDatabaseContractAbi } from '@/generated';
 import { assemblyCore, otomsDatabase } from '@/lib/addresses';
 import { alchemy, rpcClient } from '@/lib/clients';
 import { config } from '@/lib/config';
@@ -105,7 +105,7 @@ export const getUniverses = unstable_cache(
 export async function getTraitsForItem(itemId: bigint): Promise<Trait[]> {
   const rpc = rpcClient();
   const traits = await rpc.readContract({
-    abi: itemsCoreContractAbi,
+    abi: assemblyCoreContractAbi,
     address: assemblyCore[config.chainId],
     functionName: 'getTokenTraits',
     args: [itemId],

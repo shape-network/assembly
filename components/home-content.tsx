@@ -159,12 +159,8 @@ const OtomItemsInventory: FC = () => {
   return (
     <div>
       <ul className="flex flex-wrap items-start gap-2 rounded">
-        {data.map((molecule) => (
-          <OtomItemCard
-            key={molecule.id}
-            isOwned
-            blueprintComponent={{ element: molecule, amount: 1 }}
-          />
+        {data.map((element) => (
+          <OtomItemCard key={element.molecule.id} element={element} />
         ))}
       </ul>
     </div>
