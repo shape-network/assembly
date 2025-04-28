@@ -1,6 +1,6 @@
 import { getTraitsForItem } from '@/app/api/fetchers';
 import { itemsCoreContractAbi } from '@/generated';
-import { itemsCore } from '@/lib/addresses';
+import { assemblyCore } from '@/lib/addresses';
 import { rpcClient } from '@/lib/clients';
 import { config } from '@/lib/config';
 import { Item } from '@/lib/types';
@@ -12,7 +12,7 @@ async function getCraftItems(): Promise<Item[]> {
 
   const nextItemId = await rpc.readContract({
     abi: itemsCoreContractAbi,
-    address: itemsCore[config.chainId],
+    address: assemblyCore[config.chainId],
     functionName: 'getNextItemId',
     args: [],
   });
@@ -23,7 +23,7 @@ async function getCraftItems(): Promise<Item[]> {
     Array.from({ length: itemsLength }, async (_, i) => {
       const result = await rpc.readContract({
         abi: itemsCoreContractAbi,
-        address: itemsCore[config.chainId],
+        address: assemblyCore[config.chainId],
         functionName: 'items',
         args: [BigInt(i + 1)],
       });

@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useWriteItemsCoreContractCraftItem } from '@/generated';
-import { itemsCore } from '@/lib/addresses';
+import { assemblyCore } from '@/lib/addresses';
 import { config } from '@/lib/config';
 import { BlueprintComponent, Item, Molecule, Trait } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -129,7 +129,7 @@ const CraftItemButton: FC<{ item: Item }> = ({ item }) => {
     try {
       toast.info('Please confirm the transaction in your wallet.');
       await writeContractAsync({
-        address: itemsCore[config.chainId],
+        address: assemblyCore[config.chainId],
         args: [item.id, BigInt(1)],
       });
     } catch (error) {
