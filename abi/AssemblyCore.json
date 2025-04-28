@@ -2,11 +2,56 @@
   "abi": [
     { "inputs": [], "stateMutability": "nonpayable", "type": "constructor" },
     { "inputs": [], "name": "CreationDisabled", "type": "error" },
+    { "inputs": [], "name": "CriteriaNotMet", "type": "error" },
+    { "inputs": [], "name": "EmptyBlueprint", "type": "error" },
     { "inputs": [], "name": "InsufficientItemBalance", "type": "error" },
+    {
+      "inputs": [
+        { "internalType": "uint256", "name": "tokenId", "type": "uint256" },
+        { "internalType": "uint256", "name": "currentTier", "type": "uint256" },
+        { "internalType": "uint256", "name": "requiredTier", "type": "uint256" }
+      ],
+      "name": "InsufficientItemTier",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        { "internalType": "uint256", "name": "required", "type": "uint256" },
+        { "internalType": "uint256", "name": "available", "type": "uint256" }
+      ],
+      "name": "InsufficientMatchingItems",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        { "internalType": "uint256", "name": "required", "type": "uint256" },
+        { "internalType": "uint256", "name": "available", "type": "uint256" }
+      ],
+      "name": "InsufficientMatchingOtoms",
+      "type": "error"
+    },
     { "inputs": [], "name": "InsufficientOtomBalance", "type": "error" },
+    {
+      "inputs": [
+        { "internalType": "uint256", "name": "required", "type": "uint256" },
+        { "internalType": "uint256", "name": "provided", "type": "uint256" }
+      ],
+      "name": "InsufficientPayment",
+      "type": "error"
+    },
+    { "inputs": [], "name": "InvalidBlueprintComponent", "type": "error" },
     { "inputs": [], "name": "InvalidCraftAmount", "type": "error" },
+    { "inputs": [], "name": "InvalidFeeRecipient", "type": "error" },
     { "inputs": [], "name": "InvalidInitialization", "type": "error" },
     { "inputs": [], "name": "InvalidItem", "type": "error" },
+    { "inputs": [], "name": "InvalidName", "type": "error" },
+    {
+      "inputs": [{ "internalType": "uint256", "name": "tier", "type": "uint256" }],
+      "name": "InvalidTier",
+      "type": "error"
+    },
+    { "inputs": [], "name": "InvalidTraits", "type": "error" },
+    { "inputs": [], "name": "ItemDoesNotExist", "type": "error" },
     {
       "inputs": [{ "internalType": "uint256", "name": "itemId", "type": "uint256" }],
       "name": "ItemIsFrozen",
@@ -25,6 +70,8 @@
       "name": "NotOwner",
       "type": "error"
     },
+    { "inputs": [], "name": "OnlyFungible", "type": "error" },
+    { "inputs": [], "name": "OnlyNonFungible", "type": "error" },
     {
       "inputs": [{ "internalType": "address", "name": "owner", "type": "address" }],
       "name": "OwnableInvalidOwner",
@@ -35,15 +82,11 @@
       "name": "OwnableUnauthorizedAccount",
       "type": "error"
     },
+    { "inputs": [], "name": "PaymentFailed", "type": "error" },
+    { "inputs": [], "name": "PaymentNotRequired", "type": "error" },
     { "inputs": [], "name": "ReentrancyGuardReentrantCall", "type": "error" },
-    {
-      "inputs": [
-        { "internalType": "uint256", "name": "value", "type": "uint256" },
-        { "internalType": "uint256", "name": "length", "type": "uint256" }
-      ],
-      "name": "StringsInsufficientHexLength",
-      "type": "error"
-    },
+    { "inputs": [], "name": "RefundFailed", "type": "error" },
+    { "inputs": [], "name": "TraitNotFound", "type": "error" },
     {
       "anonymous": false,
       "inputs": [{ "indexed": true, "internalType": "bool", "name": "isEnabled", "type": "bool" }],
@@ -63,7 +106,33 @@
       "inputs": [
         { "indexed": true, "internalType": "address", "name": "crafter", "type": "address" },
         { "indexed": true, "internalType": "uint256", "name": "itemId", "type": "uint256" },
-        { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" }
+        { "indexed": false, "internalType": "uint256", "name": "amount", "type": "uint256" },
+        { "indexed": false, "internalType": "uint256", "name": "tokenId", "type": "uint256" },
+        {
+          "components": [
+            { "internalType": "enum ComponentType", "name": "componentType", "type": "uint8" },
+            { "internalType": "uint256", "name": "itemIdOrOtomTokenId", "type": "uint256" },
+            { "internalType": "uint256", "name": "amount", "type": "uint256" },
+            {
+              "components": [
+                { "internalType": "enum PropertyType", "name": "propertyType", "type": "uint8" },
+                { "internalType": "uint256", "name": "minValue", "type": "uint256" },
+                { "internalType": "uint256", "name": "maxValue", "type": "uint256" },
+                { "internalType": "bool", "name": "boolValue", "type": "bool" },
+                { "internalType": "bool", "name": "checkBoolValue", "type": "bool" },
+                { "internalType": "string", "name": "stringValue", "type": "string" },
+                { "internalType": "bool", "name": "checkStringValue", "type": "bool" }
+              ],
+              "internalType": "struct PropertyCriterion[]",
+              "name": "criteria",
+              "type": "tuple[]"
+            }
+          ],
+          "indexed": false,
+          "internalType": "struct ActualBlueprintComponent[]",
+          "name": "actualComponents",
+          "type": "tuple[]"
+        }
       ],
       "name": "ItemCrafted",
       "type": "event"
@@ -71,6 +140,7 @@
     {
       "anonymous": false,
       "inputs": [
+        { "indexed": true, "internalType": "address", "name": "creator", "type": "address" },
         { "indexed": true, "internalType": "uint256", "name": "itemId", "type": "uint256" },
         { "indexed": false, "internalType": "string", "name": "name", "type": "string" }
       ],
@@ -116,6 +186,17 @@
     {
       "anonymous": false,
       "inputs": [
+        { "indexed": true, "internalType": "address", "name": "owner", "type": "address" },
+        { "indexed": true, "internalType": "uint256[]", "name": "itemIds", "type": "uint256[]" },
+        { "indexed": true, "internalType": "address", "name": "operator", "type": "address" },
+        { "indexed": false, "internalType": "bool", "name": "approved", "type": "bool" }
+      ],
+      "name": "ItemsApprovalForAll",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
         { "indexed": true, "internalType": "address", "name": "operator", "type": "address" },
         { "indexed": true, "internalType": "bool", "name": "isActive", "type": "bool" }
       ],
@@ -136,15 +217,6 @@
         { "indexed": true, "internalType": "address", "name": "previousOwner", "type": "address" },
         { "indexed": true, "internalType": "address", "name": "newOwner", "type": "address" }
       ],
-      "name": "OwnershipTransferStarted",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        { "indexed": true, "internalType": "address", "name": "previousOwner", "type": "address" },
-        { "indexed": true, "internalType": "address", "name": "newOwner", "type": "address" }
-      ],
       "name": "OwnershipTransferred",
       "type": "event"
     },
@@ -154,6 +226,17 @@
         { "indexed": true, "internalType": "address", "name": "renderer", "type": "address" }
       ],
       "name": "RendererSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        { "indexed": true, "internalType": "address", "name": "owner", "type": "address" },
+        { "indexed": true, "internalType": "uint256[]", "name": "tokenIds", "type": "uint256[]" },
+        { "indexed": true, "internalType": "address", "name": "operator", "type": "address" },
+        { "indexed": false, "internalType": "bool", "name": "approved", "type": "bool" }
+      ],
+      "name": "TokensApprovalForAll",
       "type": "event"
     },
     {
@@ -177,10 +260,25 @@
       "type": "event"
     },
     {
-      "inputs": [],
-      "name": "acceptOwnership",
-      "outputs": [],
-      "stateMutability": "nonpayable",
+      "anonymous": false,
+      "inputs": [
+        { "indexed": true, "internalType": "address", "name": "validator", "type": "address" }
+      ],
+      "name": "ValidatorSet",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        { "internalType": "uint256", "name": "", "type": "uint256" },
+        { "internalType": "uint256", "name": "", "type": "uint256" }
+      ],
+      "name": "_nonFungibleTokenToActualBlueprint",
+      "outputs": [
+        { "internalType": "enum ComponentType", "name": "componentType", "type": "uint8" },
+        { "internalType": "uint256", "name": "itemIdOrOtomTokenId", "type": "uint256" },
+        { "internalType": "uint256", "name": "amount", "type": "uint256" }
+      ],
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -197,11 +295,13 @@
     {
       "inputs": [
         { "internalType": "uint256", "name": "_itemId", "type": "uint256" },
-        { "internalType": "uint256", "name": "_amount", "type": "uint256" }
+        { "internalType": "uint256", "name": "_amount", "type": "uint256" },
+        { "internalType": "uint256[]", "name": "variableOtomIds", "type": "uint256[]" },
+        { "internalType": "uint256[]", "name": "nonFungibleTokenIds", "type": "uint256[]" }
       ],
       "name": "craftItem",
       "outputs": [],
-      "stateMutability": "nonpayable",
+      "stateMutability": "payable",
       "type": "function"
     },
     {
@@ -213,7 +313,21 @@
           "components": [
             { "internalType": "enum ComponentType", "name": "componentType", "type": "uint8" },
             { "internalType": "uint256", "name": "itemIdOrOtomTokenId", "type": "uint256" },
-            { "internalType": "uint256", "name": "amount", "type": "uint256" }
+            { "internalType": "uint256", "name": "amount", "type": "uint256" },
+            {
+              "components": [
+                { "internalType": "enum PropertyType", "name": "propertyType", "type": "uint8" },
+                { "internalType": "uint256", "name": "minValue", "type": "uint256" },
+                { "internalType": "uint256", "name": "maxValue", "type": "uint256" },
+                { "internalType": "bool", "name": "boolValue", "type": "bool" },
+                { "internalType": "bool", "name": "checkBoolValue", "type": "bool" },
+                { "internalType": "string", "name": "stringValue", "type": "string" },
+                { "internalType": "bool", "name": "checkStringValue", "type": "bool" }
+              ],
+              "internalType": "struct PropertyCriterion[]",
+              "name": "criteria",
+              "type": "tuple[]"
+            }
           ],
           "internalType": "struct BlueprintComponent[]",
           "name": "_blueprint",
@@ -229,7 +343,9 @@
           "internalType": "struct Trait[]",
           "name": "_traits",
           "type": "tuple[]"
-        }
+        },
+        { "internalType": "uint256", "name": "_ethCostInWei", "type": "uint256" },
+        { "internalType": "address", "name": "_feeRecipient", "type": "address" }
       ],
       "name": "createFungibleItem",
       "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
@@ -241,11 +357,26 @@
         { "internalType": "string", "name": "_name", "type": "string" },
         { "internalType": "string", "name": "_description", "type": "string" },
         { "internalType": "string", "name": "_defaultImageUri", "type": "string" },
+        { "internalType": "string[7]", "name": "_defaultTierImageUris", "type": "string[7]" },
         {
           "components": [
             { "internalType": "enum ComponentType", "name": "componentType", "type": "uint8" },
             { "internalType": "uint256", "name": "itemIdOrOtomTokenId", "type": "uint256" },
-            { "internalType": "uint256", "name": "amount", "type": "uint256" }
+            { "internalType": "uint256", "name": "amount", "type": "uint256" },
+            {
+              "components": [
+                { "internalType": "enum PropertyType", "name": "propertyType", "type": "uint8" },
+                { "internalType": "uint256", "name": "minValue", "type": "uint256" },
+                { "internalType": "uint256", "name": "maxValue", "type": "uint256" },
+                { "internalType": "bool", "name": "boolValue", "type": "bool" },
+                { "internalType": "bool", "name": "checkBoolValue", "type": "bool" },
+                { "internalType": "string", "name": "stringValue", "type": "string" },
+                { "internalType": "bool", "name": "checkStringValue", "type": "bool" }
+              ],
+              "internalType": "struct PropertyCriterion[]",
+              "name": "criteria",
+              "type": "tuple[]"
+            }
           ],
           "internalType": "struct BlueprintComponent[]",
           "name": "_blueprint",
@@ -262,7 +393,9 @@
           "name": "_traits",
           "type": "tuple[]"
         },
-        { "internalType": "address", "name": "_mutatorContract", "type": "address" }
+        { "internalType": "address", "name": "_mutatorContract", "type": "address" },
+        { "internalType": "uint256", "name": "_ethCostInWei", "type": "uint256" },
+        { "internalType": "address", "name": "_feeRecipient", "type": "address" }
       ],
       "name": "createNonFungibleItem",
       "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
@@ -296,6 +429,7 @@
       "outputs": [
         {
           "components": [
+            { "internalType": "uint256", "name": "id", "type": "uint256" },
             { "internalType": "string", "name": "name", "type": "string" },
             { "internalType": "string", "name": "description", "type": "string" },
             { "internalType": "address", "name": "creator", "type": "address" },
@@ -306,45 +440,34 @@
               "components": [
                 { "internalType": "enum ComponentType", "name": "componentType", "type": "uint8" },
                 { "internalType": "uint256", "name": "itemIdOrOtomTokenId", "type": "uint256" },
-                { "internalType": "uint256", "name": "amount", "type": "uint256" }
+                { "internalType": "uint256", "name": "amount", "type": "uint256" },
+                {
+                  "components": [
+                    {
+                      "internalType": "enum PropertyType",
+                      "name": "propertyType",
+                      "type": "uint8"
+                    },
+                    { "internalType": "uint256", "name": "minValue", "type": "uint256" },
+                    { "internalType": "uint256", "name": "maxValue", "type": "uint256" },
+                    { "internalType": "bool", "name": "boolValue", "type": "bool" },
+                    { "internalType": "bool", "name": "checkBoolValue", "type": "bool" },
+                    { "internalType": "string", "name": "stringValue", "type": "string" },
+                    { "internalType": "bool", "name": "checkStringValue", "type": "bool" }
+                  ],
+                  "internalType": "struct PropertyCriterion[]",
+                  "name": "criteria",
+                  "type": "tuple[]"
+                }
               ],
               "internalType": "struct BlueprintComponent[]",
               "name": "blueprint",
               "type": "tuple[]"
             },
-            { "internalType": "address", "name": "mutatorContract", "type": "address" }
-          ],
-          "internalType": "struct Item",
-          "name": "",
-          "type": "tuple"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [{ "internalType": "uint256", "name": "_tokenId", "type": "uint256" }],
-      "name": "getItemByTokenId",
-      "outputs": [
-        {
-          "components": [
-            { "internalType": "string", "name": "name", "type": "string" },
-            { "internalType": "string", "name": "description", "type": "string" },
-            { "internalType": "address", "name": "creator", "type": "address" },
-            { "internalType": "address", "name": "admin", "type": "address" },
-            { "internalType": "string", "name": "defaultImageUri", "type": "string" },
-            { "internalType": "enum ItemType", "name": "itemType", "type": "uint8" },
-            {
-              "components": [
-                { "internalType": "enum ComponentType", "name": "componentType", "type": "uint8" },
-                { "internalType": "uint256", "name": "itemIdOrOtomTokenId", "type": "uint256" },
-                { "internalType": "uint256", "name": "amount", "type": "uint256" }
-              ],
-              "internalType": "struct BlueprintComponent[]",
-              "name": "blueprint",
-              "type": "tuple[]"
-            },
-            { "internalType": "address", "name": "mutatorContract", "type": "address" }
+            { "internalType": "address", "name": "mutatorContract", "type": "address" },
+            { "internalType": "uint256", "name": "ethCostInWei", "type": "uint256" },
+            { "internalType": "address", "name": "feeRecipient", "type": "address" },
+            { "internalType": "string[7]", "name": "defaultTierImageUris", "type": "string[7]" }
           ],
           "internalType": "struct Item",
           "name": "",
@@ -362,20 +485,6 @@
       "type": "function"
     },
     {
-      "inputs": [{ "internalType": "uint256", "name": "_itemId", "type": "uint256" }],
-      "name": "getItemMintCount",
-      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "getNextItemId",
-      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
       "inputs": [
         { "internalType": "uint256", "name": "itemId", "type": "uint256" },
         { "internalType": "uint256", "name": "mintIndex", "type": "uint256" }
@@ -383,6 +492,13 @@
       "name": "getNonFungibleTokenId",
       "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
       "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "uint256", "name": "_tokenId", "type": "uint256" }],
+      "name": "getTokenDefaultImageUri",
+      "outputs": [{ "internalType": "string", "name": "", "type": "string" }],
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -434,10 +550,36 @@
       "type": "function"
     },
     {
-      "inputs": [{ "internalType": "address", "name": "_otomsAddress", "type": "address" }],
+      "inputs": [
+        { "internalType": "address", "name": "_otomsAddress", "type": "address" },
+        { "internalType": "address", "name": "_otomsDatabaseAddress", "type": "address" },
+        { "internalType": "address", "name": "_otomsValidationAddress", "type": "address" }
+      ],
       "name": "initialize",
       "outputs": [],
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        { "internalType": "address", "name": "_owner", "type": "address" },
+        { "internalType": "address", "name": "_operator", "type": "address" },
+        { "internalType": "uint256", "name": "_itemId", "type": "uint256" }
+      ],
+      "name": "isApprovedForItem",
+      "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        { "internalType": "address", "name": "_owner", "type": "address" },
+        { "internalType": "address", "name": "_operator", "type": "address" },
+        { "internalType": "uint256", "name": "_tokenId", "type": "uint256" }
+      ],
+      "name": "isApprovedForToken",
+      "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -448,9 +590,9 @@
       "type": "function"
     },
     {
-      "inputs": [{ "internalType": "uint256", "name": "_itemId", "type": "uint256" }],
-      "name": "isItemFrozen",
-      "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+      "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+      "name": "itemMintCount",
+      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
       "stateMutability": "view",
       "type": "function"
     },
@@ -458,14 +600,70 @@
       "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
       "name": "items",
       "outputs": [
+        { "internalType": "uint256", "name": "id", "type": "uint256" },
         { "internalType": "string", "name": "name", "type": "string" },
         { "internalType": "string", "name": "description", "type": "string" },
         { "internalType": "address", "name": "creator", "type": "address" },
         { "internalType": "address", "name": "admin", "type": "address" },
         { "internalType": "string", "name": "defaultImageUri", "type": "string" },
         { "internalType": "enum ItemType", "name": "itemType", "type": "uint8" },
-        { "internalType": "address", "name": "mutatorContract", "type": "address" }
+        { "internalType": "address", "name": "mutatorContract", "type": "address" },
+        { "internalType": "uint256", "name": "ethCostInWei", "type": "uint256" },
+        { "internalType": "address", "name": "feeRecipient", "type": "address" }
       ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "nextItemId",
+      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "uint256", "name": "_tokenId", "type": "uint256" }],
+      "name": "nonFungibleTokenToActualBlueprint",
+      "outputs": [
+        {
+          "components": [
+            { "internalType": "enum ComponentType", "name": "componentType", "type": "uint8" },
+            { "internalType": "uint256", "name": "itemIdOrOtomTokenId", "type": "uint256" },
+            { "internalType": "uint256", "name": "amount", "type": "uint256" },
+            {
+              "components": [
+                { "internalType": "enum PropertyType", "name": "propertyType", "type": "uint8" },
+                { "internalType": "uint256", "name": "minValue", "type": "uint256" },
+                { "internalType": "uint256", "name": "maxValue", "type": "uint256" },
+                { "internalType": "bool", "name": "boolValue", "type": "bool" },
+                { "internalType": "bool", "name": "checkBoolValue", "type": "bool" },
+                { "internalType": "string", "name": "stringValue", "type": "string" },
+                { "internalType": "bool", "name": "checkStringValue", "type": "bool" }
+              ],
+              "internalType": "struct PropertyCriterion[]",
+              "name": "criteria",
+              "type": "tuple[]"
+            }
+          ],
+          "internalType": "struct ActualBlueprintComponent[]",
+          "name": "",
+          "type": "tuple[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+      "name": "nonFungibleTokenToItemId",
+      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+      "name": "nonFungibleTokenToTier",
+      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
       "stateMutability": "view",
       "type": "function"
     },
@@ -485,14 +683,14 @@
     },
     {
       "inputs": [],
-      "name": "owner",
-      "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+      "name": "otomsDatabase",
+      "outputs": [{ "internalType": "contract IOtomsDatabaseV2", "name": "", "type": "address" }],
       "stateMutability": "view",
       "type": "function"
     },
     {
       "inputs": [],
-      "name": "pendingOwner",
+      "name": "owner",
       "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
       "stateMutability": "view",
       "type": "function"
@@ -507,6 +705,28 @@
     {
       "inputs": [],
       "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        { "internalType": "address", "name": "_operator", "type": "address" },
+        { "internalType": "uint256[]", "name": "_itemIds", "type": "uint256[]" },
+        { "internalType": "bool", "name": "_approved", "type": "bool" }
+      ],
+      "name": "setApprovalForItemIds",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        { "internalType": "address", "name": "_operator", "type": "address" },
+        { "internalType": "uint256[]", "name": "_tokenIds", "type": "uint256[]" },
+        { "internalType": "bool", "name": "_approved", "type": "bool" }
+      ],
+      "name": "setApprovalForTokenIds",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -529,16 +749,6 @@
       "type": "function"
     },
     {
-      "inputs": [
-        { "internalType": "address", "name": "operator", "type": "address" },
-        { "internalType": "bool", "name": "isActive", "type": "bool" }
-      ],
-      "name": "setOperator",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
       "inputs": [{ "internalType": "address", "name": "_otomItemsAddress", "type": "address" }],
       "name": "setOtomItems",
       "outputs": [],
@@ -548,6 +758,13 @@
     {
       "inputs": [{ "internalType": "address", "name": "_rendererAddress", "type": "address" }],
       "name": "setRenderer",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "address", "name": "_validatorAddress", "type": "address" }],
+      "name": "setValidator",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -568,7 +785,21 @@
           "components": [
             { "internalType": "enum ComponentType", "name": "componentType", "type": "uint8" },
             { "internalType": "uint256", "name": "itemIdOrOtomTokenId", "type": "uint256" },
-            { "internalType": "uint256", "name": "amount", "type": "uint256" }
+            { "internalType": "uint256", "name": "amount", "type": "uint256" },
+            {
+              "components": [
+                { "internalType": "enum PropertyType", "name": "propertyType", "type": "uint8" },
+                { "internalType": "uint256", "name": "minValue", "type": "uint256" },
+                { "internalType": "uint256", "name": "maxValue", "type": "uint256" },
+                { "internalType": "bool", "name": "boolValue", "type": "bool" },
+                { "internalType": "bool", "name": "checkBoolValue", "type": "bool" },
+                { "internalType": "string", "name": "stringValue", "type": "string" },
+                { "internalType": "bool", "name": "checkStringValue", "type": "bool" }
+              ],
+              "internalType": "struct PropertyCriterion[]",
+              "name": "criteria",
+              "type": "tuple[]"
+            }
           ],
           "internalType": "struct BlueprintComponent[]",
           "name": "_blueprint",
@@ -584,7 +815,9 @@
           "internalType": "struct Trait[]",
           "name": "_traits",
           "type": "tuple[]"
-        }
+        },
+        { "internalType": "uint256", "name": "_ethCostInWei", "type": "uint256" },
+        { "internalType": "address", "name": "_feeRecipient", "type": "address" }
       ],
       "name": "updateFungibleItem",
       "outputs": [],
@@ -596,11 +829,27 @@
         { "internalType": "uint256", "name": "_itemId", "type": "uint256" },
         { "internalType": "string", "name": "_name", "type": "string" },
         { "internalType": "string", "name": "_description", "type": "string" },
+        { "internalType": "string", "name": "_defaultImageUri", "type": "string" },
+        { "internalType": "string[7]", "name": "_defaultTierImageUris", "type": "string[7]" },
         {
           "components": [
             { "internalType": "enum ComponentType", "name": "componentType", "type": "uint8" },
             { "internalType": "uint256", "name": "itemIdOrOtomTokenId", "type": "uint256" },
-            { "internalType": "uint256", "name": "amount", "type": "uint256" }
+            { "internalType": "uint256", "name": "amount", "type": "uint256" },
+            {
+              "components": [
+                { "internalType": "enum PropertyType", "name": "propertyType", "type": "uint8" },
+                { "internalType": "uint256", "name": "minValue", "type": "uint256" },
+                { "internalType": "uint256", "name": "maxValue", "type": "uint256" },
+                { "internalType": "bool", "name": "boolValue", "type": "bool" },
+                { "internalType": "bool", "name": "checkBoolValue", "type": "bool" },
+                { "internalType": "string", "name": "stringValue", "type": "string" },
+                { "internalType": "bool", "name": "checkStringValue", "type": "bool" }
+              ],
+              "internalType": "struct PropertyCriterion[]",
+              "name": "criteria",
+              "type": "tuple[]"
+            }
           ],
           "internalType": "struct BlueprintComponent[]",
           "name": "_blueprint",
@@ -617,7 +866,9 @@
           "name": "_traits",
           "type": "tuple[]"
         },
-        { "internalType": "address", "name": "_mutatorContract", "type": "address" }
+        { "internalType": "address", "name": "_mutatorContract", "type": "address" },
+        { "internalType": "uint256", "name": "_ethCostInWei", "type": "uint256" },
+        { "internalType": "address", "name": "_feeRecipient", "type": "address" }
       ],
       "name": "updateNonFungibleItem",
       "outputs": [],
@@ -633,6 +884,15 @@
       "name": "useItem",
       "outputs": [],
       "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "validator",
+      "outputs": [
+        { "internalType": "contract IOtomItemsValidator", "name": "", "type": "address" }
+      ],
+      "stateMutability": "view",
       "type": "function"
     }
   ]
