@@ -7,24 +7,44 @@ export type InventoryResponse = {
   cursor?: string;
 };
 
+/** 0: OTOM, 1: VARIABLE_OTOM, 2: FUNGIBLE_ITEM, 3: NON_FUNGIBLE_ITEM */
+export type ComponentType = 0 | 1 | 2 | 3;
+
 export type BlueprintComponent = {
-  element: Item | Molecule;
+  componentType: ComponentType;
+  itemIdOrOtomTokenId: bigint;
   amount: number;
+  criteria: {
+    propertyType: number;
+    minValue?: number;
+    maxValue?: number;
+    boolValue?: boolean;
+    checkBoolValue?: boolean;
+    stringValue?: string;
+    checkStringValue?: boolean;
+  }[];
 };
+
+/** 0: FUNGIBLE, 1: NON_FUNGIBLE */
+export type ItemType = 0 | 1;
 
 export type Item = {
   id: bigint;
   name: string;
   description: string;
   creator: Address;
-  defaultImageUri: string;
-  traits: Trait[];
+  itemType: ItemType;
   blueprint: BlueprintComponent[];
+  initialTraits: Trait[];
+  ethCostInWei: bigint;
+  defaultImageUri: string;
 };
 
-export type Trait = { name: string; value: string };
+export type Trait = { name: string; value: string | number };
 
-export type OtomItem = Molecule & {
+export type OtomItem = {
+  tokenId: bigint;
+  molecule: Molecule;
   universeHash: Hex;
 };
 

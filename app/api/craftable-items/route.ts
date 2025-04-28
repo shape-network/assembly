@@ -1,45 +1,45 @@
 import { getTraitsForItem } from '@/app/api/fetchers';
-import { itemsCoreContractAbi } from '@/generated';
-import { assemblyCore } from '@/lib/addresses';
+import { assemblyTrackingContractAbi } from '@/generated';
+import { assemblyTracking } from '@/lib/addresses';
 import { rpcClient } from '@/lib/clients';
 import { config } from '@/lib/config';
-import { Item } from '@/lib/types';
+import { ComponentType, Item, ItemType } from '@/lib/types';
 import { NextResponse } from 'next/server';
 import superjson from 'superjson';
 
 async function getCraftItems(): Promise<Item[]> {
   const rpc = rpcClient();
 
-  const nextItemId = await rpc.readContract({
-    abi: itemsCoreContractAbi,
-    address: assemblyCore[config.chainId],
-    functionName: 'getNextItemId',
-    args: [],
+  const items = await rpc.readContract({
+    abi: assemblyTrackingContractAbi,
+    address: assemblyTracking[config.chainId],
+    functionName: 'getAllItemsPaginated',
+    args: [BigInt(0), BigInt(100)],
   });
 
-  const itemsLength = Number(nextItemId - BigInt(1));
-
-  const responses = await Promise.all(
-    Array.from({ length: itemsLength }, async (_, i) => {
-      const result = await rpc.readContract({
-        abi: itemsCoreContractAbi,
-        address: assemblyCore[config.chainId],
-        functionName: 'items',
-        args: [BigInt(i + 1)],
-      });
-
-      return { result, id: BigInt(i + 1) };
-    })
-  );
-
-  return responses.map((r) => ({
+  return items.map((r) => ({
     id: r.id,
-    name: r.result[0],
-    description: r.result[1],
-    creator: r.result[2],
-    defaultImageUri: r.result[4],
-    traits: [],
-    blueprint: [],
+    name: r.name,
+    description: r.description,
+    creator: r.creator,
+    itemType: r.itemType as ItemType,
+    defaultImageUri: r.defaultImageUri,
+    ethCostInWei: r.ethCostInWei,
+    blueprint: r.blueprint.map((b) => ({
+      componentType: b.componentType as ComponentType,
+      itemIdOrOtomTokenId: b.itemIdOrOtomTokenId,
+      amount: Number(b.amount),
+      criteria: b.criteria.map((c) => ({
+        propertyType: c.propertyType,
+        minValue: Number(c.minValue),
+        maxValue: Number(c.maxValue),
+        boolValue: c.boolValue,
+        checkBoolValue: c.checkBoolValue,
+        stringValue: c.stringValue,
+        checkStringValue: c.checkStringValue,
+      })),
+    })),
+    initialTraits: [],
   }));
 }
 
