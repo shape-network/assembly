@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { Hex } from 'viem';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -32,4 +33,8 @@ export function abbreviateHash(
 
 export function universeHashToSeed(universeHash: string): string {
   return universeHash.slice(2);
+}
+
+export function universeSeedToHash(universeSeed: string): Hex {
+  return `0x${universeSeed}`;
 }

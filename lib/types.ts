@@ -3,26 +3,63 @@ import { Address, Hex } from 'viem';
 // Assembly-related types
 
 export type InventoryResponse = {
-  molecules: Molecule[];
+  elements: OtomItem[];
   cursor?: string;
 };
 
+export type ComponentType = 'otom' | 'variable_otom' | 'fungible_item' | 'non_fungible_item';
+
 export type BlueprintComponent = {
-  element: Item | Molecule;
+  itemIdOrOtomTokenId: bigint;
   amount: number;
+  componentType: ComponentType;
+  name: string;
+  criteria: {
+    propertyType: number;
+    minValue?: bigint;
+    maxValue?: bigint;
+    boolValue?: boolean;
+    checkBoolValue?: boolean;
+    stringValue?: string;
+    checkStringValue?: boolean;
+  }[];
 };
+
+export type RawBlueprintComponent = {
+  componentType: number;
+  itemIdOrOtomTokenId: bigint;
+  amount: bigint;
+  criteria: readonly {
+    propertyType: number;
+    minValue: bigint;
+    maxValue: bigint;
+    boolValue: boolean;
+    checkBoolValue: boolean;
+    stringValue: string;
+    checkStringValue: boolean;
+  }[];
+};
+
+/** 0: FUNGIBLE, 1: NON_FUNGIBLE */
+export type ItemType = 0 | 1;
 
 export type Item = {
   id: bigint;
   name: string;
   description: string;
   creator: Address;
-  defaultImageUri: string;
-  traits: Trait[];
+  itemType: ItemType;
   blueprint: BlueprintComponent[];
+  initialTraits: Trait[];
+  ethCostInWei: bigint;
+  defaultImageUri: string;
 };
 
-export type Trait = { name: string; value: string };
+export type Trait = { name: string; value: string | number };
+
+export type OtomItem = Molecule & {
+  universeHash: Hex;
+};
 
 // Otom-related types
 

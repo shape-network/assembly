@@ -1,5 +1,5 @@
-import { itemsCoreContractAbi, otomsDatabaseContractAbi } from '@/generated';
-import { itemsCore, otomsDatabase } from '@/lib/addresses';
+import { assemblyCoreContractAbi, otomsDatabaseContractAbi } from '@/generated';
+import { assemblyCore, otomsDatabase } from '@/lib/addresses';
 import { alchemy, rpcClient } from '@/lib/clients';
 import { config } from '@/lib/config';
 import { moleculeIdToTokenId, solidityMoleculeToMolecule } from '@/lib/otoms';
@@ -55,15 +55,13 @@ export async function getMoleculesByIds(tokenIds: string[]) {
     );
   }
 
-  const results = elements
-    .filter((r) => r.result && r.result.givingAtoms.length + r.result.receivingAtoms.length > 1) // Only keep elements that are molecules
-    .map((r) => {
-      const molecule = solidityMoleculeToMolecule(r.result!);
-      return {
-        tokenId: String(moleculeIdToTokenId(molecule.id)),
-        molecule,
-      };
-    });
+  const results = elements.map((r) => {
+    const molecule = solidityMoleculeToMolecule(r.result!);
+    return {
+      tokenId: String(moleculeIdToTokenId(molecule.id)),
+      molecule,
+    };
+  });
 
   return results;
 }
@@ -105,8 +103,8 @@ export const getUniverses = unstable_cache(
 export async function getTraitsForItem(itemId: bigint): Promise<Trait[]> {
   const rpc = rpcClient();
   const traits = await rpc.readContract({
-    abi: itemsCoreContractAbi,
-    address: itemsCore[config.chainId],
+    abi: assemblyCoreContractAbi,
+    address: assemblyCore[config.chainId],
     functionName: 'getTokenTraits',
     args: [itemId],
   });

@@ -1,0 +1,241 @@
+{
+  "abi": [
+    { "inputs": [], "name": "InvalidInitialization", "type": "error" },
+    { "inputs": [], "name": "InvalidItem", "type": "error" },
+    { "inputs": [], "name": "NotInitializing", "type": "error" },
+    { "inputs": [], "name": "NotOtomItems", "type": "error" },
+    {
+      "inputs": [{ "internalType": "address", "name": "owner", "type": "address" }],
+      "name": "OwnableInvalidOwner",
+      "type": "error"
+    },
+    {
+      "inputs": [{ "internalType": "address", "name": "account", "type": "address" }],
+      "name": "OwnableUnauthorizedAccount",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        { "indexed": true, "internalType": "address", "name": "coreAddress", "type": "address" }
+      ],
+      "name": "CoreSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        { "indexed": false, "internalType": "uint64", "name": "version", "type": "uint64" }
+      ],
+      "name": "Initialized",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "otomItemsAddress",
+          "type": "address"
+        }
+      ],
+      "name": "OtomItemsSet",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        { "indexed": true, "internalType": "address", "name": "previousOwner", "type": "address" },
+        { "indexed": true, "internalType": "address", "name": "newOwner", "type": "address" }
+      ],
+      "name": "OwnershipTransferStarted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        { "indexed": true, "internalType": "address", "name": "previousOwner", "type": "address" },
+        { "indexed": true, "internalType": "address", "name": "newOwner", "type": "address" }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "acceptOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "core",
+      "outputs": [{ "internalType": "contract IOtomItemsCore", "name": "", "type": "address" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        { "internalType": "uint256", "name": "_offset", "type": "uint256" },
+        { "internalType": "uint256", "name": "_limit", "type": "uint256" }
+      ],
+      "name": "getAllItemsPaginated",
+      "outputs": [
+        {
+          "components": [
+            { "internalType": "uint256", "name": "id", "type": "uint256" },
+            { "internalType": "string", "name": "name", "type": "string" },
+            { "internalType": "string", "name": "description", "type": "string" },
+            { "internalType": "address", "name": "creator", "type": "address" },
+            { "internalType": "address", "name": "admin", "type": "address" },
+            { "internalType": "string", "name": "defaultImageUri", "type": "string" },
+            { "internalType": "enum ItemType", "name": "itemType", "type": "uint8" },
+            {
+              "components": [
+                { "internalType": "enum ComponentType", "name": "componentType", "type": "uint8" },
+                { "internalType": "uint256", "name": "itemIdOrOtomTokenId", "type": "uint256" },
+                { "internalType": "uint256", "name": "amount", "type": "uint256" },
+                {
+                  "components": [
+                    {
+                      "internalType": "enum PropertyType",
+                      "name": "propertyType",
+                      "type": "uint8"
+                    },
+                    { "internalType": "uint256", "name": "minValue", "type": "uint256" },
+                    { "internalType": "uint256", "name": "maxValue", "type": "uint256" },
+                    { "internalType": "bool", "name": "boolValue", "type": "bool" },
+                    { "internalType": "bool", "name": "checkBoolValue", "type": "bool" },
+                    { "internalType": "string", "name": "stringValue", "type": "string" },
+                    { "internalType": "bool", "name": "checkStringValue", "type": "bool" }
+                  ],
+                  "internalType": "struct PropertyCriterion[]",
+                  "name": "criteria",
+                  "type": "tuple[]"
+                }
+              ],
+              "internalType": "struct BlueprintComponent[]",
+              "name": "blueprint",
+              "type": "tuple[]"
+            },
+            { "internalType": "address", "name": "mutatorContract", "type": "address" },
+            { "internalType": "uint256", "name": "ethCostInWei", "type": "uint256" },
+            { "internalType": "address", "name": "feeRecipient", "type": "address" },
+            { "internalType": "string[7]", "name": "defaultTierImageUris", "type": "string[7]" }
+          ],
+          "internalType": "struct Item[]",
+          "name": "",
+          "type": "tuple[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "uint256", "name": "_itemId", "type": "uint256" }],
+      "name": "getItemSupply",
+      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        { "internalType": "address", "name": "_owner", "type": "address" },
+        { "internalType": "uint256", "name": "_itemId", "type": "uint256" },
+        { "internalType": "uint256", "name": "_offset", "type": "uint256" },
+        { "internalType": "uint256", "name": "_limit", "type": "uint256" }
+      ],
+      "name": "getNonFungibleItemOwnerTokenIdsPaginated",
+      "outputs": [{ "internalType": "uint256[]", "name": "", "type": "uint256[]" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        { "internalType": "uint256", "name": "_itemId", "type": "uint256" },
+        { "internalType": "uint256", "name": "_offset", "type": "uint256" },
+        { "internalType": "uint256", "name": "_limit", "type": "uint256" }
+      ],
+      "name": "getNonFungibleItemTokenIdsPaginated",
+      "outputs": [{ "internalType": "uint256[]", "name": "", "type": "uint256[]" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "uint256", "name": "_tokenId", "type": "uint256" }],
+      "name": "getNonFungibleTokenOwner",
+      "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "address", "name": "_coreAddress", "type": "address" }],
+      "name": "initialize",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        { "internalType": "address", "name": "from", "type": "address" },
+        { "internalType": "address", "name": "to", "type": "address" },
+        { "internalType": "uint256[]", "name": "ids", "type": "uint256[]" },
+        { "internalType": "uint256[]", "name": "values", "type": "uint256[]" }
+      ],
+      "name": "onUpdate",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "otomItems",
+      "outputs": [{ "internalType": "contract IOtomItems", "name": "", "type": "address" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "pendingOwner",
+      "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "address", "name": "_coreAddress", "type": "address" }],
+      "name": "setCore",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "address", "name": "_otomItemsAddress", "type": "address" }],
+      "name": "setOtomItems",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [{ "internalType": "address", "name": "newOwner", "type": "address" }],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ]
+}

@@ -1,30 +1,17 @@
 'use client';
 
-import { useGetCraftableItems, useGetItemsForUser, useGetMoleculesForUser } from '@/app/api/hooks';
+import { useGetCraftableItems, useGetItemsForUser, useGetOtomItemsForUser } from '@/app/api/hooks';
+import { ItemToCraftCard, OtomItemCard, OwnedItemCard } from '@/components/item';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { WalletConnect } from '@/components/wallet-connect';
-import { useWriteItemsCoreContractCraftItem } from '@/generated';
-import { itemsCore } from '@/lib/addresses';
-import { config } from '@/lib/config';
 import { paths } from '@/lib/paths';
-import { BlueprintComponent, Item, Molecule } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { ExternalLinkIcon } from '@radix-ui/react-icons';
-import Image from 'next/image';
 import Link from 'next/link';
-import { ComponentProps, FC, PropsWithChildren, useEffect } from 'react';
-import { toast } from 'sonner';
-import { useAccount, useWaitForTransactionReceipt } from 'wagmi';
+import { ComponentProps, FC, PropsWithChildren } from 'react';
+import { useAccount } from 'wagmi';
 
 export const HomeContent: FC = () => {
   const { address } = useAccount();
@@ -71,9 +58,7 @@ export const HomeContent: FC = () => {
             <div className="flex flex-col gap-16">
               <div className="flex w-full flex-col gap-2">
                 <div className="flex items-baseline justify-between gap-2">
-                  <h2 className="text-primary font-bold tracking-wide uppercase">
-                    Owned Molecules
-                  </h2>
+                  <h2 className="text-primary font-bold tracking-wide uppercase">Owned otoms</h2>
                   <InlineLink
                     href={paths.otom}
                     className="text-muted-foreground/50 text-sm no-underline hover:underline"
@@ -81,7 +66,7 @@ export const HomeContent: FC = () => {
                     Mine more otoms <ExternalLinkIcon className="size-4" />
                   </InlineLink>
                 </div>
-                <MoleculesInventory />
+                <OtomsInventory />
               </div>
 
               <div className="flex w-full flex-col gap-2">
@@ -134,147 +119,18 @@ const ItemsToCraft: FC = () => {
   return (
     <BlueprintComponentsGrid>
       {data.map((item) => (
-        <BlueprintComponentCard key={item.id} item={item} isOwned={false} />
+        <ItemToCraftCard key={item.id} item={item} />
       ))}
     </BlueprintComponentsGrid>
   );
 };
 
 const BlueprintComponentsGrid: FC<PropsWithChildren> = ({ children }) => {
-  return <ul className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">{children}</ul>;
+  return <ul className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-8">{children}</ul>;
 };
 
-const BlueprintComponentCard: FC<{ item: Item; isOwned: boolean }> = ({ item, isOwned }) => {
-  const { address } = useAccount();
-  const { data: inventory } = useGetMoleculesForUser();
-
-  function isElementOwned(name: string) {
-    if (!inventory) return false;
-    return inventory.some((i) => i.name === name);
-  }
-
-  const isCraftable = inventory && item.blueprint.every((el) => isElementOwned(el.element.name));
-
-  return (
-    <li>
-      <Card>
-        <CardHeader>
-          <CardTitle>{item.name}</CardTitle>
-        </CardHeader>
-
-        <div className="relative h-40 w-full">
-          {item.defaultImageUri ? (
-            <Image
-              src={item.defaultImageUri}
-              alt={item.name}
-              fill
-              className="object-contain py-2"
-            />
-          ) : (
-            <Skeleton className="h-48 w-full" />
-          )}
-        </div>
-
-        <CardContent className="flex flex-col gap-6">
-          <CardDescription className="text-center italic">{item.description}</CardDescription>
-
-          {!isOwned && (
-            <div className="flex flex-wrap gap-1">
-              {item.blueprint.map((el, i) => {
-                const isOwned = isElementOwned(el.element.name);
-
-                return <MoleculeBadge key={i} isOwned={isOwned} blueprintComponent={el} />;
-              })}
-            </div>
-          )}
-
-          <ul className="text-sm">
-            {item.traits.map((trait, idx) => (
-              <li key={idx} className="flex flex-col gap-1">
-                <div className="text-primary flex items-center gap-2">
-                  <span>{trait.name}</span>
-                  <span className="border-muted-foreground/15 flex-grow border-b border-dotted"></span>
-                  <span className="font-medium">{trait.value}</span>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </CardContent>
-
-        {address && !isOwned && (
-          <CardFooter>
-            {isCraftable ? (
-              <CraftItemButton item={item} />
-            ) : (
-              <Button disabled variant="ghost" className="-ml-4">
-                Missing{' '}
-                {item.blueprint
-                  .filter((el) => !isElementOwned(el.element.name))
-                  .map((el) => el.element.name)
-                  .join(', ')}
-              </Button>
-            )}
-          </CardFooter>
-        )}
-      </Card>
-    </li>
-  );
-};
-
-const CraftItemButton: FC<{ item: Item }> = ({ item }) => {
-  const { data: hash, writeContractAsync, isPending } = useWriteItemsCoreContractCraftItem();
-  const { refetch: refetchMolecules } = useGetMoleculesForUser();
-
-  console.log('config.chainId', config.chainId);
-
-  async function handleCraftItem() {
-    try {
-      toast.info('Please confirm the transaction in your wallet.');
-      await writeContractAsync({
-        address: itemsCore[config.chainId],
-        args: [item.id, BigInt(1)],
-      });
-    } catch (error) {
-      toast.error(`An error ocurred while crafting ${item.name}, please try again.`);
-      console.error(error);
-    }
-  }
-
-  const {
-    isLoading: isTxConfirming,
-    isError: isTxError,
-    isSuccess: isTxConfirmed,
-  } = useWaitForTransactionReceipt({
-    hash,
-    query: { enabled: !!hash },
-  });
-
-  useEffect(() => {
-    if (hash && isTxConfirming) {
-      toast.loading('Item is being crafted...');
-    }
-
-    if (isTxConfirmed) {
-      toast.success(`${item.name} crafted successfully!`);
-      refetchMolecules();
-    }
-
-    if (isTxError) {
-      toast.error(`An error ocurred while crafting ${item.name}, please try again.`);
-    }
-  }, [hash, refetchMolecules, isTxConfirming, isTxConfirmed, isTxError, item.name]);
-
-  const disabled = isPending || isTxConfirming;
-
-  return (
-    <Button disabled={disabled} onClick={handleCraftItem}>
-      {isPending ? 'Crafting...' : 'Craft'}
-    </Button>
-  );
-};
-
-const MoleculesInventory: FC = () => {
-  const { data, isLoading, isError } = useGetMoleculesForUser();
+const OtomsInventory: FC = () => {
+  const { data, isLoading, isError } = useGetOtomItemsForUser();
 
   if (isLoading) {
     return <InventorySkeleton />;
@@ -286,33 +142,24 @@ const MoleculesInventory: FC = () => {
 
   if (!data || data.length === 0) {
     return (
-      <Card>
-        <CardContent className="grid place-items-center gap-4 py-12">
-          <p>No molecules found in your wallet.</p>
-          <Button asChild>
-            <a href={paths.otom} target="_blank" rel="noopener noreferrer">
-              Get Molecules
-            </a>
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="grid place-items-center gap-4 py-12">
+        <p>No otoms found in your wallet.</p>
+
+        <Button asChild>
+          <a href={paths.otom} target="_blank" rel="noopener noreferrer">
+            Get otoms
+          </a>
+        </Button>
+      </div>
     );
   }
 
   return (
-    <Card>
-      <CardContent>
-        <ul className="flex flex-wrap items-start gap-2 rounded">
-          {data.map((molecule) => (
-            <MoleculeBadge
-              key={molecule.id}
-              isOwned
-              blueprintComponent={{ element: molecule, amount: 1 }}
-            />
-          ))}
-        </ul>
-      </CardContent>
-    </Card>
+    <ul className="flex flex-wrap items-start gap-2 rounded">
+      {data.map((element) => (
+        <OtomItemCard key={element.id} element={element} />
+      ))}
+    </ul>
   );
 };
 
@@ -339,61 +186,19 @@ const ItemsInventory: FC = () => {
   return (
     <BlueprintComponentsGrid>
       {data.map((item) => (
-        <BlueprintComponentCard key={item.id} item={item} isOwned />
+        <OwnedItemCard key={item.id} item={item} />
       ))}
     </BlueprintComponentsGrid>
   );
 };
 
-const MoleculeBadge: FC<{ blueprintComponent: BlueprintComponent; isOwned: boolean }> = ({
-  blueprintComponent,
-  isOwned,
-}) => {
-  return (
-    <Popover>
-      <PopoverTrigger
-        className={cn(
-          'cursor-pointer rounded px-2 py-1',
-          isOwned ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'
-        )}
-      >
-        {blueprintComponent.element.name}
-      </PopoverTrigger>
-
-      <PopoverContent>
-        <ul>
-          {isElementMolecule(blueprintComponent.element) ? (
-            <>
-              <li>Toughness: {blueprintComponent.element.toughness}</li>
-              <li>Hardness: {blueprintComponent.element.hardness}</li>
-              <li>Ductility: {blueprintComponent.element.ductility}</li>
-              <li>Electrical Conductivity: {blueprintComponent.element.electrical_conductivity}</li>
-              <li>Thermal Conductivity: {blueprintComponent.element.thermal_conductivity}</li>
-            </>
-          ) : (
-            <li>item properties</li>
-          )}
-        </ul>
-      </PopoverContent>
-    </Popover>
-  );
-};
-
-function isElementMolecule(element: Item | Molecule): element is Molecule {
-  return 'identifier' in element;
-}
-
 const InventorySkeleton: FC = () => {
   return (
-    <Card>
-      <CardContent>
-        <div className="flex flex-wrap items-start gap-2">
-          {Array.from({ length: 75 }).map((_, index) => (
-            <Skeleton key={index} className="h-10 w-10" />
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+    <div className="flex flex-wrap items-start gap-2">
+      {Array.from({ length: 25 }).map((_, index) => (
+        <Skeleton key={index} className="size-15" />
+      ))}
+    </div>
   );
 };
 

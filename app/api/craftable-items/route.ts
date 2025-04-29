@@ -1,58 +1,42 @@
 import { getTraitsForItem } from '@/app/api/fetchers';
-import { itemsCoreContractAbi } from '@/generated';
-import { itemsCore } from '@/lib/addresses';
+import { assemblyTrackingContractAbi } from '@/generated';
+import { assemblyTracking } from '@/lib/addresses';
 import { rpcClient } from '@/lib/clients';
 import { config } from '@/lib/config';
-import { Item } from '@/lib/types';
+import { getBlueprintForItem } from '@/lib/items';
+import { Item, ItemType } from '@/lib/types';
 import { NextResponse } from 'next/server';
 import superjson from 'superjson';
 
 async function getCraftItems(): Promise<Item[]> {
   const rpc = rpcClient();
 
-  const nextItemId = await rpc.readContract({
-    abi: itemsCoreContractAbi,
-    address: itemsCore[config.chainId],
-    functionName: 'getNextItemId',
-    args: [],
+  const results = await rpc.readContract({
+    abi: assemblyTrackingContractAbi,
+    address: assemblyTracking[config.chainId],
+    functionName: 'getAllItemsPaginated',
+    args: [BigInt(0), BigInt(100)], // TODO: add proper pagination
   });
 
-  const itemsLength = Number(nextItemId - BigInt(1));
-
-  const responses = await Promise.all(
-    Array.from({ length: itemsLength }, async (_, i) => {
-      const result = await rpc.readContract({
-        abi: itemsCoreContractAbi,
-        address: itemsCore[config.chainId],
-        functionName: 'items',
-        args: [BigInt(i + 1)],
-      });
-
-      return { result, id: BigInt(i + 1) };
-    })
+  const items = await Promise.all(
+    results.map(async (r) => ({
+      id: r.id,
+      name: r.name,
+      description: r.description,
+      creator: r.creator,
+      itemType: r.itemType as ItemType,
+      defaultImageUri: r.defaultImageUri,
+      ethCostInWei: r.ethCostInWei,
+      blueprint: await Promise.all(r.blueprint.map(getBlueprintForItem)),
+      initialTraits: await getTraitsForItem(r.id),
+    }))
   );
 
-  return responses.map((r) => ({
-    id: r.id,
-    name: r.result[0],
-    description: r.result[1],
-    creator: r.result[2],
-    defaultImageUri: r.result[4],
-    traits: [],
-    blueprint: [],
-  }));
+  return items;
 }
 
 export async function GET() {
   const items = await getCraftItems();
-
-  const itemsWithTraits = await Promise.all(
-    items.map(async (item) => {
-      const traits = await getTraitsForItem(item.id);
-      return { ...item, traits };
-    })
-  );
-
-  const serialized = superjson.stringify(itemsWithTraits);
+  const serialized = superjson.stringify(items);
   return NextResponse.json(serialized);
 }
