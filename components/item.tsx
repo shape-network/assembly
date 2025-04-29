@@ -4,12 +4,13 @@ import { useGetCraftableItems, useGetOtomItemsForUser } from '@/app/api/hooks';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useWriteAssemblyCoreContractCraftItem } from '@/generated';
 import { assemblyCore } from '@/lib/addresses';
 import { config } from '@/lib/config';
 import { Item, OtomItem, Trait } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { LightningBoltIcon } from '@radix-ui/react-icons';
+import { LightningBoltIcon, QuestionMarkCircledIcon } from '@radix-ui/react-icons';
 import Image from 'next/image';
 import { FC, useEffect } from 'react';
 import { toast } from 'sonner';
@@ -100,15 +101,48 @@ export const ItemToCraftCard: FC<{ item: Item }> = ({ item }) => {
 
             {variableBlueprints.length > 0 ? (
               <div className="flex flex-col gap-2">
-                <p className="text-muted-foreground text-sm">Enhancements</p>
+                <p className="text-muted-foreground flex items-center gap-1 text-sm">
+                  Enhancements{' '}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <QuestionMarkCircledIcon className="size-4" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>
+                        Enhance the {item.name} with otoms that match specific criteria. The higher
+                        the value, the better the effect applied to the item.
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </p>
+
                 <div className="flex justify-start gap-1">
-                  {variableBlueprints.map((_, i) => (
-                    <Card key={i} className="py-0">
-                      <CardContent className="text-muted-foreground/40 grid size-15 place-items-center px-0">
-                        <LightningBoltIcon className="size-4" />
-                      </CardContent>
-                    </Card>
-                  ))}
+                  {variableBlueprints.map((vb, i) => {
+                    console.log('vb', vb);
+                    return (
+                      <Tooltip key={i}>
+                        <TooltipTrigger asChild>
+                          <Card className="py-0">
+                            <CardContent className="text-muted-foreground/40 grid size-15 place-items-center px-0">
+                              <LightningBoltIcon className="size-4" />
+                            </CardContent>
+                          </Card>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <div className="flex flex-col gap-1">
+                            {vb.criteria.map((c) => (
+                              <span key={c.propertyType}>
+                                <p>{c.propertyType}</p>
+                                <p>
+                                  Range: {c.minValue} - {c.maxValue}
+                                </p>
+                              </span>
+                            ))}
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    );
+                  })}
                 </div>
               </div>
             ) : (
