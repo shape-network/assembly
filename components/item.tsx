@@ -29,7 +29,8 @@ export const ItemToCraftCard: FC<{ item: Item }> = ({ item }) => {
     item.blueprint.length > 0 &&
     item.blueprint.every((component) => isElementOwned(component.name));
 
-  const variableSlots = item.blueprint.filter((i) => i.componentType === 'variable_otom');
+  const requiredBlueprints = item.blueprint.filter((i) => i.componentType !== 'variable_otom');
+  const variableBlueprints = item.blueprint.filter((i) => i.componentType === 'variable_otom');
 
   return (
     <li className="grid grid-rows-[1fr_auto] gap-1">
@@ -76,7 +77,7 @@ export const ItemToCraftCard: FC<{ item: Item }> = ({ item }) => {
             <div className="flex flex-col gap-2">
               <p className="text-muted-foreground text-sm">Required elements</p>
               <div className="flex flex-wrap gap-1">
-                {item.blueprint.map((component, i) => {
+                {requiredBlueprints.map((component, i) => {
                   const isOwned = isElementOwned(component.name);
                   return (
                     <Card
@@ -97,11 +98,11 @@ export const ItemToCraftCard: FC<{ item: Item }> = ({ item }) => {
               </div>
             </div>
 
-            {variableSlots.length > 0 ? (
+            {variableBlueprints.length > 0 ? (
               <div className="flex flex-col gap-2">
                 <p className="text-muted-foreground text-sm">Enhancements</p>
                 <div className="flex justify-start gap-1">
-                  {variableSlots.map((_, i) => (
+                  {variableBlueprints.map((_, i) => (
                     <Card key={i} className="py-0">
                       <CardContent className="text-muted-foreground/40 grid size-15 place-items-center px-0">
                         <LightningBoltIcon className="size-4" />
