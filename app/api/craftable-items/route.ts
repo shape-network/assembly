@@ -10,14 +10,14 @@ import superjson from 'superjson';
 async function getCraftItems(): Promise<Item[]> {
   const rpc = rpcClient();
 
-  const items = await rpc.readContract({
+  const results = await rpc.readContract({
     abi: assemblyTrackingContractAbi,
     address: assemblyTracking[config.chainId],
     functionName: 'getAllItemsPaginated',
-    args: [BigInt(0), BigInt(100)],
+    args: [BigInt(0), BigInt(100)], // TODO: add proper pagination
   });
 
-  return items.map((r) => ({
+  const items = results.map((r) => ({
     id: r.id,
     name: r.name,
     description: r.description,
@@ -41,18 +41,19 @@ async function getCraftItems(): Promise<Item[]> {
     })),
     initialTraits: [],
   }));
-}
-
-export async function GET() {
-  const items = await getCraftItems();
 
   const itemsWithTraits = await Promise.all(
     items.map(async (item) => {
       const traits = await getTraitsForItem(item.id);
-      return { ...item, traits };
+      return { ...item, initialTraits: traits };
     })
   );
 
-  const serialized = superjson.stringify(itemsWithTraits);
+  return itemsWithTraits;
+}
+
+export async function GET() {
+  const items = await getCraftItems();
+  const serialized = superjson.stringify(items);
   return NextResponse.json(serialized);
 }
