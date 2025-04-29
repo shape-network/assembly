@@ -1,21 +1,15 @@
 'use client';
 
-import { useGetOtomItemsForUser } from '@/app/api/hooks';
+import { useGetCraftableItems, useGetOtomItemsForUser } from '@/app/api/hooks';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useWriteAssemblyCoreContractCraftItem } from '@/generated';
 import { assemblyCore } from '@/lib/addresses';
 import { config } from '@/lib/config';
 import { Item, OtomItem, Trait } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { LightningBoltIcon } from '@radix-ui/react-icons';
 import Image from 'next/image';
 import { FC, useEffect } from 'react';
 import { toast } from 'sonner';
@@ -25,87 +19,126 @@ export const ItemToCraftCard: FC<{ item: Item }> = ({ item }) => {
   const { address } = useAccount();
   const { data: inventory } = useGetOtomItemsForUser();
 
-  function isElementOwned(itemId: bigint) {
+  function isElementOwned(name: string) {
     if (!inventory) return false;
-    return inventory.some((i) => i.tokenId === itemId);
+    return inventory.some((i) => i.name === name);
   }
 
   const isCraftable =
     inventory &&
     item.blueprint.length > 0 &&
-    item.blueprint.every((component) => isElementOwned(component.itemIdOrOtomTokenId));
+    item.blueprint.every((component) => isElementOwned(component.name));
+
+  const variableSlots = item.blueprint.filter((i) => i.componentType === 'variable_otom');
 
   return (
-    <li>
-      <Card>
-        <CardHeader>
+    <li className="grid grid-rows-[1fr_auto] gap-1">
+      <Card className="relative w-full">
+        {isCraftable && address && (
+          <CraftItemButton item={item} className="absolute top-2 right-2 h-8 px-3" />
+        )}
+
+        <CardHeader className="relative">
           <CardTitle>{item.name}</CardTitle>
         </CardHeader>
 
-        <div className="relative h-40 w-full">
-          {item.defaultImageUri ? (
-            <Image
-              src={item.defaultImageUri}
-              alt={item.name}
-              fill
-              className="object-contain py-2"
-            />
-          ) : (
-            <Skeleton className="h-48 w-full" />
-          )}
-        </div>
+        <CardContent className="flex h-full flex-col justify-between gap-6">
+          <div className="flex flex-col gap-6">
+            <div className="relative h-40 w-full">
+              {item.defaultImageUri ? (
+                <Image
+                  src={item.defaultImageUri}
+                  alt={item.name}
+                  fill
+                  className="object-contain py-2"
+                />
+              ) : (
+                <Skeleton className="h-48 w-full" />
+              )}
+            </div>
 
-        <CardContent className="flex flex-col gap-6">
-          <CardDescription className="text-center italic">{item.description}</CardDescription>
+            <CardDescription className="text-center italic">{item.description}</CardDescription>
 
-          <div className="flex flex-wrap gap-1">
-            {item.blueprint.map((component, i) => {
-              return <div key={i}>{component.itemIdOrOtomTokenId}</div>;
-            })}
+            <ul className="text-sm">
+              {item.initialTraits.map((trait, idx) => (
+                <li key={idx} className="flex flex-col gap-1">
+                  <div className="text-primary flex items-center gap-2">
+                    <span>{trait.name === 'Usages Remaining' ? 'Usages' : trait.name}</span>
+                    <span className="border-muted-foreground/15 flex-grow border-b border-dotted"></span>
+                    <span className="font-medium">{trait.value}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
 
-          <ul className="text-sm">
-            {item.initialTraits.map((trait, idx) => (
-              <li key={idx} className="flex flex-col gap-1">
-                <div className="text-primary flex items-center gap-2">
-                  <span>{trait.name}</span>
-                  <span className="border-muted-foreground/15 flex-grow border-b border-dotted"></span>
-                  <span className="font-medium">{trait.value}</span>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </CardContent>
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-2">
+              <p className="text-muted-foreground text-sm">Required elements</p>
+              <div className="flex flex-wrap gap-1">
+                {item.blueprint.map((component, i) => {
+                  const isOwned = isElementOwned(component.name);
+                  return (
+                    <Card
+                      key={i}
+                      className={cn(
+                        'py-0',
+                        isOwned
+                          ? 'bg-primary border-primary font-semibold text-white'
+                          : 'text-muted-foreground/50 border-border'
+                      )}
+                    >
+                      <CardContent className="grid size-15 place-items-center px-0">
+                        {component.name}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </div>
 
-        {address && (
-          <CardFooter>
-            {isCraftable ? (
-              <CraftItemButton item={item} />
+            {variableSlots.length > 0 ? (
+              <div className="flex flex-col gap-2">
+                <p className="text-muted-foreground text-sm">Enhancements</p>
+                <div className="flex justify-start gap-1">
+                  {variableSlots.map((_, i) => (
+                    <Card key={i} className="py-0">
+                      <CardContent className="text-muted-foreground/40 grid size-15 place-items-center px-0">
+                        <LightningBoltIcon className="size-4" />
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
             ) : (
-              <Button disabled variant="ghost" className="-ml-4">
-                Missing elements
-              </Button>
+              <div className="flex h-[90px] items-center justify-start">
+                <p className="text-muted-foreground text-sm">No enhancements available</p>
+              </div>
             )}
-          </CardFooter>
-        )}
+          </div>
+        </CardContent>
       </Card>
     </li>
   );
 };
 
 export const OtomItemCard: FC<{ element: OtomItem }> = ({ element }) => {
+  const { data } = useGetCraftableItems();
+  const isElementInBlueprint = data?.some((i) => i.blueprint.some((b) => b.name === element.name));
+
   return (
-    <div
+    <Card
       className={cn(
-        'bg-card border-primary relative grid size-15 cursor-pointer place-items-center rounded border p-2 text-lg font-semibold'
+        'border-primary py-0 font-semibold',
+        isElementInBlueprint ? 'bg-primary text-white' : ''
       )}
     >
-      {element.molecule.name}
-    </div>
+      <CardContent className="grid size-15 place-items-center px-0">{element.name}</CardContent>
+    </Card>
   );
 };
 
-const CraftItemButton: FC<{ item: Item }> = ({ item }) => {
+const CraftItemButton: FC<{ item: Item; className?: string }> = ({ item, className }) => {
   const { data: hash, writeContractAsync, isPending } = useWriteAssemblyCoreContractCraftItem();
   const { refetch: refetchOtomItems } = useGetOtomItemsForUser();
 
@@ -149,7 +182,7 @@ const CraftItemButton: FC<{ item: Item }> = ({ item }) => {
   const disabled = isPending || isTxConfirming;
 
   return (
-    <Button disabled={disabled} onClick={handleCraftItem}>
+    <Button disabled={disabled} onClick={handleCraftItem} className={className}>
       {isPending ? 'Crafting...' : 'Craft'}
     </Button>
   );

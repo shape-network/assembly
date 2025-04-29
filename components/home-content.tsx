@@ -58,9 +58,7 @@ export const HomeContent: FC = () => {
             <div className="flex flex-col gap-16">
               <div className="flex w-full flex-col gap-2">
                 <div className="flex items-baseline justify-between gap-2">
-                  <h2 className="text-primary font-bold tracking-wide uppercase">
-                    Owned Molecules
-                  </h2>
+                  <h2 className="text-primary font-bold tracking-wide uppercase">Owned otoms</h2>
                   <InlineLink
                     href={paths.otom}
                     className="text-muted-foreground/50 text-sm no-underline hover:underline"
@@ -68,7 +66,7 @@ export const HomeContent: FC = () => {
                     Mine more otoms <ExternalLinkIcon className="size-4" />
                   </InlineLink>
                 </div>
-                <OtomItemsInventory />
+                <OtomsInventory />
               </div>
 
               <div className="flex w-full flex-col gap-2">
@@ -128,10 +126,10 @@ const ItemsToCraft: FC = () => {
 };
 
 const BlueprintComponentsGrid: FC<PropsWithChildren> = ({ children }) => {
-  return <ul className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">{children}</ul>;
+  return <ul className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-8">{children}</ul>;
 };
 
-const OtomItemsInventory: FC = () => {
+const OtomsInventory: FC = () => {
   const { data, isLoading, isError } = useGetOtomItemsForUser();
 
   if (isLoading) {
@@ -145,11 +143,11 @@ const OtomItemsInventory: FC = () => {
   if (!data || data.length === 0) {
     return (
       <div className="grid place-items-center gap-4 py-12">
-        <p>No Otom elements found in your wallet.</p>
+        <p>No otoms found in your wallet.</p>
 
         <Button asChild>
           <a href={paths.otom} target="_blank" rel="noopener noreferrer">
-            Get Otoms
+            Get otoms
           </a>
         </Button>
       </div>
@@ -157,13 +155,11 @@ const OtomItemsInventory: FC = () => {
   }
 
   return (
-    <div>
-      <ul className="flex flex-wrap items-start gap-2 rounded">
-        {data.map((element) => (
-          <OtomItemCard key={element.molecule.id} element={element} />
-        ))}
-      </ul>
-    </div>
+    <ul className="flex flex-wrap items-start gap-2 rounded">
+      {data.map((element) => (
+        <OtomItemCard key={element.id} element={element} />
+      ))}
+    </ul>
   );
 };
 
