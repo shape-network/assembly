@@ -89,7 +89,9 @@ export async function POST(request: Request) {
     });
 
     const inventory: InventoryResponse = {
-      elements: otomItems.sort((a, b) => b.universeHash.localeCompare(a.universeHash)),
+      elements: otomItems
+        .sort((a, b) => b.universeHash.localeCompare(a.universeHash))
+        .sort((a, b) => a.name.localeCompare(b.name)),
       cursor: nfts.pageKey,
     };
 
