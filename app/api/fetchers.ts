@@ -55,15 +55,13 @@ export async function getMoleculesByIds(tokenIds: string[]) {
     );
   }
 
-  const results = elements
-    .filter((r) => r.result && r.result.givingAtoms.length + r.result.receivingAtoms.length > 1) // Only keep elements that are molecules
-    .map((r) => {
-      const molecule = solidityMoleculeToMolecule(r.result!);
-      return {
-        tokenId: String(moleculeIdToTokenId(molecule.id)),
-        molecule,
-      };
-    });
+  const results = elements.map((r) => {
+    const molecule = solidityMoleculeToMolecule(r.result!);
+    return {
+      tokenId: String(moleculeIdToTokenId(molecule.id)),
+      molecule,
+    };
+  });
 
   return results;
 }
