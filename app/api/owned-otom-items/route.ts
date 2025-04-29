@@ -33,7 +33,6 @@ async function getMolecules({
   tokenIds: string[];
 }): Promise<{ tokenId: string; molecule: Molecule }[]> {
   try {
-    console.log('tokenIds', tokenIds);
     const moleculeResults = await getMoleculesByIds(tokenIds);
 
     return moleculeResults;
