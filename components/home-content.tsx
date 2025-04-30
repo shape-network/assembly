@@ -1,111 +1,31 @@
 'use client';
 
 import { useGetCraftableItems, useGetItemsForUser, useGetOtomItemsForUser } from '@/app/api/hooks';
-import { ItemToCraftCard, OtomItemCard, OwnedItemCard } from '@/components/item';
+import {
+  BlueprintComponentsGrid,
+  ItemToCraftCard,
+  OtomItemCard,
+  OwnedItemCard,
+} from '@/components/item';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { InlineLink } from '@/components/ui/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import { WalletConnect } from '@/components/wallet-connect';
 import { paths } from '@/lib/paths';
-import { cn } from '@/lib/utils';
+import { OtomItem } from '@/lib/types';
+import { DndContext, DragEndEvent } from '@dnd-kit/core';
 import { ExternalLinkIcon } from '@radix-ui/react-icons';
 import Link from 'next/link';
-import { ComponentProps, FC, PropsWithChildren } from 'react';
+import { FC, useState } from 'react';
 import { useAccount } from 'wagmi';
 
-export const HomeContent: FC = () => {
-  const { address } = useAccount();
-
-  return (
-    <div className="mx-auto grid min-h-screen max-w-7xl grid-rows-[auto_1fr] gap-4 p-5">
-      <header className="flex items-center justify-between">
-        <div className="relative">
-          <h1 className="text-primary text-2xl font-semibold tracking-wide uppercase">
-            <Link href={paths.home}>Assembly</Link>
-          </h1>
-          <span className="text-muted-foreground/50 absolute -bottom-5 left-0 text-sm whitespace-nowrap">
-            An otom-based item crafter
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button asChild variant="link">
-            <a href={paths.otom} target="_blank" rel="noopener noreferrer">
-              otom.xyz
-            </a>
-          </Button>
-
-          <WalletConnect />
-        </div>
-      </header>
-
-      <main className="flex flex-col justify-start gap-8 py-12">
-        <div className="flex flex-col gap-16">
-          <div className="flex flex-col gap-2">
-            <div className="flex items-baseline justify-between gap-2">
-              <h2 className="text-primary font-bold tracking-wide uppercase">Items to craft</h2>
-              <InlineLink
-                href={paths.repo}
-                className="text-muted-foreground/50 text-sm no-underline hover:underline"
-              >
-                Propose your own <ExternalLinkIcon className="size-4" />
-              </InlineLink>
-            </div>
-            <ItemsToCraft />
-          </div>
-
-          {address ? (
-            <div className="flex flex-col gap-16">
-              <div className="flex w-full flex-col gap-2">
-                <div className="flex items-baseline justify-between gap-2">
-                  <h2 className="text-primary font-bold tracking-wide uppercase">Owned otoms</h2>
-                  <InlineLink
-                    href={paths.otom}
-                    className="text-muted-foreground/50 text-sm no-underline hover:underline"
-                  >
-                    Mine more otoms <ExternalLinkIcon className="size-4" />
-                  </InlineLink>
-                </div>
-                <OtomsInventory />
-              </div>
-
-              <div className="flex w-full flex-col gap-2">
-                <div className="flex items-baseline justify-between gap-2">
-                  <h2 className="text-primary font-bold tracking-wide uppercase">Owned Items</h2>
-                </div>
-                <ItemsInventory />
-              </div>
-            </div>
-          ) : (
-            <div className="flex w-full flex-col items-start gap-8">
-              <div className="flex flex-col gap-4">
-                <p>
-                  Assembly is an open-source item crafting tool on{' '}
-                  <InlineLink href={paths.otom}>Shape</InlineLink>, based on the world of{' '}
-                  <InlineLink href={paths.otom}>Otoms</InlineLink>.
-                </p>
-                <p>
-                  It&apos;s In esse ullamco in mollit mollit irure laboris irure consectetur aliqua
-                  cillum velit duis commodo incididunt. Quis anim consectetur fugiat dolore occaecat
-                  nulla ipsum enim laborum ut sint ut.
-                </p>
-                <InlineLink className="self-start" href={paths.otom}>
-                  View source code
-                </InlineLink>
-              </div>
-
-              <div className="flex w-full flex-col items-center gap-2">
-                <WalletConnect />
-              </div>
-            </div>
-          )}
-        </div>
-      </main>
-    </div>
-  );
-};
-
-const ItemsToCraft: FC = () => {
+const ItemsToCraft: FC<{
+  droppedItemsState: Record<string, Record<number, OtomItem | null>>;
+  onDrop: (itemId: string, index: number, item: OtomItem | null) => void;
+  droppedOnRequiredSlots: Set<string>;
+  onClearRequired: (itemId: string) => void;
+}> = ({ droppedItemsState, onDrop, droppedOnRequiredSlots, onClearRequired }) => {
   const { data, isLoading, isError } = useGetCraftableItems();
 
   if (isLoading) {
@@ -118,18 +38,24 @@ const ItemsToCraft: FC = () => {
 
   return (
     <BlueprintComponentsGrid>
-      {data.map((item) => (
-        <ItemToCraftCard key={item.id} item={item} />
-      ))}
+      {data.map((item) => {
+        const droppedItemsForThisCard = droppedItemsState[String(item.id)] || {};
+        return (
+          <ItemToCraftCard
+            key={item.id}
+            item={item}
+            droppedVariableItems={droppedItemsForThisCard}
+            onDropVariable={onDrop}
+            droppedOnRequiredSlots={droppedOnRequiredSlots}
+            onClearRequired={onClearRequired}
+          />
+        );
+      })}
     </BlueprintComponentsGrid>
   );
 };
 
-const BlueprintComponentsGrid: FC<PropsWithChildren> = ({ children }) => {
-  return <ul className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-8">{children}</ul>;
-};
-
-const OtomsInventory: FC = () => {
+const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedRequiredItems }) => {
   const { data, isLoading, isError } = useGetOtomItemsForUser();
 
   if (isLoading) {
@@ -157,7 +83,11 @@ const OtomsInventory: FC = () => {
   return (
     <ul className="flex flex-wrap items-start gap-2 rounded">
       {data.map((element) => (
-        <OtomItemCard key={element.id} element={element} />
+        <OtomItemCard
+          key={element.id}
+          element={element}
+          isUsed={usedRequiredItems.has(element.id)}
+        />
       ))}
     </ul>
   );
@@ -214,18 +144,236 @@ const ItemsToCraftSkeleton: FC = () => {
   );
 };
 
-const InlineLink: FC<PropsWithChildren<ComponentProps<'a'>>> = ({ children, href, className }) => {
+export const HomeContent = () => {
+  const { address } = useAccount();
+  const [droppedItemsState, setDroppedItemsState] = useState<
+    Record<string, Record<number, OtomItem | null>>
+  >({});
+  const [droppedOnRequiredSlots, setDroppedOnRequiredSlots] = useState<Set<string>>(new Set());
+  const [usedRequiredItems, setUsedRequiredItems] = useState<Set<string>>(new Set());
+  const [requiredSlotToOtomMap, setRequiredSlotToOtomMap] = useState<Record<string, string>>({});
+
+  function handleDrop(itemId: string, index: number, droppedItem: OtomItem | null) {
+    setDroppedItemsState((prev) => {
+      const newState = { ...prev };
+      if (!newState[itemId]) {
+        newState[itemId] = {};
+      }
+      newState[itemId][index] = droppedItem;
+      if (droppedItem === null && Object.values(newState[itemId]).every((v) => v === null)) {
+      }
+      return newState;
+    });
+  }
+
+  function handleClearRequired(itemId: string) {
+    const slotsToClear = new Set<string>();
+    const otomsToUnuse = new Set<string>();
+    const mapUpdates = { ...requiredSlotToOtomMap };
+
+    for (const slotId in mapUpdates) {
+      if (slotId.startsWith(`required-${itemId}-`)) {
+        slotsToClear.add(slotId);
+        otomsToUnuse.add(mapUpdates[slotId]);
+        delete mapUpdates[slotId];
+      }
+    }
+
+    if (slotsToClear.size > 0) {
+      console.log(`Clearing required slots for item ${itemId}:`, slotsToClear, otomsToUnuse);
+      setRequiredSlotToOtomMap(mapUpdates);
+      setDroppedOnRequiredSlots((prev) => new Set([...prev].filter((id) => !slotsToClear.has(id))));
+      setUsedRequiredItems((prev) => new Set([...prev].filter((id) => !otomsToUnuse.has(id))));
+    }
+  }
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+
+    if (over) {
+      const droppedItemData = active.data.current as OtomItem | null;
+      const dropZoneId = String(over.id);
+      const dropZoneData = over.data.current as {
+        type: string;
+        requiredName?: string;
+        index?: number;
+      };
+      const draggedItemId = String(active.id);
+
+      if (!droppedItemData || !dropZoneData) return;
+
+      console.log(
+        `Item "${droppedItemData?.name}" [ID: ${draggedItemId}] dropped onto ${dropZoneData?.type} zone ${over.id}`
+      );
+
+      if (dropZoneData?.type === 'required') {
+        if (droppedItemData?.name === dropZoneData?.requiredName) {
+          console.log(`Correct item dropped on required slot ${over.id}.`);
+          setDroppedOnRequiredSlots((prev) => new Set(prev).add(dropZoneId));
+          setUsedRequiredItems((prev) => new Set(prev).add(draggedItemId));
+          setRequiredSlotToOtomMap((prev) => ({ ...prev, [dropZoneId]: draggedItemId }));
+        } else {
+          console.log(
+            `Incorrect item dropped on required slot ${over.id}. Required: ${dropZoneData?.requiredName}, Got: ${droppedItemData?.name}`
+          );
+          setDroppedOnRequiredSlots((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(dropZoneId);
+            return newSet;
+          });
+          const otomIdToRemove = requiredSlotToOtomMap[dropZoneId];
+          if (otomIdToRemove) {
+            setUsedRequiredItems((prev) => {
+              const newSet = new Set(prev);
+              newSet.delete(otomIdToRemove);
+              return newSet;
+            });
+            setRequiredSlotToOtomMap((prev) => {
+              const newMap = { ...prev };
+              delete newMap[dropZoneId];
+              return newMap;
+            });
+          }
+        }
+      } else if (dropZoneData?.type === 'variable') {
+        const parts = dropZoneId.split('-');
+        if (parts.length === 3 && parts[0] === 'variable') {
+          const itemId = parts[1];
+          const index = parseInt(parts[2], 10);
+          if (!isNaN(index)) {
+            console.log(`Item dropped on variable slot index ${index} for item ID ${itemId}.`);
+            handleDrop(itemId, index, droppedItemData);
+          } else {
+            console.error('Could not parse index from drop zone ID:', dropZoneId);
+          }
+        } else {
+          console.error('Could not parse item ID and index from drop zone ID:', dropZoneId);
+        }
+      }
+    } else {
+      console.log(`Item "${active.data.current?.name}" dropped outside a valid zone.`);
+      let slotIdToClear: string | null = null;
+      for (const slotId in requiredSlotToOtomMap) {
+        if (requiredSlotToOtomMap[slotId] === String(active.id)) {
+          slotIdToClear = slotId;
+          break;
+        }
+      }
+      if (slotIdToClear) {
+        console.log(
+          `Unmapping required item ${active.id} from slot ${slotIdToClear} due to drop outside.`
+        );
+        setDroppedOnRequiredSlots((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(slotIdToClear!);
+          return newSet;
+        });
+        setUsedRequiredItems((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(String(active.id));
+          return newSet;
+        });
+        setRequiredSlotToOtomMap((prev) => {
+          const newMap = { ...prev };
+          delete newMap[slotIdToClear!];
+          return newMap;
+        });
+      }
+    }
+  }
+
   return (
-    <a
-      className={cn(
-        'inline-flex items-center gap-x-2 font-medium underline hover:no-underline',
-        className
-      )}
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      {children}
-    </a>
+    <div className="mx-auto grid min-h-screen max-w-7xl grid-rows-[auto_1fr] gap-4 p-5">
+      <header className="flex items-center justify-between">
+        <div className="relative">
+          <h1 className="text-primary text-2xl font-semibold tracking-wide uppercase">
+            <Link href={paths.home}>Assembly</Link>
+          </h1>
+          <span className="text-muted-foreground/50 absolute -bottom-5 left-0 text-sm whitespace-nowrap">
+            An otom-based item crafter
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button asChild variant="link">
+            <a href={paths.otom} target="_blank" rel="noopener noreferrer">
+              otom.xyz
+            </a>
+          </Button>
+
+          <WalletConnect />
+        </div>
+      </header>
+
+      <main className="flex flex-col justify-start gap-8 py-12">
+        <DndContext onDragEnd={handleDragEnd}>
+          <div className="flex flex-col gap-16">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-baseline justify-between gap-2">
+                <h2 className="text-primary font-bold tracking-wide uppercase">Items to craft</h2>
+                <InlineLink
+                  href={paths.repo}
+                  className="text-muted-foreground/50 text-sm no-underline hover:underline"
+                >
+                  Propose your own <ExternalLinkIcon className="size-4" />
+                </InlineLink>
+              </div>
+              <ItemsToCraft
+                droppedItemsState={droppedItemsState}
+                onDrop={handleDrop}
+                droppedOnRequiredSlots={droppedOnRequiredSlots}
+                onClearRequired={handleClearRequired}
+              />
+            </div>
+
+            {address ? (
+              <div className="flex flex-col gap-16">
+                <div className="flex w-full flex-col gap-2">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <h2 className="text-primary font-bold tracking-wide uppercase">Owned otoms</h2>
+                    <InlineLink
+                      href={paths.otom}
+                      className="text-muted-foreground/50 text-sm no-underline hover:underline"
+                    >
+                      Mine more otoms <ExternalLinkIcon className="size-4" />
+                    </InlineLink>
+                  </div>
+                  <OtomsInventory usedRequiredItems={usedRequiredItems} />
+                </div>
+
+                <div className="flex w-full flex-col gap-2">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <h2 className="text-primary font-bold tracking-wide uppercase">Owned Items</h2>
+                  </div>
+                  <ItemsInventory />
+                </div>
+              </div>
+            ) : (
+              <div className="flex w-full flex-col items-start gap-8">
+                <div className="flex flex-col gap-4">
+                  <p>
+                    Assembly is an open-source item crafting tool on{' '}
+                    <InlineLink href={paths.otom}>Shape</InlineLink>, based on the world of{' '}
+                    <InlineLink href={paths.otom}>Otoms</InlineLink>.
+                  </p>
+                  <p>
+                    It&apos;s In esse ullamco in mollit mollit irure laboris irure consectetur
+                    aliqua cillum velit duis commodo incididunt. Quis anim consectetur fugiat dolore
+                    occaecat nulla ipsum enim laborum ut sint ut.
+                  </p>
+                  <InlineLink className="self-start" href={paths.otom}>
+                    View source code
+                  </InlineLink>
+                </div>
+
+                <div className="flex w-full flex-col items-center gap-2">
+                  <WalletConnect />
+                </div>
+              </div>
+            )}
+          </div>
+        </DndContext>
+      </main>
+    </div>
   );
 };
