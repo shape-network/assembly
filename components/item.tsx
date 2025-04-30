@@ -229,7 +229,7 @@ export const OtomItemCard: FC<{ element: OtomItem; isUsed: boolean }> = ({ eleme
       {...listeners}
       {...attributes}
       className={cn(
-        'touch-none py-0 font-semibold transition-colors',
+        'cursor-pointer touch-none py-0 font-semibold transition-colors',
         isUsed
           ? 'bg-primary text-primary-foreground'
           : isRequiredInBlueprint
@@ -375,7 +375,7 @@ const RequiredDropZone: FC<{
     <Card
       ref={setNodeRef}
       className={cn(
-        'py-0 transition-colors',
+        'py-0 transition-colors select-none',
         isDropped
           ? 'bg-primary text-primary-foreground'
           : isOwned
@@ -508,7 +508,6 @@ function checkCriteria(item: OtomItem, criteria: BlueprintComponent['criteria'])
   return true; // All criteria passed
 }
 
-// Updated VariableDropZone with remove button
 const VariableDropZone: FC<{
   id: string;
   index: number;
