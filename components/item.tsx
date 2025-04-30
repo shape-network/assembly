@@ -378,10 +378,11 @@ const RequiredDropZone: FC<{
   );
 };
 
-// --- Helper Function for Criteria Validation ---
-
 // TODO: Define the complete mapping from propertyType enum value (number)
-// to the actual property path and type in OtomItem/Atom
+// to the actual property path and type in OtomItem/Atom based on the
+// **PropertyType enum definition in the Solidity contracts**.
+// The current mappings (0, 1, 2, 3, 100) are placeholders/assumptions
+// and MUST BE VERIFIED.
 // NOTE: Assuming criteria apply to the FIRST atom in giving_atoms unless it's a molecule property
 type PropertyPath = (string | number)[]; // Define a type for the path array
 const PROPERTY_TYPE_MAP: Record<
@@ -389,14 +390,20 @@ const PROPERTY_TYPE_MAP: Record<
   { path: PropertyPath; type: 'number' | 'boolean' | 'string' }
 > = {
   // --- Atom Properties (Accessed via item.giving_atoms[0]) ---
-  0: { path: ['giving_atoms', 0, 'radius'], type: 'number' }, // Assuming 0 maps to Atom radius
-  1: { path: ['giving_atoms', 0, 'mass'], type: 'number' }, // Assuming 1 maps to Atom mass
-  2: { path: ['giving_atoms', 0, 'nucleus', 'protons'], type: 'number' }, // Atom protons
-  3: { path: ['giving_atoms', 0, 'metallic'], type: 'boolean' }, // Atom metallic
-  // 4: { path: ['giving_atoms', 0, 'nucleus', 'decay_type'], type: 'string' }, // Atom decay_type example
+  // Example: Assumed PropertyType.ATOM_RADIUS = 0
+  0: { path: ['giving_atoms', 0, 'radius'], type: 'number' },
+  // Example: Assumed PropertyType.ATOM_MASS = 1
+  1: { path: ['giving_atoms', 0, 'mass'], type: 'number' },
+  // Example: Assumed PropertyType.ATOM_PROTONS = 2
+  2: { path: ['giving_atoms', 0, 'nucleus', 'protons'], type: 'number' },
+  // Example: Assumed PropertyType.ATOM_METALLIC = 3
+  3: { path: ['giving_atoms', 0, 'metallic'], type: 'boolean' },
+  // Example: Assumed PropertyType.ATOM_DECAY_TYPE = 4 (if exists)
+  // 4: { path: ['giving_atoms', 0, 'nucleus', 'decay_type'], type: 'string' },
 
   // --- Molecule Properties (Accessed via item directly) ---
-  100: { path: ['electrical_conductivity'], type: 'number' }, // Example molecule property
+  // Example: Assumed PropertyType.MOLECULE_CONDUCTIVITY = 100
+  100: { path: ['electrical_conductivity'], type: 'number' },
 
   // Add other mappings based on PropertyType enum in Solidity
 };
@@ -420,80 +427,118 @@ function getNestedValue(obj: Record<string, unknown>, path: PropertyPath): unkno
 }
 
 function checkCriteria(item: OtomItem, criteria: BlueprintComponent['criteria']): boolean {
-  if (!item || !criteria) return false;
+  // Basic validation of inputs
+  if (!item || !criteria || criteria.length === 0) {
+    console.log('checkCriteria: Invalid item or criteria input.');
+    return false;
+  }
 
-  // Ensure there's an atom to check if needed
-  if (
-    criteria.some((c) => PROPERTY_TYPE_MAP[c.propertyType]?.path[0] === 'giving_atoms') &&
-    (!item.giving_atoms || item.giving_atoms.length === 0)
-  ) {
+  // Pre-check: Ensure giving_atoms exists if any criterion needs it
+  const needsAtom = criteria.some((c) => {
+    const mapping = PROPERTY_TYPE_MAP[c.propertyType];
+    // Check if mapping exists and the path starts with 'giving_atoms'
+    return mapping?.path?.[0] === 'giving_atoms';
+  });
+
+  if (needsAtom && (!item.giving_atoms || item.giving_atoms.length === 0)) {
     console.warn('Criteria requires atom properties, but item has no giving_atoms.');
     return false;
   }
 
+  // Iterate through each criterion
   for (const c of criteria) {
     const mapping = PROPERTY_TYPE_MAP[c.propertyType];
     if (!mapping) {
-      console.warn(`Unknown propertyType ${c.propertyType} in criteria check.`);
-      return false; // Unknown property type fails the check
+      console.warn(
+        `Unknown propertyType ${c.propertyType} in criteria check. Verify PROPERTY_TYPE_MAP.`
+      );
+      return false; // Unknown property type fails the check immediately
     }
 
     const itemValue = getNestedValue(item, mapping.path);
 
+    // --- Strict Check: Value Existence ---
     if (itemValue === undefined || itemValue === null) {
       console.warn(`Property ${String(mapping.path)} not found or is null/undefined on item.`);
+      return false; // Missing required property fails the check
+    }
+
+    // --- Strict Check: Type Matching & Value Validation ---
+
+    // 1. Number Criteria
+    if (mapping.type === 'number') {
+      if (typeof itemValue !== 'number') {
+        console.warn(
+          `Type mismatch for criteria check: Property ${String(mapping.path)} expected number, got ${typeof itemValue}`
+        );
+        return false; // Type mismatch fails
+      }
+      // Safe to treat as number now
+      try {
+        const itemValueBigInt = BigInt(itemValue); // Convert to BigInt for comparison with criteria values
+        const min = c.minValue;
+        const max = c.maxValue;
+        // Check range, minValue/maxValue are bigint from the type
+        if (
+          (min !== undefined && itemValueBigInt < min) ||
+          (max !== undefined && itemValueBigInt > max)
+        ) {
+          console.log(
+            `Criteria fail (Number): ${String(mapping.path)} value ${itemValueBigInt} not in range [${min ?? '-inf'}, ${max ?? '+inf'}]`
+          );
+          return false; // Range check fails
+        }
+      } catch (error) {
+        console.error(
+          `Error converting item value '${itemValue}' to BigInt for comparison at path ${String(mapping.path)}:`,
+          error
+        );
+        return false; // Conversion error fails
+      }
+    }
+    // 2. Boolean Criteria
+    else if (mapping.type === 'boolean') {
+      if (typeof itemValue !== 'boolean') {
+        console.warn(
+          `Type mismatch for criteria check: Property ${String(mapping.path)} expected boolean, got ${typeof itemValue}`
+        );
+        return false; // Type mismatch fails
+      }
+      // Only check the value if the criterion requires it
+      if (c.checkBoolValue && itemValue !== c.boolValue) {
+        console.log(
+          `Criteria fail (Boolean): ${String(mapping.path)} value ${itemValue} !== required ${c.boolValue}`
+        );
+        return false; // Boolean value mismatch fails
+      }
+    }
+    // 3. String Criteria
+    else if (mapping.type === 'string') {
+      if (typeof itemValue !== 'string') {
+        console.warn(
+          `Type mismatch for criteria check: Property ${String(mapping.path)} expected string, got ${typeof itemValue}`
+        );
+        return false; // Type mismatch fails
+      }
+      // Only check the value if the criterion requires it
+      if (c.checkStringValue && itemValue !== c.stringValue) {
+        console.log(
+          `Criteria fail (String): ${String(mapping.path)} value "${itemValue}" !== required "${c.stringValue}"`
+        );
+        return false; // String value mismatch fails
+      }
+    }
+    // This case should not be reached if PROPERTY_TYPE_MAP types are correct
+    else {
+      console.error(
+        `Unhandled mapping type '${mapping.type}' for property path ${String(mapping.path)}.`
+      );
       return false;
     }
+  } // End of criteria loop
 
-    // Perform checks based on criterion type and flags
-    if (mapping.type === 'number' && typeof itemValue === 'number') {
-      const itemValueBigInt = BigInt(itemValue);
-      const min = c.minValue;
-      const max = c.maxValue;
-      if (
-        (min !== undefined && itemValueBigInt < min) ||
-        (max !== undefined && itemValueBigInt > max)
-      ) {
-        console.log(
-          `Criteria fail (Number): ${String(mapping.path)} (${itemValueBigInt}) not in range [${min ?? '-inf'}, ${max ?? '+inf'}]`
-        );
-        return false;
-      }
-    } else if (mapping.type === 'boolean' && typeof itemValue === 'boolean' && c.checkBoolValue) {
-      if (itemValue !== c.boolValue) {
-        console.log(
-          `Criteria fail (Boolean): ${String(mapping.path)} (${itemValue}) !== ${c.boolValue}`
-        );
-        return false;
-      }
-    } else if (mapping.type === 'string' && typeof itemValue === 'string' && c.checkStringValue) {
-      if (itemValue !== c.stringValue) {
-        console.log(
-          `Criteria fail (String): ${String(mapping.path)} (${itemValue}) !== ${c.stringValue}`
-        );
-        return false;
-      }
-    } else if (
-      mapping.type === 'number' ||
-      mapping.type === 'boolean' ||
-      mapping.type === 'string'
-    ) {
-      // Check if the type mismatch occurred (itemValue's type didn't match mapping.type)
-      if (
-        (mapping.type === 'number' && typeof itemValue !== 'number') ||
-        (mapping.type === 'boolean' && typeof itemValue !== 'boolean') ||
-        (mapping.type === 'string' && typeof itemValue !== 'string')
-      ) {
-        console.warn(
-          `Type mismatch for criteria check: Property ${String(mapping.path)} expected ${mapping.type}, got ${typeof itemValue}`
-        );
-        return false;
-      }
-      // If types matched but conditions above didn't fail (e.g., boolean check where checkBoolValue is false), continue.
-    }
-  }
-
-  return true; // All criteria passed
+  // If the loop completes without returning false, all criteria passed
+  return true;
 }
 
 const VariableDropZone: FC<{
