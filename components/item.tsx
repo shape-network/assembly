@@ -134,7 +134,14 @@ export const ItemToCraftCard: FC<{ item: Item }> = ({ item }) => {
                               <span key={c.propertyType}>
                                 <p>{c.propertyType}</p>
                                 <p>
-                                  Range: {c.minValue} - {c.maxValue}
+                                  Range:{' '}
+                                  {typeof c.minValue === 'bigint' && c.minValue > BigInt(10000)
+                                    ? `${Number(c.minValue).toExponential(2)}`
+                                    : c.minValue}{' '}
+                                  -{' '}
+                                  {typeof c.maxValue === 'bigint' && c.maxValue > BigInt(10000)
+                                    ? `${Number(c.maxValue).toExponential(2)}`
+                                    : c.maxValue}
                                 </p>
                               </span>
                             ))}
