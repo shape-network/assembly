@@ -8,15 +8,27 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useWriteAssemblyCoreContractCraftItem } from '@/generated';
 import { assemblyCore } from '@/lib/addresses';
 import { config } from '@/lib/config';
-import { Item, OtomItem, Trait } from '@/lib/types';
+import { BlueprintComponent, Item, OtomItem, Trait } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { useDraggable, useDroppable } from '@dnd-kit/core';
+import { CSS } from '@dnd-kit/utilities';
 import { LightningBoltIcon, QuestionMarkCircledIcon } from '@radix-ui/react-icons';
 import Image from 'next/image';
-import { FC, useEffect } from 'react';
+import { FC, PropsWithChildren, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useAccount, useWaitForTransactionReceipt } from 'wagmi';
 
-export const ItemToCraftCard: FC<{ item: Item }> = ({ item }) => {
+type ItemToCraftCardProps = {
+  item: Item;
+  droppedVariableItems: Record<number, OtomItem | null>;
+  onDropVariable: (itemId: string, index: number, item: OtomItem | null) => void;
+};
+
+export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
+  item,
+  droppedVariableItems,
+  onDropVariable,
+}) => {
   const { address } = useAccount();
   const { data: inventory } = useGetOtomItemsForUser();
 
@@ -25,19 +37,34 @@ export const ItemToCraftCard: FC<{ item: Item }> = ({ item }) => {
     return inventory.some((i) => i.name === name);
   }
 
+  const variableBlueprints = item.blueprint.filter((i) => i.componentType === 'variable_otom');
+
   const isCraftable =
     inventory &&
     item.blueprint.length > 0 &&
-    item.blueprint.every((component) => isElementOwned(component.name));
+    item.blueprint.every((component) => {
+      if (component.componentType === 'variable_otom') {
+        const variableIndex = variableBlueprints.findIndex((vb) => vb === component);
+        return (
+          droppedVariableItems[variableIndex] !== null &&
+          droppedVariableItems[variableIndex] !== undefined
+        );
+      } else {
+        return isElementOwned(component.name);
+      }
+    });
 
   const requiredBlueprints = item.blueprint.filter((i) => i.componentType !== 'variable_otom');
-  const variableBlueprints = item.blueprint.filter((i) => i.componentType === 'variable_otom');
 
   return (
     <li className="grid grid-rows-[1fr_auto] gap-1">
       <Card className="relative w-full">
         {isCraftable && address && (
-          <CraftItemButton item={item} className="absolute top-2 right-2 h-8 px-3" />
+          <CraftItemButton
+            item={item}
+            className="absolute top-2 right-2 h-8 px-3"
+            droppedVariableItems={droppedVariableItems}
+          />
         )}
 
         <CardHeader className="relative">
@@ -80,20 +107,14 @@ export const ItemToCraftCard: FC<{ item: Item }> = ({ item }) => {
               <div className="flex flex-wrap gap-1">
                 {requiredBlueprints.map((component, i) => {
                   const isOwned = isElementOwned(component.name);
+                  const dropId = `required-${item.id}-${i}`;
                   return (
-                    <Card
-                      key={i}
-                      className={cn(
-                        'py-0',
-                        isOwned
-                          ? 'border-primary font-semibold'
-                          : 'text-muted-foreground/50 border-border'
-                      )}
-                    >
-                      <CardContent className="grid size-15 place-items-center px-0">
-                        {component.name}
-                      </CardContent>
-                    </Card>
+                    <RequiredDropZone
+                      key={dropId}
+                      id={dropId}
+                      component={component}
+                      isOwned={isOwned}
+                    />
                   );
                 })}
               </div>
@@ -118,36 +139,20 @@ export const ItemToCraftCard: FC<{ item: Item }> = ({ item }) => {
 
                 <div className="flex justify-start gap-1">
                   {variableBlueprints.map((vb, i) => {
-                    console.log('vb', vb);
+                    const dropId = `variable-${item.id}-${i}`;
+                    const droppedItem = droppedVariableItems[i] || null;
                     return (
-                      <Tooltip key={i}>
-                        <TooltipTrigger asChild>
-                          <Card className="py-0">
-                            <CardContent className="text-muted-foreground/40 grid size-15 place-items-center px-0">
-                              <LightningBoltIcon className="size-4" />
-                            </CardContent>
-                          </Card>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <div className="flex flex-col gap-1">
-                            {vb.criteria.map((c) => (
-                              <span key={c.propertyType}>
-                                <p>{c.propertyType}</p>
-                                <p>
-                                  Range:{' '}
-                                  {typeof c.minValue === 'bigint' && c.minValue > BigInt(10000)
-                                    ? `${Number(c.minValue).toExponential(2)}`
-                                    : c.minValue}{' '}
-                                  -{' '}
-                                  {typeof c.maxValue === 'bigint' && c.maxValue > BigInt(10000)
-                                    ? `${Number(c.maxValue).toExponential(2)}`
-                                    : c.maxValue}
-                                </p>
-                              </span>
-                            ))}
-                          </div>
-                        </TooltipContent>
-                      </Tooltip>
+                      <VariableDropZone
+                        key={dropId}
+                        id={dropId}
+                        index={i}
+                        criteria={vb.criteria}
+                        droppedItem={droppedItem}
+                        onDrop={(index, item) =>
+                          onDropVariable(String(vb.itemIdOrOtomTokenId), index, item)
+                        }
+                        itemName={item.name}
+                      />
                     );
                   })}
                 </div>
@@ -164,12 +169,26 @@ export const ItemToCraftCard: FC<{ item: Item }> = ({ item }) => {
 
 export const OtomItemCard: FC<{ element: OtomItem }> = ({ element }) => {
   const { data } = useGetCraftableItems();
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: element.id,
+    data: element,
+  });
+
+  const style = {
+    transform: CSS.Translate.toString(transform),
+    opacity: isDragging ? 0.5 : 1,
+  };
+
   const isElementInBlueprint = data?.some((i) => i.blueprint.some((b) => b.name === element.name));
 
   return (
     <Card
+      ref={setNodeRef}
+      style={style}
+      {...listeners}
+      {...attributes}
       className={cn(
-        'py-0 font-semibold',
+        'touch-none py-0 font-semibold',
         isElementInBlueprint ? 'border-primary text-primary' : 'border-border text-muted-foreground'
       )}
     >
@@ -178,16 +197,36 @@ export const OtomItemCard: FC<{ element: OtomItem }> = ({ element }) => {
   );
 };
 
-const CraftItemButton: FC<{ item: Item; className?: string }> = ({ item, className }) => {
+const CraftItemButton: FC<{
+  item: Item;
+  className?: string;
+  droppedVariableItems?: Record<number, OtomItem | null>;
+}> = ({ item, className, droppedVariableItems }) => {
   const { data: hash, writeContractAsync, isPending } = useWriteAssemblyCoreContractCraftItem();
   const { refetch: refetchOtomItems } = useGetOtomItemsForUser();
 
   async function handleCraftItem() {
+    const variableOtomTokenIds = item.blueprint
+      .filter((bp) => bp.componentType === 'variable_otom')
+      .map((bp, index) => {
+        const dropped = droppedVariableItems ? droppedVariableItems[index] : null;
+        return dropped ? BigInt(dropped.id) : BigInt(0);
+      })
+      .filter((id) => id !== BigInt(0));
+
+    const variableSlotsCount = item.blueprint.filter(
+      (bp) => bp.componentType === 'variable_otom'
+    ).length;
+    if (variableOtomTokenIds.length !== variableSlotsCount) {
+      toast.error('Please fill all enhancement slots.');
+      return;
+    }
+
     try {
       toast.info('Please confirm the transaction in your wallet.');
       await writeContractAsync({
         address: assemblyCore[config.chainId],
-        args: [item.id, BigInt(1), [], []],
+        args: [item.id, BigInt(1), variableOtomTokenIds, []],
       });
     } catch (error) {
       toast.error(`An error ocurred while crafting ${item.name}, please try again.`);
@@ -223,7 +262,7 @@ const CraftItemButton: FC<{ item: Item; className?: string }> = ({ item, classNa
 
   return (
     <Button disabled={disabled} onClick={handleCraftItem} className={className}>
-      {isPending ? 'Crafting...' : 'Craft'}
+      {isPending || isTxConfirming ? 'Crafting...' : 'Craft'}
     </Button>
   );
 };
@@ -272,4 +311,101 @@ const ItemTraits: FC<{ traits: Trait[] }> = ({ traits }) => {
       ))}
     </ul>
   );
+};
+
+const RequiredDropZone: FC<{
+  id: string;
+  component: BlueprintComponent;
+  isOwned: boolean;
+}> = ({ id, component, isOwned }) => {
+  const { isOver, setNodeRef, active } = useDroppable({
+    id: id,
+    data: { requiredName: component.name, type: 'required' },
+  });
+
+  const canDrop = active?.data.current?.name === component.name;
+
+  return (
+    <Card
+      ref={setNodeRef}
+      className={cn(
+        'py-0',
+        isOwned ? 'border-primary font-semibold' : 'text-muted-foreground/50 border-border',
+        isOver && canDrop && 'ring-primary ring-2 ring-offset-2',
+        isOver && !canDrop && 'ring-destructive ring-2 ring-offset-2'
+      )}
+    >
+      <CardContent className="grid size-15 place-items-center px-0">{component.name}</CardContent>
+    </Card>
+  );
+};
+
+const VariableDropZone: FC<{
+  id: string;
+  index: number;
+  criteria: BlueprintComponent['criteria'];
+  droppedItem: OtomItem | null;
+  onDrop: (index: number, item: OtomItem | null) => void;
+  itemName: string;
+}> = ({ id, index, criteria, droppedItem, onDrop, itemName }) => {
+  const { isOver, setNodeRef, active } = useDroppable({
+    id: id,
+    data: { index: index, type: 'variable' },
+  });
+
+  const canDrop = !!active?.data.current?.name;
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Card
+          ref={setNodeRef}
+          className={cn(
+            'py-0',
+            isOver && canDrop && 'ring-primary ring-2 ring-offset-2',
+            isOver && !canDrop && 'ring-destructive ring-2 ring-offset-2',
+            droppedItem && 'border-primary font-semibold'
+          )}
+        >
+          <CardContent
+            className={cn(
+              'grid size-15 place-items-center px-0',
+              droppedItem ? 'text-primary' : 'text-muted-foreground/40'
+            )}
+          >
+            {droppedItem ? droppedItem.name : <LightningBoltIcon className="size-4" />}
+          </CardContent>
+        </Card>
+      </TooltipTrigger>
+      <TooltipContent>
+        <div className="flex flex-col gap-1">
+          <p className="font-medium">Enhance {itemName}</p>
+          {droppedItem ? (
+            <p>Using: {droppedItem.name}</p>
+          ) : (
+            <p>Drop an Otom that meets the criteria.</p>
+          )}
+          {criteria.map((c) => (
+            <span key={c.propertyType}>
+              <p className="text-muted-foreground text-xs">{c.propertyType}</p>
+              <p className="text-xs">
+                Range:{' '}
+                {typeof c.minValue === 'bigint' && c.minValue > BigInt(10000)
+                  ? `${Number(c.minValue).toExponential(2)}`
+                  : String(c.minValue)}{' '}
+                -{' '}
+                {typeof c.maxValue === 'bigint' && c.maxValue > BigInt(10000)
+                  ? `${Number(c.maxValue).toExponential(2)}`
+                  : String(c.maxValue)}
+              </p>
+            </span>
+          ))}
+        </div>
+      </TooltipContent>
+    </Tooltip>
+  );
+};
+
+export const BlueprintComponentsGrid: FC<PropsWithChildren> = ({ children }) => {
+  return <ul className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-8">{children}</ul>;
 };
