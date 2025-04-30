@@ -234,7 +234,7 @@ export const OtomItemCard: FC<{ element: OtomItem; isUsed: boolean }> = ({ eleme
           ? 'bg-primary text-primary-foreground'
           : isRequiredInBlueprint
             ? 'border-primary text-primary'
-            : 'border-border text-muted-foreground'
+            : 'border-border text-muted-foreground font-normal'
       )}
     >
       <CardContent className="grid size-15 place-items-center px-0">{element.name}</CardContent>
@@ -377,10 +377,10 @@ const RequiredDropZone: FC<{
       className={cn(
         'py-0 transition-colors select-none',
         isDropped
-          ? 'bg-primary text-primary-foreground'
+          ? 'bg-primary text-primary-foreground font-semibold'
           : isOwned
             ? 'border-primary font-semibold'
-            : 'text-muted-foreground/50 border-border',
+            : 'text-muted-foreground/50 border-border font-normal',
         isOver && canDrop && 'ring-primary ring-2 ring-offset-2',
         isOver && !canDrop && 'ring-destructive ring-2 ring-offset-2'
       )}
