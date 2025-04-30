@@ -9,7 +9,7 @@ import { useWriteAssemblyCoreContractCraftItem } from '@/generated';
 import { assemblyCore } from '@/lib/addresses';
 import { config } from '@/lib/config';
 import { BlueprintComponent, Item, OtomItem, Trait } from '@/lib/types';
-import { cn } from '@/lib/utils';
+import { cn, isNotNullish } from '@/lib/utils';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { LightningBoltIcon, QuestionMarkCircledIcon } from '@radix-ui/react-icons';
@@ -36,44 +36,44 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
   const { address } = useAccount();
   const { data: inventory } = useGetOtomItemsForUser();
 
-  function isElementOwned(name: string) {
+  function isElementOwned(name: string): boolean {
     if (!inventory) return false;
     return inventory.some((i) => i.name === name);
   }
 
+  const requiredBlueprints = item.blueprint.filter((i) => i.componentType !== 'variable_otom');
   const variableBlueprints = item.blueprint.filter((i) => i.componentType === 'variable_otom');
 
-  const isCraftable =
-    inventory &&
-    item.blueprint.length > 0 &&
-    item.blueprint.every((component) => {
-      if (component.componentType === 'variable_otom') {
-        const variableIndex = variableBlueprints.findIndex((vb) => vb === component);
-        return (
-          droppedVariableItems[variableIndex] !== null &&
-          droppedVariableItems[variableIndex] !== undefined
-        );
-      } else {
-        return isElementOwned(component.name);
-      }
-    });
-
-  const requiredBlueprints = item.blueprint.filter((i) => i.componentType !== 'variable_otom');
-
   const hasDroppedRequired = requiredBlueprints.some((_, i) =>
-    droppedOnRequiredSlots.has(`required-${item.id}-${i}`)
+    droppedOnRequiredSlots.has(getRequiredDropZoneId(item.id, i))
   );
   const hasDroppedVariable = Object.values(droppedVariableItems).some((item) => item !== null);
 
-  const handleClearRequiredClick = () => {
-    onClearRequired(String(item.id));
-  };
+  const isCraftable =
+    requiredBlueprints.length > 0 &&
+    requiredBlueprints.every(({ componentType, itemIdOrOtomTokenId }, index) => {
+      const dropId = getRequiredDropZoneId(item.id, index);
+      const isDropped = droppedOnRequiredSlots.has(dropId);
 
-  const handleClearVariableClick = () => {
+      if (componentType !== 'variable_otom') {
+        const requiredTokenId = String(itemIdOrOtomTokenId);
+        const hasRequiredComponent =
+          inventory?.some((ownedItem) => ownedItem.tokenId === requiredTokenId) ?? false;
+        return isDropped && hasRequiredComponent;
+      } else {
+        return false;
+      }
+    });
+
+  function handleClearRequiredClick() {
+    onClearRequired(String(item.id));
+  }
+
+  function handleClearVariableClick() {
     variableBlueprints.forEach((_, index) => {
       onDropVariable(String(item.id), index, null);
     });
-  };
+  }
 
   return (
     <li className="grid grid-rows-[1fr_auto] gap-1">
@@ -81,7 +81,7 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
         {isCraftable && address && (
           <CraftItemButton
             item={item}
-            className="absolute top-2 right-2 h-8 px-3"
+            className="absolute top-2 right-2 z-10 h-8 px-3"
             droppedVariableItems={droppedVariableItems}
           />
         )}
@@ -137,7 +137,7 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
               <div className="flex flex-wrap gap-1">
                 {requiredBlueprints.map((component, i) => {
                   const isOwned = isElementOwned(component.name);
-                  const dropId = `required-${item.id}-${i}`;
+                  const dropId = getRequiredDropZoneId(item.id, i);
                   return (
                     <RequiredDropZone
                       key={dropId}
@@ -253,19 +253,11 @@ const CraftItemButton: FC<{
   async function handleCraftItem() {
     const variableOtomTokenIds = item.blueprint
       .filter((bp) => bp.componentType === 'variable_otom')
-      .map((bp, index) => {
+      .map((_, index) => {
         const dropped = droppedVariableItems ? droppedVariableItems[index] : null;
-        return dropped ? BigInt(dropped.id) : BigInt(0);
+        return dropped && dropped.tokenId ? BigInt(dropped.tokenId) : null;
       })
-      .filter((id) => id !== BigInt(0));
-
-    const variableSlotsCount = item.blueprint.filter(
-      (bp) => bp.componentType === 'variable_otom'
-    ).length;
-    if (variableOtomTokenIds.length !== variableSlotsCount) {
-      toast.error('Please fill all enhancement slots.');
-      return;
-    }
+      .filter(isNotNullish);
 
     try {
       toast.info('Please confirm the transaction in your wallet.');
@@ -274,7 +266,7 @@ const CraftItemButton: FC<{
         args: [item.id, BigInt(1), variableOtomTokenIds, []],
       });
     } catch (error) {
-      toast.error(`An error ocurred while crafting ${item.name}, please try again.`);
+      toast.error(`An error occurred while crafting ${item.name}, please try again.`);
       console.error(error);
     }
   }
@@ -283,11 +275,7 @@ const CraftItemButton: FC<{
     isLoading: isTxConfirming,
     isError: isTxError,
     isSuccess: isTxConfirmed,
-  } = useWaitForTransactionReceipt({
-    hash,
-    query: { enabled: !!hash },
-  });
-
+  } = useWaitForTransactionReceipt({ hash, query: { enabled: !!hash } });
   useEffect(() => {
     if (hash && isTxConfirming) {
       toast.loading('Item is being crafted...');
@@ -299,7 +287,7 @@ const CraftItemButton: FC<{
     }
 
     if (isTxError) {
-      toast.error(`An error ocurred while crafting ${item.name}, please try again.`);
+      toast.error(`An error occurred while crafting ${item.name}, please try again.`);
     }
   }, [hash, refetchOtomItems, isTxConfirming, isTxConfirmed, isTxError, item.name]);
 
@@ -590,3 +578,7 @@ const VariableDropZone: FC<{
 export const BlueprintComponentsGrid: FC<PropsWithChildren> = ({ children }) => {
   return <ul className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-8">{children}</ul>;
 };
+
+function getRequiredDropZoneId(itemId: bigint | string, index: number): string {
+  return `required-${itemId}-${index}`;
+}

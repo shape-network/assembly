@@ -38,3 +38,7 @@ export function universeHashToSeed(universeHash: string): string {
 export function universeSeedToHash(universeSeed: string): Hex {
   return `0x${universeSeed}`;
 }
+
+export function isNotNullish<T>(val: T | null | undefined): val is T {
+  return val !== null && val !== undefined;
+}

@@ -59,6 +59,7 @@ export type Trait = { name: string; value: string | number };
 
 export type OtomItem = Molecule & {
   universeHash: Hex;
+  tokenId: string;
 };
 
 // Otom-related types
