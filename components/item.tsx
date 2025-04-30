@@ -86,7 +86,7 @@ export const ItemToCraftCard: FC<{ item: Item }> = ({ item }) => {
                       className={cn(
                         'py-0',
                         isOwned
-                          ? 'bg-primary border-primary font-semibold text-white'
+                          ? 'border-primary font-semibold'
                           : 'text-muted-foreground/50 border-border'
                       )}
                     >
@@ -153,9 +153,7 @@ export const ItemToCraftCard: FC<{ item: Item }> = ({ item }) => {
                 </div>
               </div>
             ) : (
-              <div className="flex h-[90px] items-center justify-start">
-                <p className="text-muted-foreground text-sm">No enhancements available</p>
-              </div>
+              <div className="h-[90px]" />
             )}
           </div>
         </CardContent>
@@ -171,8 +169,8 @@ export const OtomItemCard: FC<{ element: OtomItem }> = ({ element }) => {
   return (
     <Card
       className={cn(
-        'border-primary py-0 font-semibold',
-        isElementInBlueprint ? 'bg-primary text-white' : ''
+        'py-0 font-semibold',
+        isElementInBlueprint ? 'border-primary text-primary' : 'border-border text-muted-foreground'
       )}
     >
       <CardContent className="grid size-15 place-items-center px-0">{element.name}</CardContent>
