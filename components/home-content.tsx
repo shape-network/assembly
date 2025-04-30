@@ -23,7 +23,8 @@ import { useAccount } from 'wagmi';
 const ItemsToCraft: FC<{
   droppedItemsState: Record<string, Record<number, OtomItem | null>>;
   onDrop: (itemId: string, index: number, item: OtomItem | null) => void;
-}> = ({ droppedItemsState, onDrop }) => {
+  droppedOnRequiredSlots: Set<string>;
+}> = ({ droppedItemsState, onDrop, droppedOnRequiredSlots }) => {
   const { data, isLoading, isError } = useGetCraftableItems();
 
   if (isLoading) {
@@ -44,6 +45,7 @@ const ItemsToCraft: FC<{
             item={item}
             droppedVariableItems={droppedItemsForThisCard}
             onDropVariable={onDrop}
+            droppedOnRequiredSlots={droppedOnRequiredSlots}
           />
         );
       })}
@@ -51,7 +53,7 @@ const ItemsToCraft: FC<{
   );
 };
 
-const OtomsInventory: FC = () => {
+const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedRequiredItems }) => {
   const { data, isLoading, isError } = useGetOtomItemsForUser();
 
   if (isLoading) {
@@ -79,7 +81,11 @@ const OtomsInventory: FC = () => {
   return (
     <ul className="flex flex-wrap items-start gap-2 rounded">
       {data.map((element) => (
-        <OtomItemCard key={element.id} element={element} />
+        <OtomItemCard
+          key={element.id}
+          element={element}
+          isUsed={usedRequiredItems.has(element.id)}
+        />
       ))}
     </ul>
   );
@@ -141,6 +147,8 @@ export const HomeContent = () => {
   const [droppedItemsState, setDroppedItemsState] = useState<
     Record<string, Record<number, OtomItem | null>>
   >({});
+  const [droppedOnRequiredSlots, setDroppedOnRequiredSlots] = useState<Set<string>>(new Set());
+  const [usedRequiredItems, setUsedRequiredItems] = useState<Set<string>>(new Set());
 
   function handleDrop(itemId: string, index: number, droppedItem: OtomItem | null) {
     setDroppedItemsState((prev) => ({
@@ -163,16 +171,19 @@ export const HomeContent = () => {
         requiredName?: string;
         index?: number;
       };
+      const draggedItemId = String(active.id);
 
-      if (!droppedItemData) return;
+      if (!droppedItemData || !dropZoneData) return;
 
       console.log(
-        `Item "${droppedItemData?.name}" dropped onto ${dropZoneData?.type} zone ${over.id}`
+        `Item "${droppedItemData?.name}" [ID: ${draggedItemId}] dropped onto ${dropZoneData?.type} zone ${over.id}`
       );
 
       if (dropZoneData?.type === 'required') {
         if (droppedItemData?.name === dropZoneData?.requiredName) {
           console.log(`Correct item dropped on required slot ${over.id}.`);
+          setDroppedOnRequiredSlots((prev) => new Set(prev).add(dropZoneId));
+          setUsedRequiredItems((prev) => new Set(prev).add(draggedItemId));
         } else {
           console.log(
             `Incorrect item dropped on required slot ${over.id}. Required: ${dropZoneData?.requiredName}, Got: ${droppedItemData?.name}`
@@ -234,7 +245,11 @@ export const HomeContent = () => {
                   Propose your own <ExternalLinkIcon className="size-4" />
                 </InlineLink>
               </div>
-              <ItemsToCraft droppedItemsState={droppedItemsState} onDrop={handleDrop} />
+              <ItemsToCraft
+                droppedItemsState={droppedItemsState}
+                onDrop={handleDrop}
+                droppedOnRequiredSlots={droppedOnRequiredSlots}
+              />
             </div>
 
             {address ? (
@@ -249,7 +264,7 @@ export const HomeContent = () => {
                       Mine more otoms <ExternalLinkIcon className="size-4" />
                     </InlineLink>
                   </div>
-                  <OtomsInventory />
+                  <OtomsInventory usedRequiredItems={usedRequiredItems} />
                 </div>
 
                 <div className="flex w-full flex-col gap-2">

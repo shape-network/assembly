@@ -22,12 +22,14 @@ type ItemToCraftCardProps = {
   item: Item;
   droppedVariableItems: Record<number, OtomItem | null>;
   onDropVariable: (itemId: string, index: number, item: OtomItem | null) => void;
+  droppedOnRequiredSlots: Set<string>;
 };
 
 export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
   item,
   droppedVariableItems,
   onDropVariable,
+  droppedOnRequiredSlots,
 }) => {
   const { address } = useAccount();
   const { data: inventory } = useGetOtomItemsForUser();
@@ -114,6 +116,7 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
                       id={dropId}
                       component={component}
                       isOwned={isOwned}
+                      isDropped={droppedOnRequiredSlots.has(dropId)}
                     />
                   );
                 })}
@@ -167,7 +170,7 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
   );
 };
 
-export const OtomItemCard: FC<{ element: OtomItem }> = ({ element }) => {
+export const OtomItemCard: FC<{ element: OtomItem; isUsed: boolean }> = ({ element, isUsed }) => {
   const { data } = useGetCraftableItems();
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: element.id,
@@ -179,7 +182,9 @@ export const OtomItemCard: FC<{ element: OtomItem }> = ({ element }) => {
     opacity: isDragging ? 0.5 : 1,
   };
 
-  const isElementInBlueprint = data?.some((i) => i.blueprint.some((b) => b.name === element.name));
+  const isRequiredInBlueprint = data?.some((item) =>
+    item.blueprint.some((b) => b.componentType !== 'variable_otom' && b.name === element.name)
+  );
 
   return (
     <Card
@@ -188,8 +193,12 @@ export const OtomItemCard: FC<{ element: OtomItem }> = ({ element }) => {
       {...listeners}
       {...attributes}
       className={cn(
-        'touch-none py-0 font-semibold',
-        isElementInBlueprint ? 'border-primary text-primary' : 'border-border text-muted-foreground'
+        'touch-none py-0 font-semibold transition-colors',
+        isUsed
+          ? 'bg-primary text-primary-foreground'
+          : isRequiredInBlueprint
+            ? 'border-primary text-primary'
+            : 'border-border text-muted-foreground'
       )}
     >
       <CardContent className="grid size-15 place-items-center px-0">{element.name}</CardContent>
@@ -317,7 +326,8 @@ const RequiredDropZone: FC<{
   id: string;
   component: BlueprintComponent;
   isOwned: boolean;
-}> = ({ id, component, isOwned }) => {
+  isDropped: boolean;
+}> = ({ id, component, isOwned, isDropped }) => {
   const { isOver, setNodeRef, active } = useDroppable({
     id: id,
     data: { requiredName: component.name, type: 'required' },
@@ -329,8 +339,12 @@ const RequiredDropZone: FC<{
     <Card
       ref={setNodeRef}
       className={cn(
-        'py-0',
-        isOwned ? 'border-primary font-semibold' : 'text-muted-foreground/50 border-border',
+        'py-0 transition-colors',
+        isDropped
+          ? 'bg-primary text-primary-foreground'
+          : isOwned
+            ? 'border-primary font-semibold'
+            : 'text-muted-foreground/50 border-border',
         isOver && canDrop && 'ring-primary ring-2 ring-offset-2',
         isOver && !canDrop && 'ring-destructive ring-2 ring-offset-2'
       )}
@@ -340,12 +354,131 @@ const RequiredDropZone: FC<{
   );
 };
 
+// --- Helper Function for Criteria Validation ---
+
+// TODO: Define the complete mapping from propertyType enum value (number)
+// to the actual property path and type in OtomItem/Atom
+// NOTE: Assuming criteria apply to the FIRST atom in giving_atoms unless it's a molecule property
+type PropertyPath = (string | number)[]; // Define a type for the path array
+const PROPERTY_TYPE_MAP: Record<
+  number,
+  { path: PropertyPath; type: 'number' | 'boolean' | 'string' }
+> = {
+  // --- Atom Properties (Accessed via item.giving_atoms[0]) ---
+  0: { path: ['giving_atoms', 0, 'radius'], type: 'number' }, // Assuming 0 maps to Atom radius
+  1: { path: ['giving_atoms', 0, 'mass'], type: 'number' }, // Assuming 1 maps to Atom mass
+  2: { path: ['giving_atoms', 0, 'nucleus', 'protons'], type: 'number' }, // Atom protons
+  3: { path: ['giving_atoms', 0, 'metallic'], type: 'boolean' }, // Atom metallic
+  // 4: { path: ['giving_atoms', 0, 'nucleus', 'decay_type'], type: 'string' }, // Atom decay_type example
+
+  // --- Molecule Properties (Accessed via item directly) ---
+  100: { path: ['electrical_conductivity'], type: 'number' }, // Example molecule property
+
+  // Add other mappings based on PropertyType enum in Solidity
+};
+
+// Helper to safely get nested property value with improved typing
+function getNestedValue(obj: Record<string, any>, path: PropertyPath): unknown {
+  try {
+    // Use 'unknown' as initial type for accumulator
+    const value = path.reduce((current: unknown, key: string | number) => {
+      // Check if current is an object and key is valid before indexing
+      if (typeof current === 'object' && current !== null && key in current) {
+        return (current as Record<string | number, unknown>)[key];
+      }
+      return undefined; // Path is invalid or current is not an object
+    }, obj as unknown); // Start with the object cast to unknown
+    return value;
+  } catch (e) {
+    console.error('Error accessing property path:', path, e);
+    return undefined;
+  }
+}
+
+function checkCriteria(item: OtomItem, criteria: BlueprintComponent['criteria']): boolean {
+  if (!item || !criteria) return false;
+
+  // Ensure there's an atom to check if needed
+  if (
+    criteria.some((c) => PROPERTY_TYPE_MAP[c.propertyType]?.path[0] === 'giving_atoms') &&
+    (!item.giving_atoms || item.giving_atoms.length === 0)
+  ) {
+    console.warn('Criteria requires atom properties, but item has no giving_atoms.');
+    return false;
+  }
+
+  for (const c of criteria) {
+    const mapping = PROPERTY_TYPE_MAP[c.propertyType];
+    if (!mapping) {
+      console.warn(`Unknown propertyType ${c.propertyType} in criteria check.`);
+      return false; // Unknown property type fails the check
+    }
+
+    const itemValue = getNestedValue(item, mapping.path);
+
+    if (itemValue === undefined || itemValue === null) {
+      console.warn(`Property ${String(mapping.path)} not found or is null/undefined on item.`);
+      return false;
+    }
+
+    // Perform checks based on criterion type and flags
+    if (mapping.type === 'number' && typeof itemValue === 'number') {
+      const itemValueBigInt = BigInt(itemValue);
+      const min = c.minValue;
+      const max = c.maxValue;
+      if (
+        (min !== undefined && itemValueBigInt < min) ||
+        (max !== undefined && itemValueBigInt > max)
+      ) {
+        console.log(
+          `Criteria fail (Number): ${String(mapping.path)} (${itemValueBigInt}) not in range [${min ?? '-inf'}, ${max ?? '+inf'}]`
+        );
+        return false;
+      }
+    } else if (mapping.type === 'boolean' && typeof itemValue === 'boolean' && c.checkBoolValue) {
+      if (itemValue !== c.boolValue) {
+        console.log(
+          `Criteria fail (Boolean): ${String(mapping.path)} (${itemValue}) !== ${c.boolValue}`
+        );
+        return false;
+      }
+    } else if (mapping.type === 'string' && typeof itemValue === 'string' && c.checkStringValue) {
+      if (itemValue !== c.stringValue) {
+        console.log(
+          `Criteria fail (String): ${String(mapping.path)} (${itemValue}) !== ${c.stringValue}`
+        );
+        return false;
+      }
+    } else if (
+      mapping.type === 'number' ||
+      mapping.type === 'boolean' ||
+      mapping.type === 'string'
+    ) {
+      // Check if the type mismatch occurred (itemValue's type didn't match mapping.type)
+      if (
+        (mapping.type === 'number' && typeof itemValue !== 'number') ||
+        (mapping.type === 'boolean' && typeof itemValue !== 'boolean') ||
+        (mapping.type === 'string' && typeof itemValue !== 'string')
+      ) {
+        console.warn(
+          `Type mismatch for criteria check: Property ${String(mapping.path)} expected ${mapping.type}, got ${typeof itemValue}`
+        );
+        return false;
+      }
+      // If types matched but conditions above didn't fail (e.g., boolean check where checkBoolValue is false), continue.
+    }
+  }
+
+  return true; // All criteria passed
+}
+
+// Updated VariableDropZone with Criteria Check
 const VariableDropZone: FC<{
   id: string;
   index: number;
   criteria: BlueprintComponent['criteria'];
   droppedItem: OtomItem | null;
-  onDrop: (index: number, item: OtomItem | null) => void;
+  onDrop: (itemId: string, index: number, item: OtomItem | null) => void;
   itemName: string;
 }> = ({ id, index, criteria, droppedItem, onDrop, itemName }) => {
   const { isOver, setNodeRef, active } = useDroppable({
@@ -353,7 +486,9 @@ const VariableDropZone: FC<{
     data: { index: index, type: 'variable' },
   });
 
-  const canDrop = !!active?.data.current?.name;
+  // Check criteria if an item is being dragged over
+  const draggedItem = active?.data.current as OtomItem | undefined;
+  const canDrop = active ? checkCriteria(draggedItem!, criteria) : false;
 
   return (
     <Tooltip>
@@ -361,10 +496,12 @@ const VariableDropZone: FC<{
         <Card
           ref={setNodeRef}
           className={cn(
-            'py-0',
+            'py-0 transition-colors',
+            // Style if item is dropped (valid or not previously)
+            droppedItem && 'border-primary font-semibold',
+            // Style on hover
             isOver && canDrop && 'ring-primary ring-2 ring-offset-2',
-            isOver && !canDrop && 'ring-destructive ring-2 ring-offset-2',
-            droppedItem && 'border-primary font-semibold'
+            isOver && !canDrop && 'ring-destructive ring-2 ring-offset-2' // Show error ring if criteria fail
           )}
         >
           <CardContent
@@ -385,21 +522,34 @@ const VariableDropZone: FC<{
           ) : (
             <p>Drop an Otom that meets the criteria.</p>
           )}
-          {criteria.map((c) => (
-            <span key={c.propertyType}>
-              <p className="text-muted-foreground text-xs">{c.propertyType}</p>
-              <p className="text-xs">
-                Range:{' '}
-                {typeof c.minValue === 'bigint' && c.minValue > BigInt(10000)
-                  ? `${Number(c.minValue).toExponential(2)}`
-                  : String(c.minValue)}{' '}
-                -{' '}
-                {typeof c.maxValue === 'bigint' && c.maxValue > BigInt(10000)
-                  ? `${Number(c.maxValue).toExponential(2)}`
-                  : String(c.maxValue)}
-              </p>
-            </span>
-          ))}
+          {criteria.map((c) => {
+            // Find the mapping to display the name nicely if possible
+            const mapping = PROPERTY_TYPE_MAP[c.propertyType];
+            const propName = mapping ? String(mapping.path) : `Property ${c.propertyType}`;
+            return (
+              <span key={c.propertyType}>
+                <p className="text-muted-foreground text-xs">{propName}</p>
+                <p className="text-xs">
+                  {c.checkBoolValue ? (
+                    `Required: ${c.boolValue}`
+                  ) : c.checkStringValue ? (
+                    `Required: ${c.stringValue}`
+                  ) : (
+                    <>
+                      Range:{' '}
+                      {typeof c.minValue === 'bigint' && c.minValue > BigInt(10000)
+                        ? `${Number(c.minValue).toExponential(2)}`
+                        : String(c.minValue)}{' '}
+                      -{' '}
+                      {typeof c.maxValue === 'bigint' && c.maxValue > BigInt(10000)
+                        ? `${Number(c.maxValue).toExponential(2)}`
+                        : String(c.maxValue)}
+                    </>
+                  )}
+                </p>
+              </span>
+            );
+          })}
         </div>
       </TooltipContent>
     </Tooltip>
