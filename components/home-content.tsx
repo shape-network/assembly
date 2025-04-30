@@ -24,7 +24,8 @@ const ItemsToCraft: FC<{
   droppedItemsState: Record<string, Record<number, OtomItem | null>>;
   onDrop: (itemId: string, index: number, item: OtomItem | null) => void;
   droppedOnRequiredSlots: Set<string>;
-}> = ({ droppedItemsState, onDrop, droppedOnRequiredSlots }) => {
+  onClearRequired: (itemId: string) => void;
+}> = ({ droppedItemsState, onDrop, droppedOnRequiredSlots, onClearRequired }) => {
   const { data, isLoading, isError } = useGetCraftableItems();
 
   if (isLoading) {
@@ -46,6 +47,7 @@ const ItemsToCraft: FC<{
             droppedVariableItems={droppedItemsForThisCard}
             onDropVariable={onDrop}
             droppedOnRequiredSlots={droppedOnRequiredSlots}
+            onClearRequired={onClearRequired}
           />
         );
       })}
@@ -149,15 +151,40 @@ export const HomeContent = () => {
   >({});
   const [droppedOnRequiredSlots, setDroppedOnRequiredSlots] = useState<Set<string>>(new Set());
   const [usedRequiredItems, setUsedRequiredItems] = useState<Set<string>>(new Set());
+  const [requiredSlotToOtomMap, setRequiredSlotToOtomMap] = useState<Record<string, string>>({});
 
   function handleDrop(itemId: string, index: number, droppedItem: OtomItem | null) {
-    setDroppedItemsState((prev) => ({
-      ...prev,
-      [itemId]: {
-        ...(prev[itemId] || {}),
-        [index]: droppedItem,
-      },
-    }));
+    setDroppedItemsState((prev) => {
+      const newState = { ...prev };
+      if (!newState[itemId]) {
+        newState[itemId] = {};
+      }
+      newState[itemId][index] = droppedItem;
+      if (droppedItem === null && Object.values(newState[itemId]).every((v) => v === null)) {
+      }
+      return newState;
+    });
+  }
+
+  function handleClearRequired(itemId: string) {
+    const slotsToClear = new Set<string>();
+    const otomsToUnuse = new Set<string>();
+    const mapUpdates = { ...requiredSlotToOtomMap };
+
+    for (const slotId in mapUpdates) {
+      if (slotId.startsWith(`required-${itemId}-`)) {
+        slotsToClear.add(slotId);
+        otomsToUnuse.add(mapUpdates[slotId]);
+        delete mapUpdates[slotId];
+      }
+    }
+
+    if (slotsToClear.size > 0) {
+      console.log(`Clearing required slots for item ${itemId}:`, slotsToClear, otomsToUnuse);
+      setRequiredSlotToOtomMap(mapUpdates);
+      setDroppedOnRequiredSlots((prev) => new Set([...prev].filter((id) => !slotsToClear.has(id))));
+      setUsedRequiredItems((prev) => new Set([...prev].filter((id) => !otomsToUnuse.has(id))));
+    }
   }
 
   function handleDragEnd(event: DragEndEvent) {
@@ -184,10 +211,29 @@ export const HomeContent = () => {
           console.log(`Correct item dropped on required slot ${over.id}.`);
           setDroppedOnRequiredSlots((prev) => new Set(prev).add(dropZoneId));
           setUsedRequiredItems((prev) => new Set(prev).add(draggedItemId));
+          setRequiredSlotToOtomMap((prev) => ({ ...prev, [dropZoneId]: draggedItemId }));
         } else {
           console.log(
             `Incorrect item dropped on required slot ${over.id}. Required: ${dropZoneData?.requiredName}, Got: ${droppedItemData?.name}`
           );
+          setDroppedOnRequiredSlots((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(dropZoneId);
+            return newSet;
+          });
+          const otomIdToRemove = requiredSlotToOtomMap[dropZoneId];
+          if (otomIdToRemove) {
+            setUsedRequiredItems((prev) => {
+              const newSet = new Set(prev);
+              newSet.delete(otomIdToRemove);
+              return newSet;
+            });
+            setRequiredSlotToOtomMap((prev) => {
+              const newMap = { ...prev };
+              delete newMap[dropZoneId];
+              return newMap;
+            });
+          }
         }
       } else if (dropZoneData?.type === 'variable') {
         const parts = dropZoneId.split('-');
@@ -206,6 +252,33 @@ export const HomeContent = () => {
       }
     } else {
       console.log(`Item "${active.data.current?.name}" dropped outside a valid zone.`);
+      let slotIdToClear: string | null = null;
+      for (const slotId in requiredSlotToOtomMap) {
+        if (requiredSlotToOtomMap[slotId] === String(active.id)) {
+          slotIdToClear = slotId;
+          break;
+        }
+      }
+      if (slotIdToClear) {
+        console.log(
+          `Unmapping required item ${active.id} from slot ${slotIdToClear} due to drop outside.`
+        );
+        setDroppedOnRequiredSlots((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(slotIdToClear!);
+          return newSet;
+        });
+        setUsedRequiredItems((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(String(active.id));
+          return newSet;
+        });
+        setRequiredSlotToOtomMap((prev) => {
+          const newMap = { ...prev };
+          delete newMap[slotIdToClear!];
+          return newMap;
+        });
+      }
     }
   }
 
@@ -249,6 +322,7 @@ export const HomeContent = () => {
                 droppedItemsState={droppedItemsState}
                 onDrop={handleDrop}
                 droppedOnRequiredSlots={droppedOnRequiredSlots}
+                onClearRequired={handleClearRequired}
               />
             </div>
 

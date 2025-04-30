@@ -23,6 +23,7 @@ type ItemToCraftCardProps = {
   droppedVariableItems: Record<number, OtomItem | null>;
   onDropVariable: (itemId: string, index: number, item: OtomItem | null) => void;
   droppedOnRequiredSlots: Set<string>;
+  onClearRequired: (itemId: string) => void;
 };
 
 export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
@@ -30,6 +31,7 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
   droppedVariableItems,
   onDropVariable,
   droppedOnRequiredSlots,
+  onClearRequired,
 }) => {
   const { address } = useAccount();
   const { data: inventory } = useGetOtomItemsForUser();
@@ -57,6 +59,21 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
     });
 
   const requiredBlueprints = item.blueprint.filter((i) => i.componentType !== 'variable_otom');
+
+  const hasDroppedRequired = requiredBlueprints.some((_, i) =>
+    droppedOnRequiredSlots.has(`required-${item.id}-${i}`)
+  );
+  const hasDroppedVariable = Object.values(droppedVariableItems).some((item) => item !== null);
+
+  const handleClearRequiredClick = () => {
+    onClearRequired(String(item.id));
+  };
+
+  const handleClearVariableClick = () => {
+    variableBlueprints.forEach((_, index) => {
+      onDropVariable(String(item.id), index, null);
+    });
+  };
 
   return (
     <li className="grid grid-rows-[1fr_auto] gap-1">
@@ -105,7 +122,18 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
 
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-2">
-              <p className="text-muted-foreground text-sm">Required elements</p>
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-muted-foreground text-sm">Required elements</p>
+                {hasDroppedRequired && (
+                  <button
+                    type="button"
+                    className="text-muted-foreground cursor-pointer text-xs"
+                    onClick={handleClearRequiredClick}
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
               <div className="flex flex-wrap gap-1">
                 {requiredBlueprints.map((component, i) => {
                   const isOwned = isElementOwned(component.name);
@@ -125,20 +153,28 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
 
             {variableBlueprints.length > 0 ? (
               <div className="flex flex-col gap-2">
-                <p className="text-muted-foreground flex items-center gap-1 text-sm">
-                  Enhancements{' '}
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <QuestionMarkCircledIcon className="size-4" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>
-                        Enhance the {item.name} with otoms that match specific criteria. The higher
-                        the value, the better the effect applied to the item.
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </p>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1">
+                    <p className="text-muted-foreground text-sm">Enhancements</p>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <QuestionMarkCircledIcon className="text-muted-foreground/50 size-4" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Enhance the {item.name} with otoms that match specific criteria...</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                  {hasDroppedVariable && (
+                    <button
+                      type="button"
+                      className="text-muted-foreground cursor-pointer text-xs"
+                      onClick={handleClearVariableClick}
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
 
                 <div className="flex justify-start gap-1">
                   {variableBlueprints.map((vb, i) => {
@@ -151,8 +187,8 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
                         index={i}
                         criteria={vb.criteria}
                         droppedItem={droppedItem}
-                        onDrop={(index, item) =>
-                          onDropVariable(String(vb.itemIdOrOtomTokenId), index, item)
+                        onDrop={(theIndex, theDroppedItem) =>
+                          onDropVariable(String(item.id), theIndex, theDroppedItem)
                         }
                         itemName={item.name}
                       />
@@ -472,7 +508,7 @@ function checkCriteria(item: OtomItem, criteria: BlueprintComponent['criteria'])
   return true; // All criteria passed
 }
 
-// Updated VariableDropZone with Criteria Check
+// Updated VariableDropZone with remove button
 const VariableDropZone: FC<{
   id: string;
   index: number;
@@ -486,7 +522,6 @@ const VariableDropZone: FC<{
     data: { index: index, type: 'variable' },
   });
 
-  // Check criteria if an item is being dragged over
   const draggedItem = active?.data.current as OtomItem | undefined;
   const canDrop = active ? checkCriteria(draggedItem!, criteria) : false;
 
@@ -496,12 +531,10 @@ const VariableDropZone: FC<{
         <Card
           ref={setNodeRef}
           className={cn(
-            'py-0 transition-colors',
-            // Style if item is dropped (valid or not previously)
+            'relative py-0 transition-colors',
             droppedItem && 'border-primary font-semibold',
-            // Style on hover
             isOver && canDrop && 'ring-primary ring-2 ring-offset-2',
-            isOver && !canDrop && 'ring-destructive ring-2 ring-offset-2' // Show error ring if criteria fail
+            isOver && !canDrop && 'ring-destructive ring-2 ring-offset-2'
           )}
         >
           <CardContent
@@ -523,7 +556,6 @@ const VariableDropZone: FC<{
             <p>Drop an Otom that meets the criteria.</p>
           )}
           {criteria.map((c) => {
-            // Find the mapping to display the name nicely if possible
             const mapping = PROPERTY_TYPE_MAP[c.propertyType];
             const propName = mapping ? String(mapping.path) : `Property ${c.propertyType}`;
             return (
