@@ -125,13 +125,14 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
               <div className="flex items-center justify-between gap-2">
                 <p className="text-muted-foreground text-sm">Required elements</p>
                 {hasDroppedRequired && (
-                  <button
-                    type="button"
-                    className="text-muted-foreground cursor-pointer text-xs"
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-muted-foreground h-5 cursor-pointer px-2 text-xs"
                     onClick={handleClearRequiredClick}
                   >
                     Clear
-                  </button>
+                  </Button>
                 )}
               </div>
               <div className="flex flex-wrap gap-1">
@@ -165,14 +166,16 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
                       </TooltipContent>
                     </Tooltip>
                   </div>
+
                   {hasDroppedVariable && (
-                    <button
-                      type="button"
-                      className="text-muted-foreground cursor-pointer text-xs"
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-muted-foreground h-5 cursor-pointer px-2 text-xs"
                       onClick={handleClearVariableClick}
                     >
                       Clear
-                    </button>
+                    </Button>
                   )}
                 </div>
 
