@@ -187,8 +187,8 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
                         index={i}
                         criteria={vb.criteria}
                         droppedItem={droppedItem}
-                        onDrop={(theIndex, theDroppedItem) =>
-                          onDropVariable(String(item.id), theIndex, theDroppedItem)
+                        onDrop={(_itemId, index, theDroppedItem) =>
+                          onDropVariable(String(item.id), index, theDroppedItem)
                         }
                         itemName={item.name}
                       />
@@ -414,7 +414,7 @@ const PROPERTY_TYPE_MAP: Record<
 };
 
 // Helper to safely get nested property value with improved typing
-function getNestedValue(obj: Record<string, any>, path: PropertyPath): unknown {
+function getNestedValue(obj: Record<string, unknown>, path: PropertyPath): unknown {
   try {
     // Use 'unknown' as initial type for accumulator
     const value = path.reduce((current: unknown, key: string | number) => {
@@ -516,7 +516,7 @@ const VariableDropZone: FC<{
   droppedItem: OtomItem | null;
   onDrop: (itemId: string, index: number, item: OtomItem | null) => void;
   itemName: string;
-}> = ({ id, index, criteria, droppedItem, onDrop, itemName }) => {
+}> = ({ id, index, criteria, droppedItem, itemName }) => {
   const { isOver, setNodeRef, active } = useDroppable({
     id: id,
     data: { index: index, type: 'variable' },
