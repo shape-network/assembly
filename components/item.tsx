@@ -253,10 +253,9 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({
     >
       <CardContent className="grid size-15 place-items-center px-0">
         {representativeItem.name}
-        {/* Display count if greater than 1 */}
         {count > 1 && (
-          <span className="bg-muted text-muted-foreground absolute -top-2 -right-2 grid h-5 min-w-[20px] place-items-center rounded-full px-1 text-xs font-bold">
-            {count}
+          <span className="text-muted-foreground bg-background absolute -top-2 -right-2 grid h-5 min-w-[20px] place-items-center rounded-full px-0.5 text-[10px] font-bold">
+            x{count}
           </span>
         )}
       </CardContent>
