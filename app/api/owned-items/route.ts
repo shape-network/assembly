@@ -27,9 +27,6 @@ export async function POST(request: Request) {
     contractAddresses: [assemblyItems[config.chainId]],
   });
 
-  console.log('address', address);
-  console.log('nfts', nfts);
-
   const rpc = rpcClient();
   const itemIds = await Promise.all(
     nfts.ownedNfts.map(async (nft) => {
