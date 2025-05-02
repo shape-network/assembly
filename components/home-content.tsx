@@ -9,6 +9,7 @@ import {
 } from '@/components/item';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { InlineLink } from '@/components/ui/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import { WalletConnect } from '@/components/wallet-connect';
@@ -17,7 +18,7 @@ import { OtomItem } from '@/lib/types';
 import { DndContext, DragEndEvent } from '@dnd-kit/core';
 import { ExternalLinkIcon } from '@radix-ui/react-icons';
 import Link from 'next/link';
-import { FC, useState } from 'react';
+import { FC, useDeferredValue, useMemo, useState } from 'react';
 import { useAccount } from 'wagmi';
 
 const ItemsToCraft: FC<{
@@ -55,8 +56,40 @@ const ItemsToCraft: FC<{
   );
 };
 
+type GroupedOtomItems = {
+  representativeItem: OtomItem;
+  count: number;
+  allItems: OtomItem[];
+};
+
 const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedRequiredItems }) => {
-  const { data, isLoading, isError } = useGetOtomItemsForUser();
+  const { data: rawInventory, isLoading, isError } = useGetOtomItemsForUser();
+  const [searchTerm, setSearchTerm] = useState('');
+  const deferredSearchTerm = useDeferredValue(searchTerm);
+
+  const groupedInventory = useMemo(() => {
+    if (!rawInventory) return [];
+
+    const filteredInventory = rawInventory.filter((item) =>
+      item.name.toLowerCase().includes(deferredSearchTerm.toLowerCase())
+    );
+    const groups = new Map<string, GroupedOtomItems>();
+    for (const item of filteredInventory) {
+      const name = item.name;
+      if (groups.has(name)) {
+        const group = groups.get(name)!;
+        group.count++;
+        group.allItems.push(item);
+      } else {
+        groups.set(name, {
+          representativeItem: item,
+          count: 1,
+          allItems: [item],
+        });
+      }
+    }
+    return Array.from(groups.values());
+  }, [rawInventory, deferredSearchTerm]);
 
   if (isLoading) {
     return <InventorySkeleton />;
@@ -66,30 +99,44 @@ const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedRequiredIt
     return <p>Error loading inventory.</p>;
   }
 
-  if (!data || data.length === 0) {
-    return (
-      <div className="grid place-items-center gap-4 py-12">
-        <p>No otoms found in your wallet.</p>
-
-        <Button asChild>
-          <a href={paths.otom} target="_blank" rel="noopener noreferrer">
-            Get otoms
-          </a>
-        </Button>
-      </div>
-    );
-  }
-
   return (
-    <ul className="flex flex-wrap items-start gap-2 rounded">
-      {data.map((element) => (
-        <OtomItemCard
-          key={element.id}
-          element={element}
-          isUsed={usedRequiredItems.has(element.id)}
-        />
-      ))}
-    </ul>
+    <div className="flex flex-col gap-4">
+      {!rawInventory || rawInventory.length === 0 ? (
+        <div className="grid place-items-center gap-4 py-12">
+          <p>No otoms found in your wallet.</p>
+          <Button asChild>
+            <a href={paths.otom} target="_blank" rel="noopener noreferrer">
+              Get otoms
+            </a>
+          </Button>
+        </div>
+      ) : groupedInventory.length > 0 ? (
+        <>
+          <Input
+            type="search"
+            placeholder="Search owned otoms (eg Ju)"
+            className="h-9 max-w-xs"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            disabled={!rawInventory || rawInventory.length === 0}
+          />
+
+          <ul className="flex flex-wrap items-start gap-2 rounded">
+            {groupedInventory.map((group) => (
+              <OtomItemCard
+                key={group.representativeItem.name}
+                representativeItem={group.representativeItem}
+                count={group.count}
+                allItems={group.allItems}
+                usedTokenIds={usedRequiredItems}
+              />
+            ))}
+          </ul>
+        </>
+      ) : (
+        <p className="text-muted-foreground py-4 text-sm">{`No otoms found matching "${deferredSearchTerm}".`}</p>
+      )}
+    </div>
   );
 };
 

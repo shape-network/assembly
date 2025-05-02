@@ -200,11 +200,28 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
   );
 };
 
-export const OtomItemCard: FC<{ element: OtomItem; isUsed: boolean }> = ({ element, isUsed }) => {
-  const { data } = useGetCraftableItems();
+type OtomItemCardProps = {
+  representativeItem: OtomItem;
+  count: number;
+  allItems: OtomItem[];
+  usedTokenIds: Set<string>;
+};
+
+export const OtomItemCard: FC<OtomItemCardProps> = ({
+  representativeItem,
+  count,
+  allItems,
+  usedTokenIds,
+}) => {
+  const { data: craftableItems } = useGetCraftableItems();
+
+  const draggableItem = allItems.find((item) => !usedTokenIds.has(item.tokenId));
+  const areAllItemsUsed = allItems.every((item) => usedTokenIds.has(item.tokenId));
+
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-    id: element.id,
-    data: element,
+    id: draggableItem ? draggableItem.tokenId : representativeItem.tokenId,
+    data: draggableItem || representativeItem,
+    disabled: areAllItemsUsed,
   });
 
   const style = {
@@ -212,8 +229,10 @@ export const OtomItemCard: FC<{ element: OtomItem; isUsed: boolean }> = ({ eleme
     opacity: isDragging ? 0.5 : 1,
   };
 
-  const isRequiredInBlueprint = data?.some((item) =>
-    item.blueprint.some((b) => b.componentType !== 'variable_otom' && b.name === element.name)
+  const isRequiredInBlueprint = craftableItems?.some((item) =>
+    item.blueprint.some(
+      (b) => b.componentType !== 'variable_otom' && b.name === representativeItem.name
+    )
   );
 
   return (
@@ -223,15 +242,23 @@ export const OtomItemCard: FC<{ element: OtomItem; isUsed: boolean }> = ({ eleme
       {...listeners}
       {...attributes}
       className={cn(
-        'cursor-pointer touch-none py-0 font-semibold transition-colors',
-        isUsed
+        'relative cursor-pointer touch-none py-0 font-semibold transition-colors',
+        areAllItemsUsed
           ? 'bg-primary text-primary-foreground'
           : isRequiredInBlueprint
             ? 'border-primary text-primary'
-            : 'border-border text-muted-foreground font-normal'
+            : 'border-border text-muted-foreground font-normal',
+        areAllItemsUsed && 'cursor-not-allowed'
       )}
     >
-      <CardContent className="grid size-15 place-items-center px-0">{element.name}</CardContent>
+      <CardContent className="grid size-15 place-items-center px-0">
+        {representativeItem.name}
+        {count > 1 && (
+          <span className="text-muted-foreground bg-background absolute -top-2 -right-2 grid h-5 min-w-[20px] place-items-center rounded-full px-0.5 text-[10px] font-bold">
+            x{count}
+          </span>
+        )}
+      </CardContent>
     </Card>
   );
 };
