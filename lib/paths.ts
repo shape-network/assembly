@@ -11,6 +11,7 @@ export const paths = {
   api: {
     ownedOtomItems: '/api/owned-otom-items',
     craftableItems: '/api/craftable-items',
+    ownedItems: '/api/owned-items',
   },
   images: (identifier: string) => ({
     token: `https://${otomsBucket}.s3.us-east-1.amazonaws.com/otoms/${identifier}-token.png`,
