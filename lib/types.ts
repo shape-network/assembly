@@ -2,11 +2,6 @@ import { Address, Hex } from 'viem';
 
 // Assembly-related types
 
-export type InventoryResponse = {
-  elements: OtomItem[];
-  cursor?: string;
-};
-
 export type ComponentType = 'otom' | 'variable_otom' | 'fungible_item' | 'non_fungible_item';
 
 export type BlueprintComponent = {

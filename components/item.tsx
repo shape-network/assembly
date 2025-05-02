@@ -8,6 +8,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useWriteAssemblyCoreContractCraftItem } from '@/generated';
 import { assemblyCore } from '@/lib/addresses';
 import { config } from '@/lib/config';
+import { checkCriteria, PROPERTY_TYPE_MAP } from '@/lib/property-utils';
 import { BlueprintComponent, Item, OtomItem, Trait } from '@/lib/types';
 import { cn, isNotNullish } from '@/lib/utils';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
@@ -107,17 +108,7 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
 
             <CardDescription className="text-center italic">{item.description}</CardDescription>
 
-            <ul className="text-sm">
-              {item.initialTraits.map((trait, idx) => (
-                <li key={idx} className="flex flex-col gap-1">
-                  <div className="text-primary flex items-center gap-2">
-                    <span>{trait.name === 'Usages Remaining' ? 'Usages' : trait.name}</span>
-                    <span className="border-muted-foreground/15 flex-grow border-b border-dotted"></span>
-                    <span className="font-medium">{trait.value}</span>
-                  </div>
-                </li>
-              ))}
-            </ul>
+            <ItemTraits traits={item.initialTraits} />
           </div>
 
           <div className="flex flex-col gap-6">
@@ -125,13 +116,14 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
               <div className="flex items-center justify-between gap-2">
                 <p className="text-muted-foreground text-sm">Required elements</p>
                 {hasDroppedRequired && (
-                  <button
-                    type="button"
-                    className="text-muted-foreground cursor-pointer text-xs"
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-muted-foreground h-5 cursor-pointer px-2 text-xs"
                     onClick={handleClearRequiredClick}
                   >
                     Clear
-                  </button>
+                  </Button>
                 )}
               </div>
               <div className="flex flex-wrap gap-1">
@@ -165,14 +157,16 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
                       </TooltipContent>
                     </Tooltip>
                   </div>
+
                   {hasDroppedVariable && (
-                    <button
-                      type="button"
-                      className="text-muted-foreground cursor-pointer text-xs"
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-muted-foreground h-5 cursor-pointer px-2 text-xs"
                       onClick={handleClearVariableClick}
                     >
                       Clear
-                    </button>
+                    </Button>
                   )}
                 </div>
 
@@ -336,7 +330,7 @@ const ItemTraits: FC<{ traits: Trait[] }> = ({ traits }) => {
       {traits.map((trait, idx) => (
         <li key={idx} className="flex flex-col gap-1">
           <div className="text-primary flex items-center gap-2">
-            <span>{trait.name}</span>
+            <span>{trait.name === 'Usages Remaining' ? 'Usages' : trait.name}</span>
             <span className="border-muted-foreground/15 flex-grow border-b border-dotted"></span>
             <span className="font-medium">{trait.value}</span>
           </div>
@@ -377,124 +371,6 @@ const RequiredDropZone: FC<{
     </Card>
   );
 };
-
-// --- Helper Function for Criteria Validation ---
-
-// TODO: Define the complete mapping from propertyType enum value (number)
-// to the actual property path and type in OtomItem/Atom
-// NOTE: Assuming criteria apply to the FIRST atom in giving_atoms unless it's a molecule property
-type PropertyPath = (string | number)[]; // Define a type for the path array
-const PROPERTY_TYPE_MAP: Record<
-  number,
-  { path: PropertyPath; type: 'number' | 'boolean' | 'string' }
-> = {
-  // --- Atom Properties (Accessed via item.giving_atoms[0]) ---
-  0: { path: ['giving_atoms', 0, 'radius'], type: 'number' }, // Assuming 0 maps to Atom radius
-  1: { path: ['giving_atoms', 0, 'mass'], type: 'number' }, // Assuming 1 maps to Atom mass
-  2: { path: ['giving_atoms', 0, 'nucleus', 'protons'], type: 'number' }, // Atom protons
-  3: { path: ['giving_atoms', 0, 'metallic'], type: 'boolean' }, // Atom metallic
-  // 4: { path: ['giving_atoms', 0, 'nucleus', 'decay_type'], type: 'string' }, // Atom decay_type example
-
-  // --- Molecule Properties (Accessed via item directly) ---
-  100: { path: ['electrical_conductivity'], type: 'number' }, // Example molecule property
-
-  // Add other mappings based on PropertyType enum in Solidity
-};
-
-// Helper to safely get nested property value with improved typing
-function getNestedValue(obj: Record<string, unknown>, path: PropertyPath): unknown {
-  try {
-    // Use 'unknown' as initial type for accumulator
-    const value = path.reduce((current: unknown, key: string | number) => {
-      // Check if current is an object and key is valid before indexing
-      if (typeof current === 'object' && current !== null && key in current) {
-        return (current as Record<string | number, unknown>)[key];
-      }
-      return undefined; // Path is invalid or current is not an object
-    }, obj as unknown); // Start with the object cast to unknown
-    return value;
-  } catch (e) {
-    console.error('Error accessing property path:', path, e);
-    return undefined;
-  }
-}
-
-function checkCriteria(item: OtomItem, criteria: BlueprintComponent['criteria']): boolean {
-  if (!item || !criteria) return false;
-
-  // Ensure there's an atom to check if needed
-  if (
-    criteria.some((c) => PROPERTY_TYPE_MAP[c.propertyType]?.path[0] === 'giving_atoms') &&
-    (!item.giving_atoms || item.giving_atoms.length === 0)
-  ) {
-    console.warn('Criteria requires atom properties, but item has no giving_atoms.');
-    return false;
-  }
-
-  for (const c of criteria) {
-    const mapping = PROPERTY_TYPE_MAP[c.propertyType];
-    if (!mapping) {
-      console.warn(`Unknown propertyType ${c.propertyType} in criteria check.`);
-      return false; // Unknown property type fails the check
-    }
-
-    const itemValue = getNestedValue(item, mapping.path);
-
-    if (itemValue === undefined || itemValue === null) {
-      console.warn(`Property ${String(mapping.path)} not found or is null/undefined on item.`);
-      return false;
-    }
-
-    // Perform checks based on criterion type and flags
-    if (mapping.type === 'number' && typeof itemValue === 'number') {
-      const itemValueBigInt = BigInt(itemValue);
-      const min = c.minValue;
-      const max = c.maxValue;
-      if (
-        (min !== undefined && itemValueBigInt < min) ||
-        (max !== undefined && itemValueBigInt > max)
-      ) {
-        console.log(
-          `Criteria fail (Number): ${String(mapping.path)} (${itemValueBigInt}) not in range [${min ?? '-inf'}, ${max ?? '+inf'}]`
-        );
-        return false;
-      }
-    } else if (mapping.type === 'boolean' && typeof itemValue === 'boolean' && c.checkBoolValue) {
-      if (itemValue !== c.boolValue) {
-        console.log(
-          `Criteria fail (Boolean): ${String(mapping.path)} (${itemValue}) !== ${c.boolValue}`
-        );
-        return false;
-      }
-    } else if (mapping.type === 'string' && typeof itemValue === 'string' && c.checkStringValue) {
-      if (itemValue !== c.stringValue) {
-        console.log(
-          `Criteria fail (String): ${String(mapping.path)} (${itemValue}) !== ${c.stringValue}`
-        );
-        return false;
-      }
-    } else if (
-      mapping.type === 'number' ||
-      mapping.type === 'boolean' ||
-      mapping.type === 'string'
-    ) {
-      // Check if the type mismatch occurred (itemValue's type didn't match mapping.type)
-      if (
-        (mapping.type === 'number' && typeof itemValue !== 'number') ||
-        (mapping.type === 'boolean' && typeof itemValue !== 'boolean') ||
-        (mapping.type === 'string' && typeof itemValue !== 'string')
-      ) {
-        console.warn(
-          `Type mismatch for criteria check: Property ${String(mapping.path)} expected ${mapping.type}, got ${typeof itemValue}`
-        );
-        return false;
-      }
-      // If types matched but conditions above didn't fail (e.g., boolean check where checkBoolValue is false), continue.
-    }
-  }
-
-  return true; // All criteria passed
-}
 
 const VariableDropZone: FC<{
   id: string;
