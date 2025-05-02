@@ -1,7 +1,7 @@
 'use client';
 
 import { paths } from '@/lib/paths';
-import { InventoryResponse, Item, OtomItem } from '@/lib/types';
+import { Item, OtomItem } from '@/lib/types';
 import { useQuery } from '@tanstack/react-query';
 import superjson from 'superjson';
 import { useAccount } from 'wagmi';
@@ -19,7 +19,7 @@ export function useGetOtomItemsForUser() {
         body: JSON.stringify({ address }),
       });
 
-      const data = (await response.json()) as InventoryResponse;
+      const data = await response.json();
       return data.elements || [];
     },
     enabled: !!address,

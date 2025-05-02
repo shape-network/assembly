@@ -1,7 +1,7 @@
 import { getMoleculesByIds, getPagedNftsForOwner } from '@/app/api/fetchers';
 import { otomsCore } from '@/lib/addresses';
 import { config } from '@/lib/config';
-import { InventoryResponse, Molecule } from '@/lib/types';
+import { Molecule, OtomItem } from '@/lib/types';
 import { universeSeedToHash } from '@/lib/utils';
 import { OwnedNftsResponse } from 'alchemy-sdk';
 import { NextResponse } from 'next/server';
@@ -81,6 +81,7 @@ export async function POST(request: Request) {
       return Array.from({ length: balance }, (_, i) => ({
         ...moleculeData.molecule,
         id: `${nft.tokenId}-${i}`,
+        tokenId: nft.tokenId,
         name: moleculeData.molecule.name,
         universeHash: universeSeedToHash(
           moleculeData.molecule.giving_atoms[0].structure.universe_seed
@@ -88,7 +89,7 @@ export async function POST(request: Request) {
       }));
     });
 
-    const inventory: InventoryResponse = {
+    const inventory: { elements: OtomItem[]; cursor?: string } = {
       elements: otomItems
         .sort((a, b) => b.universeHash.localeCompare(a.universeHash))
         .sort((a, b) => a.name.localeCompare(b.name)),
