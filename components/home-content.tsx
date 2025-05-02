@@ -17,7 +17,7 @@ import { OtomItem } from '@/lib/types';
 import { DndContext, DragEndEvent } from '@dnd-kit/core';
 import { ExternalLinkIcon } from '@radix-ui/react-icons';
 import Link from 'next/link';
-import { FC, useState } from 'react';
+import { FC, useMemo, useState } from 'react';
 import { useAccount } from 'wagmi';
 
 const ItemsToCraft: FC<{
@@ -55,8 +55,37 @@ const ItemsToCraft: FC<{
   );
 };
 
+type GroupedOtomItems = {
+  representativeItem: OtomItem;
+  count: number;
+  allItems: OtomItem[];
+};
+
 const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedRequiredItems }) => {
-  const { data, isLoading, isError } = useGetOtomItemsForUser();
+  const { data: rawInventory, isLoading, isError } = useGetOtomItemsForUser();
+
+  const groupedInventory = useMemo(() => {
+    if (!rawInventory) return [];
+
+    const groups = new Map<string, GroupedOtomItems>();
+
+    for (const item of rawInventory) {
+      const name = item.name;
+      if (groups.has(name)) {
+        const group = groups.get(name)!;
+        group.count++;
+        group.allItems.push(item);
+      } else {
+        groups.set(name, {
+          representativeItem: item,
+          count: 1,
+          allItems: [item],
+        });
+      }
+    }
+
+    return Array.from(groups.values());
+  }, [rawInventory]);
 
   if (isLoading) {
     return <InventorySkeleton />;
@@ -66,7 +95,7 @@ const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedRequiredIt
     return <p>Error loading inventory.</p>;
   }
 
-  if (!data || data.length === 0) {
+  if (!groupedInventory || groupedInventory.length === 0) {
     return (
       <div className="grid place-items-center gap-4 py-12">
         <p>No otoms found in your wallet.</p>
@@ -82,11 +111,13 @@ const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedRequiredIt
 
   return (
     <ul className="flex flex-wrap items-start gap-2 rounded">
-      {data.map((element) => (
+      {groupedInventory.map((group) => (
         <OtomItemCard
-          key={element.id}
-          element={element}
-          isUsed={usedRequiredItems.has(element.id)}
+          key={group.representativeItem.name} // Use name as key for the group
+          representativeItem={group.representativeItem}
+          count={group.count}
+          allItems={group.allItems}
+          usedTokenIds={usedRequiredItems} // Pass the set of used token IDs
         />
       ))}
     </ul>
