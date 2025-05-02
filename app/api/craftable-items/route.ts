@@ -10,7 +10,6 @@ import superjson from 'superjson';
 
 async function getCraftItems(): Promise<Item[]> {
   const rpc = rpcClient();
-
   const results = await rpc.readContract({
     abi: assemblyTrackingContractAbi,
     address: assemblyTracking[config.chainId],

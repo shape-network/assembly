@@ -43,7 +43,12 @@ export function useGetItemsForUser() {
   return useQuery<Item[]>({
     queryKey: ['items', address],
     queryFn: async () => {
-      return [];
+      const response = await fetch(paths.api.ownedItems, {
+        method: 'POST',
+        body: JSON.stringify({ address }),
+      });
+      const data = await response.json();
+      return superjson.parse(data);
     },
     enabled: !!address,
   });

@@ -108,17 +108,7 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
 
             <CardDescription className="text-center italic">{item.description}</CardDescription>
 
-            <ul className="text-sm">
-              {item.initialTraits.map((trait, idx) => (
-                <li key={idx} className="flex flex-col gap-1">
-                  <div className="text-primary flex items-center gap-2">
-                    <span>{trait.name === 'Usages Remaining' ? 'Usages' : trait.name}</span>
-                    <span className="border-muted-foreground/15 flex-grow border-b border-dotted"></span>
-                    <span className="font-medium">{trait.value}</span>
-                  </div>
-                </li>
-              ))}
-            </ul>
+            <ItemTraits traits={item.initialTraits} />
           </div>
 
           <div className="flex flex-col gap-6">
@@ -340,7 +330,7 @@ const ItemTraits: FC<{ traits: Trait[] }> = ({ traits }) => {
       {traits.map((trait, idx) => (
         <li key={idx} className="flex flex-col gap-1">
           <div className="text-primary flex items-center gap-2">
-            <span>{trait.name}</span>
+            <span>{trait.name === 'Usages Remaining' ? 'Usages' : trait.name}</span>
             <span className="border-muted-foreground/15 flex-grow border-b border-dotted"></span>
             <span className="font-medium">{trait.value}</span>
           </div>
