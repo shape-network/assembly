@@ -101,38 +101,39 @@ const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedRequiredIt
 
   return (
     <div className="flex flex-col gap-4">
-      {!rawInventory || rawInventory.length === 0 ? (
-        <div className="grid place-items-center gap-4 py-12">
-          <p>No otoms found in your wallet.</p>
-          <Button asChild>
-            <a href={paths.otom} target="_blank" rel="noopener noreferrer">
-              Get otoms
-            </a>
-          </Button>
-        </div>
-      ) : groupedInventory.length > 0 ? (
-        <>
-          <Input
-            type="search"
-            placeholder="Search owned otoms (eg Ju)"
-            className="h-9 max-w-xs"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            disabled={!rawInventory || rawInventory.length === 0}
-          />
+      {!rawInventory ||
+        (rawInventory.length === 0 && (
+          <div className="grid place-items-center gap-4 py-12">
+            <p>No otoms found in your wallet.</p>
+            <Button asChild>
+              <a href={paths.otom} target="_blank" rel="noopener noreferrer">
+                Get otoms
+              </a>
+            </Button>
+          </div>
+        ))}
 
-          <ul className="flex flex-wrap items-start gap-2 rounded">
-            {groupedInventory.map((group) => (
-              <OtomItemCard
-                key={group.representativeItem.name}
-                representativeItem={group.representativeItem}
-                count={group.count}
-                allItems={group.allItems}
-                usedTokenIds={usedRequiredItems}
-              />
-            ))}
-          </ul>
-        </>
+      <Input
+        type="search"
+        placeholder="Search owned otoms (eg Ju)"
+        className="h-9 max-w-xs"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        disabled={!rawInventory || rawInventory.length === 0}
+      />
+
+      {groupedInventory.length > 0 ? (
+        <ul className="flex flex-wrap items-start gap-2 rounded">
+          {groupedInventory.map((group) => (
+            <OtomItemCard
+              key={group.representativeItem.name}
+              representativeItem={group.representativeItem}
+              count={group.count}
+              allItems={group.allItems}
+              usedTokenIds={usedRequiredItems}
+            />
+          ))}
+        </ul>
       ) : (
         <p className="text-muted-foreground py-4 text-sm">{`No otoms found matching "${deferredSearchTerm}".`}</p>
       )}
