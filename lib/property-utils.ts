@@ -33,6 +33,31 @@ export const PROPERTY_TYPE_MAP: Record<
   17: { path: ['giving_atoms', 0, 'nucleus', 'decay_type'], type: 'string' }, // DECAY_TYPE
 };
 
+const PROPERTY_NAME_MAP: Record<number, string> = {
+  0: 'Activation Energy',
+  1: 'Molecule Radius',
+  2: 'Electrical Conductivity',
+  3: 'Thermal Conductivity',
+  4: 'Toughness',
+  5: 'Hardness',
+  6: 'Ductility',
+  7: 'Atom Radius',
+  8: 'Volume',
+  9: 'Mass',
+  10: 'Density',
+  11: 'Electronegativity',
+  12: 'Metallic',
+  13: 'Protons',
+  14: 'Neutrons',
+  15: 'Nucleons',
+  16: 'Stability',
+  17: 'Decay Type',
+};
+
+export function formatPropertyName(propertyType: number): string {
+  return PROPERTY_NAME_MAP[propertyType] ?? `Property ${propertyType}`;
+}
+
 // Helper to safely get nested property value with improved typing
 export function getNestedValue(obj: Record<string, unknown>, path: PropertyPath): unknown {
   try {

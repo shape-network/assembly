@@ -8,7 +8,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useWriteAssemblyCoreContractCraftItem } from '@/generated';
 import { assemblyCore } from '@/lib/addresses';
 import { config } from '@/lib/config';
-import { checkCriteria, PROPERTY_TYPE_MAP } from '@/lib/property-utils';
+import { checkCriteria, formatPropertyName } from '@/lib/property-utils';
 import { BlueprintComponent, Item, OtomItem, Trait } from '@/lib/types';
 import { cn, isNotNullish } from '@/lib/utils';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
@@ -153,7 +153,7 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
                         <QuestionMarkCircledIcon className="text-muted-foreground/50 size-4" />
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>Enhance the {item.name} with otoms that match specific criteria...</p>
+                        <p>Enhance {item.name} with otoms that match specific criteria</p>
                       </TooltipContent>
                     </Tooltip>
                   </div>
@@ -236,30 +236,41 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({
   );
 
   return (
-    <Card
-      ref={setNodeRef}
-      style={style}
-      {...listeners}
-      {...attributes}
-      className={cn(
-        'relative cursor-pointer touch-none py-0 font-semibold transition-colors',
-        areAllItemsUsed
-          ? 'bg-primary text-primary-foreground'
-          : isRequiredInBlueprint
-            ? 'border-primary text-primary'
-            : 'border-border text-muted-foreground font-normal',
-        areAllItemsUsed && 'cursor-not-allowed'
-      )}
-    >
-      <CardContent className="grid size-15 place-items-center px-0">
-        {representativeItem.name}
-        {count > 1 && (
-          <span className="text-muted-foreground bg-background absolute -top-2 -right-2 grid h-5 min-w-[20px] place-items-center rounded-full px-0.5 text-[10px] font-bold">
-            x{count}
-          </span>
-        )}
-      </CardContent>
-    </Card>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Card
+          ref={setNodeRef}
+          style={style}
+          {...listeners}
+          {...attributes}
+          className={cn(
+            'relative cursor-pointer touch-none py-0 font-semibold transition-colors',
+            areAllItemsUsed
+              ? 'bg-primary text-primary-foreground'
+              : isRequiredInBlueprint
+                ? 'border-primary text-primary'
+                : 'border-border text-muted-foreground font-normal',
+            areAllItemsUsed && 'cursor-not-allowed'
+          )}
+        >
+          <CardContent className="grid size-15 place-items-center px-0">
+            {representativeItem.name}
+            {count > 1 && (
+              <span className="text-muted-foreground bg-background absolute -top-2 -right-2 grid h-5 min-w-[20px] place-items-center rounded-full px-0.5 text-[10px] font-bold">
+                x{count}
+              </span>
+            )}
+          </CardContent>
+        </Card>
+      </TooltipTrigger>
+
+      <TooltipContent className="max-w-[300px]">
+        <p>Hardness: {representativeItem.hardness.toFixed(3)}</p>
+        <p>Toughness: {representativeItem.toughness.toFixed(3)}</p>
+        <p>Ductility: {representativeItem.ductility.toFixed(3)}</p>
+        <p>Mass: {representativeItem.giving_atoms.reduce((acc, atom) => acc + atom.mass, 0)}</p>
+      </TooltipContent>
+    </Tooltip>
   );
 };
 
@@ -406,7 +417,7 @@ const VariableDropZone: FC<{
   droppedItem: OtomItem | null;
   onDrop: (itemId: string, index: number, item: OtomItem | null) => void;
   itemName: string;
-}> = ({ id, index, criteria, droppedItem, itemName }) => {
+}> = ({ id, index, criteria, droppedItem }) => {
   const { isOver, setNodeRef, active } = useDroppable({
     id: id,
     data: { index: index, type: 'variable' },
@@ -439,39 +450,29 @@ const VariableDropZone: FC<{
       </TooltipTrigger>
       <TooltipContent>
         <div className="flex flex-col gap-1">
-          <p className="font-medium">Enhance {itemName}</p>
-          {droppedItem ? (
-            <p>Using: {droppedItem.name}</p>
-          ) : (
-            <p>Drop an Otom that meets the criteria.</p>
-          )}
-          {criteria.map((c) => {
-            const mapping = PROPERTY_TYPE_MAP[c.propertyType];
-            const propName = mapping ? String(mapping.path) : `Property ${c.propertyType}`;
-            return (
-              <span key={c.propertyType}>
-                <p className="text-muted-foreground text-xs">{propName}</p>
-                <p className="text-xs">
-                  {c.checkBoolValue ? (
-                    `Required: ${c.boolValue}`
-                  ) : c.checkStringValue ? (
-                    `Required: ${c.stringValue}`
-                  ) : (
-                    <>
-                      Range:{' '}
-                      {typeof c.minValue === 'bigint' && c.minValue > BigInt(10000)
-                        ? `${Number(c.minValue).toExponential(2)}`
-                        : String(c.minValue)}{' '}
-                      -{' '}
-                      {typeof c.maxValue === 'bigint' && c.maxValue > BigInt(10000)
-                        ? `${Number(c.maxValue).toExponential(2)}`
-                        : String(c.maxValue)}
-                    </>
-                  )}
-                </p>
-              </span>
-            );
-          })}
+          {criteria.map((c) => (
+            <span key={c.propertyType}>
+              <p className="font-semibold">{formatPropertyName(c.propertyType)}</p>
+              <p className="">
+                {c.checkBoolValue ? (
+                  `Required: ${c.boolValue}`
+                ) : c.checkStringValue ? (
+                  `Required: ${c.stringValue}`
+                ) : (
+                  <>
+                    Range:{' '}
+                    {typeof c.minValue === 'bigint' && c.minValue > BigInt(10000)
+                      ? `${Number(c.minValue).toExponential(2)}`
+                      : String(c.minValue)}{' '}
+                    -{' '}
+                    {typeof c.maxValue === 'bigint' && c.maxValue > BigInt(10000)
+                      ? `${Number(c.maxValue).toExponential(2)}`
+                      : String(c.maxValue)}
+                  </>
+                )}
+              </p>
+            </span>
+          ))}
         </div>
       </TooltipContent>
     </Tooltip>
