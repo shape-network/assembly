@@ -126,6 +126,7 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
                   </Button>
                 )}
               </div>
+
               <div className="flex flex-wrap gap-1">
                 {requiredBlueprints.map((component, i) => {
                   const isOwned = isElementOwned(component.name);
@@ -310,16 +311,18 @@ const CraftItemButton: FC<{
   } = useWaitForTransactionReceipt({ hash, query: { enabled: !!hash } });
   useEffect(() => {
     if (hash && isTxConfirming) {
-      toast.loading('Item is being crafted...');
+      toast.loading('Item is being crafted...', { id: 'loading' });
     }
 
     if (isTxConfirmed) {
       toast.success(`${item.name} crafted successfully!`);
+      toast.dismiss('loading');
       refetchOtomItems();
     }
 
     if (isTxError) {
       toast.error(`An error occurred while crafting ${item.name}, please try again.`);
+      toast.dismiss('loading');
     }
   }, [hash, refetchOtomItems, isTxConfirming, isTxConfirmed, isTxError, item.name]);
 
@@ -433,17 +436,14 @@ const VariableDropZone: FC<{
           ref={setNodeRef}
           className={cn(
             'relative py-0 transition-colors',
-            droppedItem && 'border-primary font-semibold',
+            droppedItem
+              ? 'bg-primary border-primary font-semibold text-white'
+              : 'text-muted-foreground/40',
             isOver && canDrop && 'ring-primary ring-2 ring-offset-2',
             isOver && !canDrop && 'ring-destructive ring-2 ring-offset-2'
           )}
         >
-          <CardContent
-            className={cn(
-              'grid size-15 place-items-center px-0',
-              droppedItem ? 'text-primary' : 'text-muted-foreground/40'
-            )}
-          >
+          <CardContent className="grid size-15 place-items-center px-0">
             {droppedItem ? droppedItem.name : <LightningBoltIcon className="size-4" />}
           </CardContent>
         </Card>
