@@ -75,13 +75,12 @@ const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedRequiredIt
     );
     const groups = new Map<string, GroupedOtomItems>();
     for (const item of filteredInventory) {
-      const name = item.name;
-      if (groups.has(name)) {
-        const group = groups.get(name)!;
+      if (groups.has(item.tokenId)) {
+        const group = groups.get(item.tokenId)!;
         group.count++;
         group.allItems.push(item);
       } else {
-        groups.set(name, {
+        groups.set(item.tokenId, {
           representativeItem: item,
           count: 1,
           allItems: [item],
@@ -126,7 +125,7 @@ const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedRequiredIt
         <ul className="flex flex-wrap items-start gap-2 rounded">
           {groupedInventory.map((group) => (
             <OtomItemCard
-              key={group.representativeItem.name}
+              key={group.representativeItem.tokenId}
               representativeItem={group.representativeItem}
               count={group.count}
               allItems={group.allItems}
