@@ -375,7 +375,7 @@ export const OwnedItemCard: FC<{ item: OwnedItem }> = ({ item }) => {
 
   return (
     <li>
-      <Card>
+      <Card className="h-full">
         <CardHeader>
           <CardTitle className="text-base">{item.name}</CardTitle>
         </CardHeader>
@@ -397,9 +397,9 @@ export const OwnedItemCard: FC<{ item: OwnedItem }> = ({ item }) => {
           <ItemTraits
             traits={[
               ...traits,
-              { name: 'Remaining Usages', value: item.usagesRemaining ?? 0 },
-              { name: 'Tier', value: item.tier ?? 0 },
-            ]}
+              { name: 'Remaining Usages', value: item.usagesRemaining ?? '?' },
+              item.tier ? { name: 'Tier', value: item.tier } : null,
+            ].filter(isNotNullish)}
           />
         </CardContent>
       </Card>
