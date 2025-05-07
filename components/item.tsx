@@ -375,10 +375,10 @@ export const OwnedItemCard: FC<{ item: Item }> = ({ item }) => {
     <li>
       <Card>
         <CardHeader>
-          <CardTitle>{item.name}</CardTitle>
+          <CardTitle className="text-base">{item.name}</CardTitle>
         </CardHeader>
 
-        <div className="relative h-40 w-full">
+        <div className="relative h-20 w-full">
           {item.defaultImageUri ? (
             <Image
               src={item.defaultImageUri}
@@ -387,13 +387,18 @@ export const OwnedItemCard: FC<{ item: Item }> = ({ item }) => {
               className="object-contain py-2"
             />
           ) : (
-            <Skeleton className="h-48 w-full" />
+            <Skeleton className="h-20 w-full" />
           )}
         </div>
 
         <CardContent className="flex flex-col gap-6">
-          <CardDescription className="text-center italic">{item.description}</CardDescription>
           <ItemTraits traits={item.initialTraits} />
+          <ItemTraits
+            traits={[
+              { name: 'Remaining Usages', value: 9 },
+              { name: 'Tier', value: 1 },
+            ]}
+          />
         </CardContent>
       </Card>
     </li>
