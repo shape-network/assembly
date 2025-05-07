@@ -72,7 +72,7 @@ export async function POST(request: Request) {
         });
 
         const itemResult = itemResponse.status === 'success' ? itemResponse.result : null;
-        const tierResult = tierResponse.status === 'success' ? tierResponse.result : 0;
+        const tierResult = tierResponse.status === 'success' ? tierResponse.result : null;
         const traitsResult = traitsResponse.status === 'success' ? traitsResponse.result : null;
 
         if (itemResult === null) {
