@@ -1,6 +1,10 @@
 'use client';
 
-import { useGetCraftableItems, useGetOtomItemsForUser } from '@/app/api/hooks';
+import {
+  useGetCraftableItems,
+  useGetMoleculesFromOtomTokenId,
+  useGetOtomItemsForUser,
+} from '@/app/api/hooks';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -8,8 +12,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useWriteAssemblyCoreContractCraftItem } from '@/generated';
 import { assemblyCore } from '@/lib/addresses';
 import { config } from '@/lib/config';
+import { isOtomAtom } from '@/lib/otoms';
 import { checkCriteria, formatPropertyName } from '@/lib/property-utils';
-import { BlueprintComponent, Item, OtomItem, Trait } from '@/lib/types';
+import { BlueprintComponent, Item, Molecule, OtomItem, Trait } from '@/lib/types';
 import { cn, isNotNullish } from '@/lib/utils';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
@@ -148,7 +153,7 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
               <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1">
-                    <p className="text-muted-foreground text-sm">Enhancements</p>
+                    <p className="text-muted-foreground text-sm">Wildcards</p>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <QuestionMarkCircledIcon className="text-muted-foreground/50 size-4" />
@@ -236,6 +241,10 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({
     )
   );
 
+  const mass =
+    representativeItem.giving_atoms.reduce((acc, atom) => acc + atom.mass, 0) +
+    representativeItem.receiving_atoms.reduce((acc, atom) => acc + atom.mass, 0);
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -255,7 +264,7 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({
           )}
         >
           <CardContent className="grid size-15 place-items-center px-0">
-            {representativeItem.name}
+            <ElementName otom={representativeItem} />
             {count > 1 && (
               <span className="text-muted-foreground bg-background absolute -top-2 -right-2 grid h-5 min-w-[20px] place-items-center rounded-full px-0.5 text-[10px] font-bold">
                 x{count}
@@ -269,9 +278,35 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({
         <p>Hardness: {representativeItem.hardness.toFixed(3)}</p>
         <p>Toughness: {representativeItem.toughness.toFixed(3)}</p>
         <p>Ductility: {representativeItem.ductility.toFixed(3)}</p>
-        <p>Mass: {representativeItem.giving_atoms.reduce((acc, atom) => acc + atom.mass, 0)}</p>
+        <p>Mass: {mass}</p>
       </TooltipContent>
     </Tooltip>
+  );
+};
+
+export const ElementName: FC<{ otom: OtomItem | Molecule; className?: string }> = ({
+  otom,
+  className,
+}) => {
+  const isAtom = isOtomAtom(otom);
+
+  return (
+    <p className={cn('select-none', className)}>
+      <span className="flex items-center">
+        {isAtom && (
+          <span className="mr-0.5 inline-block text-right text-xs">
+            <sup className="block leading-1.5 font-semibold">
+              {otom.giving_atoms[0].nucleus.nucleons}
+            </sup>
+            <sub className="block leading-1.5 font-semibold">
+              {otom.giving_atoms[0].nucleus.protons}
+            </sub>
+          </span>
+        )}
+
+        <span className="text-lg">{otom.name}</span>
+      </span>
+    </p>
   );
 };
 
@@ -340,10 +375,10 @@ export const OwnedItemCard: FC<{ item: Item }> = ({ item }) => {
     <li>
       <Card>
         <CardHeader>
-          <CardTitle>{item.name}</CardTitle>
+          <CardTitle className="text-base">{item.name}</CardTitle>
         </CardHeader>
 
-        <div className="relative h-40 w-full">
+        <div className="relative h-20 w-full">
           {item.defaultImageUri ? (
             <Image
               src={item.defaultImageUri}
@@ -352,13 +387,18 @@ export const OwnedItemCard: FC<{ item: Item }> = ({ item }) => {
               className="object-contain py-2"
             />
           ) : (
-            <Skeleton className="h-48 w-full" />
+            <Skeleton className="h-20 w-full" />
           )}
         </div>
 
         <CardContent className="flex flex-col gap-6">
-          <CardDescription className="text-center italic">{item.description}</CardDescription>
           <ItemTraits traits={item.initialTraits} />
+          <ItemTraits
+            traits={[
+              { name: 'Remaining Usages', value: 9 },
+              { name: 'Tier', value: 1 },
+            ]}
+          />
         </CardContent>
       </Card>
     </li>
@@ -394,6 +434,11 @@ const RequiredDropZone: FC<{
 
   const canDrop = active?.data.current?.name === component.name;
 
+  const { data: molecule } = useGetMoleculesFromOtomTokenId({
+    otomTokenId: String(component.itemIdOrOtomTokenId),
+    enabled: component.componentType === 'otom',
+  });
+
   return (
     <Card
       ref={setNodeRef}
@@ -408,7 +453,13 @@ const RequiredDropZone: FC<{
         isOver && !canDrop && 'ring-destructive ring-2 ring-offset-2'
       )}
     >
-      <CardContent className="grid size-15 place-items-center px-0">{component.name}</CardContent>
+      <CardContent className="grid size-15 place-items-center px-0">
+        {component.componentType === 'otom' && molecule ? (
+          <ElementName otom={molecule} />
+        ) : (
+          component.name
+        )}
+      </CardContent>
     </Card>
   );
 };

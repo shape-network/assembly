@@ -75,13 +75,14 @@ const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedRequiredIt
     );
     const groups = new Map<string, GroupedOtomItems>();
     for (const item of filteredInventory) {
-      const name = item.name;
-      if (groups.has(name)) {
-        const group = groups.get(name)!;
-        group.count++;
-        group.allItems.push(item);
+      if (groups.has(item.tokenId)) {
+        const group = groups.get(item.tokenId);
+        if (group) {
+          group.count++;
+          group.allItems.push(item);
+        }
       } else {
-        groups.set(name, {
+        groups.set(item.tokenId, {
           representativeItem: item,
           count: 1,
           allItems: [item],
@@ -126,7 +127,7 @@ const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedRequiredIt
         <ul className="flex flex-wrap items-start gap-2 rounded">
           {groupedInventory.map((group) => (
             <OtomItemCard
-              key={group.representativeItem.name}
+              key={group.representativeItem.tokenId}
               representativeItem={group.representativeItem}
               count={group.count}
               allItems={group.allItems}
@@ -162,11 +163,11 @@ const ItemsInventory: FC = () => {
     );
 
   return (
-    <BlueprintComponentsGrid>
+    <ul className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
       {data.map((item) => (
         <OwnedItemCard key={item.id} item={item} />
       ))}
-    </BlueprintComponentsGrid>
+    </ul>
   );
 };
 
@@ -364,6 +365,13 @@ export const HomeContent = () => {
               <div className="flex flex-col gap-16">
                 <div className="flex w-full flex-col gap-2">
                   <div className="flex items-baseline justify-between gap-2">
+                    <h2 className="text-primary font-bold tracking-wide uppercase">Owned Items</h2>
+                  </div>
+                  <ItemsInventory />
+                </div>
+
+                <div className="flex w-full flex-col gap-2">
+                  <div className="flex items-baseline justify-between gap-2">
                     <h2 className="text-primary font-bold tracking-wide uppercase">Owned otoms</h2>
                     <InlineLink
                       href={paths.otom}
@@ -372,14 +380,8 @@ export const HomeContent = () => {
                       Mine more otoms <ExternalLinkIcon className="size-4" />
                     </InlineLink>
                   </div>
-                  <OtomsInventory usedRequiredItems={usedRequiredItems} />
-                </div>
 
-                <div className="flex w-full flex-col gap-2">
-                  <div className="flex items-baseline justify-between gap-2">
-                    <h2 className="text-primary font-bold tracking-wide uppercase">Owned Items</h2>
-                  </div>
-                  <ItemsInventory />
+                  <OtomsInventory usedRequiredItems={usedRequiredItems} />
                 </div>
               </div>
             ) : (

@@ -1,4 +1,10 @@
-import { Atom, Molecule, SolidityCompatibleAtom, SolidityCompatibleMolecule } from '@/lib/types';
+import {
+  Atom,
+  Molecule,
+  OtomItem,
+  SolidityCompatibleAtom,
+  SolidityCompatibleMolecule,
+} from '@/lib/types';
 import { encodeAbiParameters, formatUnits, keccak256, parseAbiParameters } from 'viem';
 
 export function moleculeIdToTokenId(moleculeId: string) {
@@ -12,6 +18,7 @@ export function solidityMoleculeToMolecule(molecule: SolidityCompatibleMolecule)
     id: molecule.id,
     name: molecule.name,
     giving_atoms: molecule.givingAtoms.map(solidityAtomToAtom),
+    receiving_atoms: molecule.receivingAtoms.map(solidityAtomToAtom),
     electrical_conductivity: fromWad(molecule.electricalConductivity),
     thermal_conductivity: fromWad(molecule.thermalConductivity),
     toughness: fromWad(molecule.toughness),
@@ -52,4 +59,8 @@ function solidityAtomToAtom(a: SolidityCompatibleAtom): Atom {
     metallic: a.metallic,
     pt_pos: [fromWad(a.periodicTableX), fromWad(a.periodicTableY)],
   };
+}
+
+export function isOtomAtom(otom: OtomItem | Molecule): boolean {
+  return (otom.giving_atoms?.length ?? 0) + (otom.receiving_atoms?.length ?? 0) === 1;
 }
