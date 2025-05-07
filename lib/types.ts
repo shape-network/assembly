@@ -154,6 +154,7 @@ export type Molecule = {
   id: string;
   name: string;
   giving_atoms: Atom[];
+  receiving_atoms: Atom[];
   electrical_conductivity: number;
   thermal_conductivity: number;
   toughness: number;
