@@ -76,9 +76,11 @@ const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedRequiredIt
     const groups = new Map<string, GroupedOtomItems>();
     for (const item of filteredInventory) {
       if (groups.has(item.tokenId)) {
-        const group = groups.get(item.tokenId)!;
-        group.count++;
-        group.allItems.push(item);
+        const group = groups.get(item.tokenId);
+        if (group) {
+          group.count++;
+          group.allItems.push(item);
+        }
       } else {
         groups.set(item.tokenId, {
           representativeItem: item,
