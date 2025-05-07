@@ -161,11 +161,11 @@ const ItemsInventory: FC = () => {
     );
 
   return (
-    <BlueprintComponentsGrid>
+    <ul className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
       {data.map((item) => (
         <OwnedItemCard key={item.id} item={item} />
       ))}
-    </BlueprintComponentsGrid>
+    </ul>
   );
 };
 
@@ -363,6 +363,13 @@ export const HomeContent = () => {
               <div className="flex flex-col gap-16">
                 <div className="flex w-full flex-col gap-2">
                   <div className="flex items-baseline justify-between gap-2">
+                    <h2 className="text-primary font-bold tracking-wide uppercase">Owned Items</h2>
+                  </div>
+                  <ItemsInventory />
+                </div>
+
+                <div className="flex w-full flex-col gap-2">
+                  <div className="flex items-baseline justify-between gap-2">
                     <h2 className="text-primary font-bold tracking-wide uppercase">Owned otoms</h2>
                     <InlineLink
                       href={paths.otom}
@@ -371,14 +378,8 @@ export const HomeContent = () => {
                       Mine more otoms <ExternalLinkIcon className="size-4" />
                     </InlineLink>
                   </div>
-                  <OtomsInventory usedRequiredItems={usedRequiredItems} />
-                </div>
 
-                <div className="flex w-full flex-col gap-2">
-                  <div className="flex items-baseline justify-between gap-2">
-                    <h2 className="text-primary font-bold tracking-wide uppercase">Owned Items</h2>
-                  </div>
-                  <ItemsInventory />
+                  <OtomsInventory usedRequiredItems={usedRequiredItems} />
                 </div>
               </div>
             ) : (
