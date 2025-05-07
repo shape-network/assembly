@@ -2,6 +2,7 @@ import { assemblyCoreContractAbi } from '@/generated';
 import { assemblyCore, assemblyItems } from '@/lib/addresses';
 import { alchemy, rpcClient } from '@/lib/clients';
 import { config } from '@/lib/config';
+import { ItemType, OwnedItem } from '@/lib/types';
 import { NextResponse } from 'next/server';
 import superjson from 'superjson';
 import { isAddress } from 'viem';
@@ -28,33 +29,87 @@ export async function POST(request: Request) {
   });
 
   const rpc = rpcClient();
-  const itemIds = await Promise.all(
-    nfts.ownedNfts.map(async (nft) => {
-      const itemId = await rpc.readContract({
-        abi: assemblyCoreContractAbi,
-        address: assemblyCore[config.chainId],
-        functionName: 'getItemIdForToken',
-        args: [BigInt(nft.tokenId)],
-      });
-
-      return itemId;
-    })
-  );
 
   const items = await Promise.all(
-    itemIds.map(async (itemId) => {
-      const item = await rpc.readContract({
-        abi: assemblyCoreContractAbi,
-        address: assemblyCore[config.chainId],
-        functionName: 'getItemByItemId',
-        args: [itemId],
-      });
+    nfts.ownedNfts.map(async (nft) => {
+      try {
+        const nftTokenId = BigInt(nft.tokenId);
 
-      return { ...item, initialTraits: [] };
+        const itemId = await rpc.readContract({
+          abi: assemblyCoreContractAbi,
+          address: assemblyCore[config.chainId],
+          functionName: 'getItemIdForToken',
+          args: [nftTokenId],
+        });
+
+        if (itemId === null || typeof itemId === 'undefined') {
+          console.warn(`Could not get itemId for token ${nft.tokenId}`);
+          return null;
+        }
+
+        const [itemResponse, tierResponse, traitsResponse] = await rpc.multicall({
+          contracts: [
+            {
+              abi: assemblyCoreContractAbi,
+              address: assemblyCore[config.chainId],
+              functionName: 'getItemByItemId',
+              args: [itemId],
+            },
+            {
+              abi: assemblyCoreContractAbi,
+              address: assemblyCore[config.chainId],
+              functionName: 'nonFungibleTokenToTier',
+              args: [nftTokenId],
+            },
+            {
+              abi: assemblyCoreContractAbi,
+              address: assemblyCore[config.chainId],
+              functionName: 'getTokenTraits',
+              args: [nftTokenId],
+            },
+          ],
+          allowFailure: true,
+        });
+
+        const itemResult = itemResponse.status === 'success' ? itemResponse.result : null;
+        const tierResult = tierResponse.status === 'success' ? tierResponse.result : null;
+        const traitsResult = traitsResponse.status === 'success' ? traitsResponse.result : null;
+
+        if (itemResult === null) {
+          console.error(
+            `An error occurred while fetching item ${nft.tokenId}:`,
+            itemResponse.error
+          );
+          return null;
+        }
+
+        const tier = Number(tierResult);
+        const usagesTrait = traitsResult?.find((trait) => trait.typeName === 'Usages Remaining');
+        const usagesRemaining = usagesTrait ? Number(usagesTrait.valueNumber) : null;
+
+        return {
+          ...itemResult,
+          blueprint: [],
+          itemType: itemResult.itemType as ItemType,
+          tokenId: nft.tokenId,
+          tier,
+          usagesRemaining,
+          initialTraits: traitsResult
+            ? traitsResult?.map((t) => ({
+                name: t.typeName,
+                value: t.valueString ?? t.valueNumber.toString(),
+              }))
+            : [],
+        };
+      } catch (e) {
+        console.error(e);
+        return null;
+      }
     })
   );
 
-  const serialized = superjson.stringify(items);
+  const filteredItems: OwnedItem[] = items.filter((item) => item !== null);
+  const serialized = superjson.stringify(filteredItems);
 
   return NextResponse.json(serialized);
 }

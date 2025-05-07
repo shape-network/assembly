@@ -163,7 +163,7 @@ const ItemsInventory: FC = () => {
     );
 
   return (
-    <ul className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
+    <ul className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-2">
       {data.map((item) => (
         <OwnedItemCard key={item.id} item={item} />
       ))}

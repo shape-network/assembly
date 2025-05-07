@@ -14,7 +14,7 @@ import { assemblyCore } from '@/lib/addresses';
 import { config } from '@/lib/config';
 import { isOtomAtom } from '@/lib/otoms';
 import { checkCriteria, formatPropertyName } from '@/lib/property-utils';
-import { BlueprintComponent, Item, Molecule, OtomItem, Trait } from '@/lib/types';
+import { BlueprintComponent, Item, Molecule, OtomItem, OwnedItem, Trait } from '@/lib/types';
 import { cn, isNotNullish } from '@/lib/utils';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
@@ -370,10 +370,12 @@ const CraftItemButton: FC<{
   );
 };
 
-export const OwnedItemCard: FC<{ item: Item }> = ({ item }) => {
+export const OwnedItemCard: FC<{ item: OwnedItem }> = ({ item }) => {
+  const traits = item.initialTraits.filter((t) => t.name !== 'Usages Remaining');
+
   return (
     <li>
-      <Card>
+      <Card className="h-full">
         <CardHeader>
           <CardTitle className="text-base">{item.name}</CardTitle>
         </CardHeader>
@@ -392,12 +394,12 @@ export const OwnedItemCard: FC<{ item: Item }> = ({ item }) => {
         </div>
 
         <CardContent className="flex flex-col gap-6">
-          <ItemTraits traits={item.initialTraits} />
           <ItemTraits
             traits={[
-              { name: 'Remaining Usages', value: 9 },
-              { name: 'Tier', value: 1 },
-            ]}
+              ...traits,
+              { name: 'Remaining Usages', value: item.usagesRemaining ?? '?' },
+              item.tier ? { name: 'Tier', value: item.tier } : null,
+            ].filter(isNotNullish)}
           />
         </CardContent>
       </Card>
@@ -531,7 +533,7 @@ const VariableDropZone: FC<{
 };
 
 export const BlueprintComponentsGrid: FC<PropsWithChildren> = ({ children }) => {
-  return <ul className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-8">{children}</ul>;
+  return <ul className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2">{children}</ul>;
 };
 
 function getRequiredDropZoneId(itemId: bigint | string, index: number): string {
