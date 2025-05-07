@@ -2,7 +2,7 @@
 
 import { getMoleculesByIds } from '@/app/api/fetchers';
 import { paths } from '@/lib/paths';
-import { Item, Molecule, OtomItem } from '@/lib/types';
+import { Item, Molecule, OtomItem, OwnedItem } from '@/lib/types';
 import { useQuery } from '@tanstack/react-query';
 import superjson from 'superjson';
 import { useAccount } from 'wagmi';
@@ -45,7 +45,7 @@ export function useGetCraftableItems() {
 export function useGetItemsForUser() {
   const { address } = useAccount();
 
-  return useQuery<Item[]>({
+  return useQuery<OwnedItem[]>({
     queryKey: ['items', address],
     queryFn: async () => {
       const response = await fetch(paths.api.ownedItems, {

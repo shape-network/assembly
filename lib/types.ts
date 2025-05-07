@@ -50,6 +50,12 @@ export type Item = {
   defaultImageUri: string;
 };
 
+export type OwnedItem = Item & {
+  tokenId: string;
+  tier: number | null;
+  usagesRemaining: number | null;
+};
+
 export type Trait = { name: string; value: string | number };
 
 export type OtomItem = Molecule & {
