@@ -184,8 +184,8 @@ const ItemsToCraftSkeleton: FC = () => {
   return (
     <ul className="flex gap-2">
       {Array.from({ length: 4 }).map((_, index) => (
-        <li key={index} className="w-full sm:w-sm">
-          <Skeleton className="h-96 w-full" />
+        <li key={index} className="w-xs flex-shrink-0 sm:w-sm">
+          <Skeleton className="h-[578px] w-full" />
         </li>
       ))}
     </ul>
