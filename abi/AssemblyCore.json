@@ -1,9 +1,9 @@
 {
   "abi": [
     { "inputs": [], "stateMutability": "nonpayable", "type": "constructor" },
+    { "inputs": [], "name": "CraftBlocked", "type": "error" },
     { "inputs": [], "name": "CreationDisabled", "type": "error" },
     { "inputs": [], "name": "CriteriaNotMet", "type": "error" },
-    { "inputs": [], "name": "EmptyBlueprint", "type": "error" },
     { "inputs": [], "name": "InsufficientItemBalance", "type": "error" },
     {
       "inputs": [
@@ -50,18 +50,21 @@
       "name": "InvalidTier",
       "type": "error"
     },
+    { "inputs": [], "name": "InvalidTraitType", "type": "error" },
     { "inputs": [], "name": "InvalidTraits", "type": "error" },
+    { "inputs": [], "name": "ItemAlreadyFrozen", "type": "error" },
     { "inputs": [], "name": "ItemDoesNotExist", "type": "error" },
     {
       "inputs": [{ "internalType": "uint256", "name": "itemId", "type": "uint256" }],
       "name": "ItemIsFrozen",
       "type": "error"
     },
+    { "inputs": [], "name": "MissingItemId", "type": "error" },
+    { "inputs": [], "name": "MissmatchItemType", "type": "error" },
+    { "inputs": [], "name": "MutatorBlockedTransfer", "type": "error" },
     { "inputs": [], "name": "MutatorFailed", "type": "error" },
     { "inputs": [], "name": "NotAdmin", "type": "error" },
     { "inputs": [], "name": "NotInitializing", "type": "error" },
-    { "inputs": [], "name": "NotOperator", "type": "error" },
-    { "inputs": [], "name": "NotOtomItems", "type": "error" },
     {
       "inputs": [
         { "internalType": "address", "name": "msgSender", "type": "address" },
@@ -83,7 +86,6 @@
       "type": "error"
     },
     { "inputs": [], "name": "PaymentFailed", "type": "error" },
-    { "inputs": [], "name": "PaymentNotRequired", "type": "error" },
     { "inputs": [], "name": "ReentrancyGuardReentrantCall", "type": "error" },
     { "inputs": [], "name": "RefundFailed", "type": "error" },
     { "inputs": [], "name": "TraitNotFound", "type": "error" },
@@ -197,15 +199,6 @@
     {
       "anonymous": false,
       "inputs": [
-        { "indexed": true, "internalType": "address", "name": "operator", "type": "address" },
-        { "indexed": true, "internalType": "bool", "name": "isActive", "type": "bool" }
-      ],
-      "name": "OperatorSet",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
         { "indexed": true, "internalType": "address", "name": "otomItems", "type": "address" }
       ],
       "name": "OtomItemsSet",
@@ -269,20 +262,6 @@
     },
     {
       "inputs": [
-        { "internalType": "uint256", "name": "", "type": "uint256" },
-        { "internalType": "uint256", "name": "", "type": "uint256" }
-      ],
-      "name": "_nonFungibleTokenToActualBlueprint",
-      "outputs": [
-        { "internalType": "enum ComponentType", "name": "componentType", "type": "uint8" },
-        { "internalType": "uint256", "name": "itemIdOrOtomTokenId", "type": "uint256" },
-        { "internalType": "uint256", "name": "amount", "type": "uint256" }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
         { "internalType": "uint256", "name": "_itemId", "type": "uint256" },
         { "internalType": "uint256", "name": "_amount", "type": "uint256" },
         { "internalType": "address", "name": "_owner", "type": "address" }
@@ -296,8 +275,9 @@
       "inputs": [
         { "internalType": "uint256", "name": "_itemId", "type": "uint256" },
         { "internalType": "uint256", "name": "_amount", "type": "uint256" },
-        { "internalType": "uint256[]", "name": "variableOtomIds", "type": "uint256[]" },
-        { "internalType": "uint256[]", "name": "nonFungibleTokenIds", "type": "uint256[]" }
+        { "internalType": "uint256[]", "name": "_variableOtomIds", "type": "uint256[]" },
+        { "internalType": "uint256[]", "name": "_nonFungibleTokenIds", "type": "uint256[]" },
+        { "internalType": "bytes", "name": "_data", "type": "bytes" }
       ],
       "name": "craftItem",
       "outputs": [],
@@ -552,7 +532,6 @@
     {
       "inputs": [
         { "internalType": "address", "name": "_otomsAddress", "type": "address" },
-        { "internalType": "address", "name": "_otomsDatabaseAddress", "type": "address" },
         { "internalType": "address", "name": "_otomsValidationAddress", "type": "address" }
       ],
       "name": "initialize",
@@ -597,24 +576,6 @@
       "type": "function"
     },
     {
-      "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-      "name": "items",
-      "outputs": [
-        { "internalType": "uint256", "name": "id", "type": "uint256" },
-        { "internalType": "string", "name": "name", "type": "string" },
-        { "internalType": "string", "name": "description", "type": "string" },
-        { "internalType": "address", "name": "creator", "type": "address" },
-        { "internalType": "address", "name": "admin", "type": "address" },
-        { "internalType": "string", "name": "defaultImageUri", "type": "string" },
-        { "internalType": "enum ItemType", "name": "itemType", "type": "uint8" },
-        { "internalType": "address", "name": "mutatorContract", "type": "address" },
-        { "internalType": "uint256", "name": "ethCostInWei", "type": "uint256" },
-        { "internalType": "address", "name": "feeRecipient", "type": "address" }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
       "inputs": [],
       "name": "nextItemId",
       "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
@@ -655,16 +616,21 @@
     },
     {
       "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-      "name": "nonFungibleTokenToItemId",
+      "name": "nonFungibleTokenToTier",
       "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
       "stateMutability": "view",
       "type": "function"
     },
     {
-      "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-      "name": "nonFungibleTokenToTier",
-      "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
-      "stateMutability": "view",
+      "inputs": [
+        { "internalType": "address", "name": "_from", "type": "address" },
+        { "internalType": "address", "name": "_to", "type": "address" },
+        { "internalType": "uint256[]", "name": "_ids", "type": "uint256[]" },
+        { "internalType": "uint256[]", "name": "_values", "type": "uint256[]" }
+      ],
+      "name": "onUpdate",
+      "outputs": [],
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -678,13 +644,6 @@
       "inputs": [],
       "name": "otoms",
       "outputs": [{ "internalType": "contract IOtomsV2", "name": "", "type": "address" }],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "otomsDatabase",
-      "outputs": [{ "internalType": "contract IOtomsDatabaseV2", "name": "", "type": "address" }],
       "stateMutability": "view",
       "type": "function"
     },
