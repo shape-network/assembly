@@ -9,11 +9,11 @@ import { InlineLink } from '@/components/ui/link';
 import { Skeleton } from '@/components/ui/skeleton';
 import { WalletConnect } from '@/components/wallet-connect';
 import { paths } from '@/lib/paths';
-import { OtomItem } from '@/lib/types';
-import { DndContext, DragEndEvent } from '@dnd-kit/core';
+import type { OtomItem } from '@/lib/types';
+import { DndContext, type DragEndEvent } from '@dnd-kit/core';
 import { ExternalLinkIcon } from '@radix-ui/react-icons';
 import Link from 'next/link';
-import { FC, useDeferredValue, useMemo, useState } from 'react';
+import { type FC, useDeferredValue, useMemo, useState } from 'react';
 import { useAccount } from 'wagmi';
 
 const ItemsToCraft: FC<{
@@ -33,21 +33,20 @@ const ItemsToCraft: FC<{
   }
 
   return (
-    <div className="w-full overflow-hidden">
+    <div className="w-full">
       <div className="overflow-x-auto">
         <ul className="flex flex-nowrap gap-2 pb-4">
           {data.map((item) => {
             const droppedItemsForThisCard = droppedItemsState[String(item.id)] || {};
             return (
-              <li key={item.id} className="flex-shrink-0">
-                <ItemToCraftCard
-                  item={item}
-                  droppedVariableItems={droppedItemsForThisCard}
-                  onDropVariable={onDrop}
-                  droppedOnRequiredSlots={droppedOnRequiredSlots}
-                  onClearRequired={onClearRequired}
-                />
-              </li>
+              <ItemToCraftCard
+                key={item.id}
+                item={item}
+                droppedVariableItems={droppedItemsForThisCard}
+                onDropVariable={onDrop}
+                droppedOnRequiredSlots={droppedOnRequiredSlots}
+                onClearRequired={onClearRequired}
+              />
             );
           })}
         </ul>
@@ -340,10 +339,10 @@ export const HomeContent = () => {
         </div>
       </header>
 
-      <main className="flex flex-col justify-start gap-8 py-12">
+      <main className="flex flex-col justify-start gap-8 overflow-x-hidden py-12">
         <DndContext onDragEnd={handleDragEnd}>
           <div className="flex flex-col gap-16">
-            <div className="flex flex-col gap-2 overflow-hidden">
+            <div className="flex flex-col gap-2">
               <div className="flex items-baseline justify-between gap-2">
                 <h2 className="text-primary font-bold tracking-wide uppercase">Items to craft</h2>
                 <InlineLink
