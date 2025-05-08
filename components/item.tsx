@@ -20,7 +20,7 @@ import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { LightningBoltIcon, QuestionMarkCircledIcon } from '@radix-ui/react-icons';
 import Image from 'next/image';
-import { FC, PropsWithChildren, useEffect } from 'react';
+import { FC, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useAccount, useWaitForTransactionReceipt } from 'wagmi';
 
@@ -82,7 +82,7 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
   }
 
   return (
-    <li className="grid grid-rows-[1fr_auto] gap-1">
+    <li className="grid w-[300px] shrink-0 grid-rows-[1fr_auto] gap-1">
       <Card className="relative w-full">
         {isCraftable && address && (
           <CraftItemButton
@@ -107,7 +107,7 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
                   className="object-contain py-2"
                 />
               ) : (
-                <Skeleton className="h-48 w-full" />
+                <Skeleton className="h-40 w-full" />
               )}
             </div>
 
@@ -374,13 +374,13 @@ export const OwnedItemCard: FC<{ item: OwnedItem }> = ({ item }) => {
   const traits = item.initialTraits.filter((t) => t.name !== 'Usages Remaining');
 
   return (
-    <li>
+    <li className="w-xs shrink-0 sm:w-[300px]">
       <Card className="h-full">
         <CardHeader>
-          <CardTitle className="text-base">{item.name}</CardTitle>
+          <CardTitle>{item.name}</CardTitle>
         </CardHeader>
 
-        <div className="relative h-20 w-full">
+        <div className="relative h-40 w-full">
           {item.defaultImageUri ? (
             <Image
               src={item.defaultImageUri}
@@ -389,7 +389,7 @@ export const OwnedItemCard: FC<{ item: OwnedItem }> = ({ item }) => {
               className="object-contain py-2"
             />
           ) : (
-            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-40 w-full" />
           )}
         </div>
 
@@ -532,10 +532,16 @@ const VariableDropZone: FC<{
   );
 };
 
-export const BlueprintComponentsGrid: FC<PropsWithChildren> = ({ children }) => {
-  return <ul className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2">{children}</ul>;
-};
-
 function getRequiredDropZoneId(itemId: bigint | string, index: number): string {
   return `required-${itemId}-${index}`;
 }
+
+export const HorizontallScrollWrapper: FC<{ children: React.ReactNode }> = ({ children }) => {
+  return (
+    <div className="w-full">
+      <div className="overflow-x-auto">
+        <ul className="flex flex-nowrap gap-2 pb-4">{children}</ul>
+      </div>
+    </div>
+  );
+};

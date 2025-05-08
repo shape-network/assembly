@@ -2,7 +2,7 @@
 
 import { useGetCraftableItems, useGetItemsForUser, useGetOtomItemsForUser } from '@/app/api/hooks';
 import {
-  BlueprintComponentsGrid,
+  HorizontallScrollWrapper,
   ItemToCraftCard,
   OtomItemCard,
   OwnedItemCard,
@@ -11,14 +11,16 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { InlineLink } from '@/components/ui/link';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { WalletConnect } from '@/components/wallet-connect';
 import { paths } from '@/lib/paths';
-import { OtomItem } from '@/lib/types';
-import { DndContext, DragEndEvent } from '@dnd-kit/core';
+import type { OtomItem } from '@/lib/types';
+import { DndContext, type DragEndEvent } from '@dnd-kit/core';
 import { ExternalLinkIcon } from '@radix-ui/react-icons';
 import Link from 'next/link';
-import { FC, useDeferredValue, useMemo, useState } from 'react';
+import { type FC, useDeferredValue, useMemo, useState } from 'react';
 import { useAccount } from 'wagmi';
 
 const ItemsToCraft: FC<{
@@ -38,7 +40,7 @@ const ItemsToCraft: FC<{
   }
 
   return (
-    <BlueprintComponentsGrid>
+    <HorizontallScrollWrapper>
       {data.map((item) => {
         const droppedItemsForThisCard = droppedItemsState[String(item.id)] || {};
         return (
@@ -52,7 +54,7 @@ const ItemsToCraft: FC<{
           />
         );
       })}
-    </BlueprintComponentsGrid>
+    </HorizontallScrollWrapper>
   );
 };
 
@@ -101,44 +103,46 @@ const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedRequiredIt
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      {!rawInventory ||
-        (rawInventory.length === 0 && (
-          <div className="grid place-items-center gap-4 py-12">
-            <p>No otoms found in your wallet.</p>
-            <Button asChild>
-              <a href={paths.otom} target="_blank" rel="noopener noreferrer">
-                Get otoms
-              </a>
-            </Button>
-          </div>
-        ))}
-
-      <Input
-        type="search"
-        placeholder="Search owned otoms (eg Ju)"
-        className="h-9 max-w-xs"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        disabled={!rawInventory || rawInventory.length === 0}
-      />
-
-      {groupedInventory.length > 0 ? (
-        <ul className="flex flex-wrap items-start gap-2 rounded">
-          {groupedInventory.map((group) => (
-            <OtomItemCard
-              key={group.representativeItem.tokenId}
-              representativeItem={group.representativeItem}
-              count={group.count}
-              allItems={group.allItems}
-              usedTokenIds={usedRequiredItems}
-            />
+    <ScrollArea className="h-full max-h-[50vh] sm:max-h-[36vh]">
+      <div className="flex flex-col gap-4">
+        {!rawInventory ||
+          (rawInventory.length === 0 && (
+            <div className="grid place-items-center gap-4 py-12">
+              <p>No otoms found in your wallet.</p>
+              <Button asChild>
+                <a href={paths.otom} target="_blank" rel="noopener noreferrer">
+                  Get otoms
+                </a>
+              </Button>
+            </div>
           ))}
-        </ul>
-      ) : (
-        <p className="text-muted-foreground py-4 text-sm">{`No otoms found matching "${deferredSearchTerm}".`}</p>
-      )}
-    </div>
+
+        <Input
+          type="search"
+          placeholder="Search owned otoms (eg Ju)"
+          className="h-9 max-w-xs"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          disabled={!rawInventory || rawInventory.length === 0}
+        />
+
+        {groupedInventory.length > 0 ? (
+          <ul className="flex flex-wrap items-start gap-2 rounded">
+            {groupedInventory.map((group) => (
+              <OtomItemCard
+                key={group.representativeItem.tokenId}
+                representativeItem={group.representativeItem}
+                count={group.count}
+                allItems={group.allItems}
+                usedTokenIds={usedRequiredItems}
+              />
+            ))}
+          </ul>
+        ) : (
+          <p className="text-muted-foreground py-4 text-sm">{`No otoms found matching "${deferredSearchTerm}".`}</p>
+        )}
+      </div>
+    </ScrollArea>
   );
 };
 
@@ -146,7 +150,7 @@ const ItemsInventory: FC = () => {
   const { data, isLoading, isError } = useGetItemsForUser();
 
   if (isLoading) {
-    return <InventorySkeleton />;
+    return <ItemsToCraftSkeleton />;
   }
 
   if (isError) {
@@ -163,11 +167,11 @@ const ItemsInventory: FC = () => {
     );
 
   return (
-    <ul className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-2">
+    <HorizontallScrollWrapper>
       {data.map((item) => (
         <OwnedItemCard key={item.id} item={item} />
       ))}
-    </ul>
+    </HorizontallScrollWrapper>
   );
 };
 
@@ -183,13 +187,13 @@ const InventorySkeleton: FC = () => {
 
 const ItemsToCraftSkeleton: FC = () => {
   return (
-    <BlueprintComponentsGrid>
+    <HorizontallScrollWrapper>
       {Array.from({ length: 4 }).map((_, index) => (
-        <li key={index}>
-          <Skeleton className="h-96 w-full" />
+        <li key={index} className="w-xs flex-shrink-0 sm:w-[300px]">
+          <Skeleton className="h-[578px] w-full" />
         </li>
       ))}
-    </BlueprintComponentsGrid>
+    </HorizontallScrollWrapper>
   );
 };
 
@@ -340,49 +344,53 @@ export const HomeContent = () => {
         </div>
       </header>
 
-      <main className="flex flex-col justify-start gap-8 py-12">
+      <main className="flex flex-col justify-start gap-8 overflow-x-hidden py-12">
         <DndContext onDragEnd={handleDragEnd}>
           <div className="flex flex-col gap-16">
             <div className="flex flex-col gap-2">
-              <div className="flex items-baseline justify-between gap-2">
-                <h2 className="text-primary font-bold tracking-wide uppercase">Items to craft</h2>
-                <InlineLink
-                  href={paths.repo}
-                  className="text-muted-foreground/50 text-sm no-underline hover:underline"
-                >
-                  Propose your own <ExternalLinkIcon className="size-4" />
-                </InlineLink>
-              </div>
-              <ItemsToCraft
-                droppedItemsState={droppedItemsState}
-                onDrop={handleDrop}
-                droppedOnRequiredSlots={droppedOnRequiredSlots}
-                onClearRequired={handleClearRequired}
-              />
+              <Tabs defaultValue="items-to-craft">
+                <div className="flex items-baseline justify-between gap-2">
+                  <TabsList>
+                    <TabsTrigger value="items-to-craft">Items to craft</TabsTrigger>
+                    <TabsTrigger value="owned-otoms">Owned Items</TabsTrigger>
+                  </TabsList>
+
+                  <InlineLink
+                    href={paths.repo}
+                    className="text-muted-foreground/50 text-sm no-underline hover:underline"
+                  >
+                    Propose your own <ExternalLinkIcon className="size-4" />
+                  </InlineLink>
+                </div>
+
+                <TabsContent value="items-to-craft">
+                  <ItemsToCraft
+                    droppedItemsState={droppedItemsState}
+                    onDrop={handleDrop}
+                    droppedOnRequiredSlots={droppedOnRequiredSlots}
+                    onClearRequired={handleClearRequired}
+                  />
+                </TabsContent>
+
+                <TabsContent value="owned-otoms">
+                  <ItemsInventory />
+                </TabsContent>
+              </Tabs>
             </div>
 
             {address ? (
-              <div className="flex flex-col gap-16">
-                <div className="flex w-full flex-col gap-2">
-                  <div className="flex items-baseline justify-between gap-2">
-                    <h2 className="text-primary font-bold tracking-wide uppercase">Owned Items</h2>
-                  </div>
-                  <ItemsInventory />
+              <div className="flex w-full flex-col gap-2">
+                <div className="flex items-baseline justify-between gap-2">
+                  <h2 className="text-primary font-bold tracking-wide uppercase">Owned otoms</h2>
+                  <InlineLink
+                    href={paths.otom}
+                    className="text-muted-foreground/50 text-sm no-underline hover:underline"
+                  >
+                    Mine more otoms <ExternalLinkIcon className="size-4" />
+                  </InlineLink>
                 </div>
 
-                <div className="flex w-full flex-col gap-2">
-                  <div className="flex items-baseline justify-between gap-2">
-                    <h2 className="text-primary font-bold tracking-wide uppercase">Owned otoms</h2>
-                    <InlineLink
-                      href={paths.otom}
-                      className="text-muted-foreground/50 text-sm no-underline hover:underline"
-                    >
-                      Mine more otoms <ExternalLinkIcon className="size-4" />
-                    </InlineLink>
-                  </div>
-
-                  <OtomsInventory usedRequiredItems={usedRequiredItems} />
-                </div>
+                <OtomsInventory usedRequiredItems={usedRequiredItems} />
               </div>
             ) : (
               <div className="flex w-full flex-col items-start gap-8">
