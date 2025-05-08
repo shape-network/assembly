@@ -103,29 +103,29 @@ const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedRequiredIt
   }
 
   return (
-    <ScrollArea className="h-full max-h-[50vh] sm:max-h-[36vh]">
-      <div className="flex flex-col gap-4">
-        {!rawInventory ||
-          (rawInventory.length === 0 && (
-            <div className="grid place-items-center gap-4 py-12">
-              <p>No otoms found in your wallet.</p>
-              <Button asChild>
-                <a href={paths.otom} target="_blank" rel="noopener noreferrer">
-                  Get otoms
-                </a>
-              </Button>
-            </div>
-          ))}
+    <div className="flex flex-col gap-4">
+      {!rawInventory ||
+        (rawInventory.length === 0 && (
+          <div className="grid place-items-center gap-4 py-12">
+            <p>No otoms found in your wallet.</p>
+            <Button asChild>
+              <a href={paths.otom} target="_blank" rel="noopener noreferrer">
+                Get otoms
+              </a>
+            </Button>
+          </div>
+        ))}
 
-        <Input
-          type="search"
-          placeholder="Search owned otoms (eg Ju)"
-          className="h-9 max-w-xs"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          disabled={!rawInventory || rawInventory.length === 0}
-        />
+      <Input
+        type="search"
+        placeholder="Search owned otoms (eg Ju)"
+        className="max-w-xs"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        disabled={!rawInventory || rawInventory.length === 0}
+      />
 
+      <ScrollArea className="h-full max-h-[50vh] sm:max-h-[36vh]">
         {groupedInventory.length > 0 ? (
           <ul className="flex flex-wrap items-start gap-2 rounded">
             {groupedInventory.map((group) => (
@@ -141,8 +141,8 @@ const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedRequiredIt
         ) : (
           <p className="text-muted-foreground py-4 text-sm">{`No otoms found matching "${deferredSearchTerm}".`}</p>
         )}
-      </div>
-    </ScrollArea>
+      </ScrollArea>
+    </div>
   );
 };
 
