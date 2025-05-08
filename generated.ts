@@ -11,9 +11,9 @@ import {
 
 export const assemblyCoreContractAbi = [
   { type: 'constructor', inputs: [], stateMutability: 'nonpayable' },
+  { type: 'error', inputs: [], name: 'CraftBlocked' },
   { type: 'error', inputs: [], name: 'CreationDisabled' },
   { type: 'error', inputs: [], name: 'CriteriaNotMet' },
-  { type: 'error', inputs: [], name: 'EmptyBlueprint' },
   { type: 'error', inputs: [], name: 'InsufficientItemBalance' },
   {
     type: 'error',
@@ -60,18 +60,21 @@ export const assemblyCoreContractAbi = [
     inputs: [{ name: 'tier', internalType: 'uint256', type: 'uint256' }],
     name: 'InvalidTier',
   },
+  { type: 'error', inputs: [], name: 'InvalidTraitType' },
   { type: 'error', inputs: [], name: 'InvalidTraits' },
+  { type: 'error', inputs: [], name: 'ItemAlreadyFrozen' },
   { type: 'error', inputs: [], name: 'ItemDoesNotExist' },
   {
     type: 'error',
     inputs: [{ name: 'itemId', internalType: 'uint256', type: 'uint256' }],
     name: 'ItemIsFrozen',
   },
+  { type: 'error', inputs: [], name: 'MissingItemId' },
+  { type: 'error', inputs: [], name: 'MissmatchItemType' },
+  { type: 'error', inputs: [], name: 'MutatorBlockedTransfer' },
   { type: 'error', inputs: [], name: 'MutatorFailed' },
   { type: 'error', inputs: [], name: 'NotAdmin' },
   { type: 'error', inputs: [], name: 'NotInitializing' },
-  { type: 'error', inputs: [], name: 'NotOperator' },
-  { type: 'error', inputs: [], name: 'NotOtomItems' },
   {
     type: 'error',
     inputs: [
@@ -93,7 +96,6 @@ export const assemblyCoreContractAbi = [
     name: 'OwnableUnauthorizedAccount',
   },
   { type: 'error', inputs: [], name: 'PaymentFailed' },
-  { type: 'error', inputs: [], name: 'PaymentNotRequired' },
   { type: 'error', inputs: [], name: 'ReentrancyGuardReentrantCall' },
   { type: 'error', inputs: [], name: 'RefundFailed' },
   { type: 'error', inputs: [], name: 'TraitNotFound' },
@@ -303,20 +305,6 @@ export const assemblyCoreContractAbi = [
     anonymous: false,
     inputs: [
       {
-        name: 'operator',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      { name: 'isActive', internalType: 'bool', type: 'bool', indexed: true },
-    ],
-    name: 'OperatorSet',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
         name: 'otomItems',
         internalType: 'address',
         type: 'address',
@@ -437,12 +425,17 @@ export const assemblyCoreContractAbi = [
     inputs: [
       { name: '_itemId', internalType: 'uint256', type: 'uint256' },
       { name: '_amount', internalType: 'uint256', type: 'uint256' },
-      { name: 'variableOtomIds', internalType: 'uint256[]', type: 'uint256[]' },
       {
-        name: 'nonFungibleTokenIds',
+        name: '_variableOtomIds',
         internalType: 'uint256[]',
         type: 'uint256[]',
       },
+      {
+        name: '_nonFungibleTokenIds',
+        internalType: 'uint256[]',
+        type: 'uint256[]',
+      },
+      { name: '_data', internalType: 'bytes', type: 'bytes' },
     ],
     name: 'craftItem',
     outputs: [],
@@ -758,11 +751,6 @@ export const assemblyCoreContractAbi = [
     inputs: [
       { name: '_otomsAddress', internalType: 'address', type: 'address' },
       {
-        name: '_otomsDatabaseAddress',
-        internalType: 'address',
-        type: 'address',
-      },
-      {
         name: '_otomsValidationAddress',
         internalType: 'address',
         type: 'address',
@@ -806,24 +794,6 @@ export const assemblyCoreContractAbi = [
     inputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
     name: 'itemMintCount',
     outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
-    name: 'items',
-    outputs: [
-      { name: 'id', internalType: 'uint256', type: 'uint256' },
-      { name: 'name', internalType: 'string', type: 'string' },
-      { name: 'description', internalType: 'string', type: 'string' },
-      { name: 'creator', internalType: 'address', type: 'address' },
-      { name: 'admin', internalType: 'address', type: 'address' },
-      { name: 'defaultImageUri', internalType: 'string', type: 'string' },
-      { name: 'itemType', internalType: 'enum ItemType', type: 'uint8' },
-      { name: 'mutatorContract', internalType: 'address', type: 'address' },
-      { name: 'ethCostInWei', internalType: 'uint256', type: 'uint256' },
-      { name: 'feeRecipient', internalType: 'address', type: 'address' },
-    ],
     stateMutability: 'view',
   },
   {
@@ -880,16 +850,21 @@ export const assemblyCoreContractAbi = [
   {
     type: 'function',
     inputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
-    name: 'nonFungibleTokenToItemId',
+    name: 'nonFungibleTokenToTier',
     outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
     stateMutability: 'view',
   },
   {
     type: 'function',
-    inputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
-    name: 'nonFungibleTokenToTier',
-    outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
-    stateMutability: 'view',
+    inputs: [
+      { name: '_from', internalType: 'address', type: 'address' },
+      { name: '_to', internalType: 'address', type: 'address' },
+      { name: '_ids', internalType: 'uint256[]', type: 'uint256[]' },
+      { name: '_values', internalType: 'uint256[]', type: 'uint256[]' },
+    ],
+    name: 'onUpdate',
+    outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
     type: 'function',
@@ -905,15 +880,6 @@ export const assemblyCoreContractAbi = [
     inputs: [],
     name: 'otoms',
     outputs: [{ name: '', internalType: 'contract IOtomsV2', type: 'address' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'otomsDatabase',
-    outputs: [
-      { name: '', internalType: 'contract IOtomsDatabaseV2', type: 'address' },
-    ],
     stateMutability: 'view',
   },
   {
@@ -5317,15 +5283,6 @@ export const useReadAssemblyCoreContractItemMintCount =
   })
 
 /**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link assemblyCoreContractAbi}__ and `functionName` set to `"items"`
- */
-export const useReadAssemblyCoreContractItems =
-  /*#__PURE__*/ createUseReadContract({
-    abi: assemblyCoreContractAbi,
-    functionName: 'items',
-  })
-
-/**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link assemblyCoreContractAbi}__ and `functionName` set to `"nextItemId"`
  */
 export const useReadAssemblyCoreContractNextItemId =
@@ -5341,15 +5298,6 @@ export const useReadAssemblyCoreContractNonFungibleTokenToActualBlueprint =
   /*#__PURE__*/ createUseReadContract({
     abi: assemblyCoreContractAbi,
     functionName: 'nonFungibleTokenToActualBlueprint',
-  })
-
-/**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link assemblyCoreContractAbi}__ and `functionName` set to `"nonFungibleTokenToItemId"`
- */
-export const useReadAssemblyCoreContractNonFungibleTokenToItemId =
-  /*#__PURE__*/ createUseReadContract({
-    abi: assemblyCoreContractAbi,
-    functionName: 'nonFungibleTokenToItemId',
   })
 
 /**
@@ -5377,15 +5325,6 @@ export const useReadAssemblyCoreContractOtoms =
   /*#__PURE__*/ createUseReadContract({
     abi: assemblyCoreContractAbi,
     functionName: 'otoms',
-  })
-
-/**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link assemblyCoreContractAbi}__ and `functionName` set to `"otomsDatabase"`
- */
-export const useReadAssemblyCoreContractOtomsDatabase =
-  /*#__PURE__*/ createUseReadContract({
-    abi: assemblyCoreContractAbi,
-    functionName: 'otomsDatabase',
   })
 
 /**
@@ -5473,6 +5412,15 @@ export const useWriteAssemblyCoreContractInitialize =
   /*#__PURE__*/ createUseWriteContract({
     abi: assemblyCoreContractAbi,
     functionName: 'initialize',
+  })
+
+/**
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link assemblyCoreContractAbi}__ and `functionName` set to `"onUpdate"`
+ */
+export const useWriteAssemblyCoreContractOnUpdate =
+  /*#__PURE__*/ createUseWriteContract({
+    abi: assemblyCoreContractAbi,
+    functionName: 'onUpdate',
   })
 
 /**
@@ -5641,6 +5589,15 @@ export const useSimulateAssemblyCoreContractInitialize =
   /*#__PURE__*/ createUseSimulateContract({
     abi: assemblyCoreContractAbi,
     functionName: 'initialize',
+  })
+
+/**
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link assemblyCoreContractAbi}__ and `functionName` set to `"onUpdate"`
+ */
+export const useSimulateAssemblyCoreContractOnUpdate =
+  /*#__PURE__*/ createUseSimulateContract({
+    abi: assemblyCoreContractAbi,
+    functionName: 'onUpdate',
   })
 
 /**
@@ -5836,15 +5793,6 @@ export const useWatchAssemblyCoreContractItemsApprovalForAllEvent =
   /*#__PURE__*/ createUseWatchContractEvent({
     abi: assemblyCoreContractAbi,
     eventName: 'ItemsApprovalForAll',
-  })
-
-/**
- * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link assemblyCoreContractAbi}__ and `eventName` set to `"OperatorSet"`
- */
-export const useWatchAssemblyCoreContractOperatorSetEvent =
-  /*#__PURE__*/ createUseWatchContractEvent({
-    abi: assemblyCoreContractAbi,
-    eventName: 'OperatorSet',
   })
 
 /**
