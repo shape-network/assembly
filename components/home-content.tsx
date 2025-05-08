@@ -103,7 +103,7 @@ const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedRequiredIt
   }
 
   return (
-    <ScrollArea className="h-full max-h-[42vh]">
+    <ScrollArea className="h-full max-h-[36vh]">
       <div className="flex flex-col gap-4">
         {!rawInventory ||
           (rawInventory.length === 0 && (
