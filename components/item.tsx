@@ -107,7 +107,7 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
                   className="object-contain py-2"
                 />
               ) : (
-                <Skeleton className="h-48 w-full" />
+                <Skeleton className="h-40 w-full" />
               )}
             </div>
 
@@ -374,13 +374,13 @@ export const OwnedItemCard: FC<{ item: OwnedItem }> = ({ item }) => {
   const traits = item.initialTraits.filter((t) => t.name !== 'Usages Remaining');
 
   return (
-    <li>
+    <li className="w-xs shrink-0 sm:w-[300px]">
       <Card className="h-full">
         <CardHeader>
-          <CardTitle className="text-base">{item.name}</CardTitle>
+          <CardTitle>{item.name}</CardTitle>
         </CardHeader>
 
-        <div className="relative h-20 w-full">
+        <div className="relative h-40 w-full">
           {item.defaultImageUri ? (
             <Image
               src={item.defaultImageUri}
@@ -389,7 +389,7 @@ export const OwnedItemCard: FC<{ item: OwnedItem }> = ({ item }) => {
               className="object-contain py-2"
             />
           ) : (
-            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-40 w-full" />
           )}
         </div>
 
@@ -535,3 +535,13 @@ const VariableDropZone: FC<{
 function getRequiredDropZoneId(itemId: bigint | string, index: number): string {
   return `required-${itemId}-${index}`;
 }
+
+export const HorizontallScrollWrapper: FC<{ children: React.ReactNode }> = ({ children }) => {
+  return (
+    <div className="w-full">
+      <div className="overflow-x-auto">
+        <ul className="flex flex-nowrap gap-2 pb-4">{children}</ul>
+      </div>
+    </div>
+  );
+};
