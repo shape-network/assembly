@@ -331,7 +331,7 @@ const CraftItemButton: FC<{
       toast.info('Please confirm the transaction in your wallet.');
       await writeContractAsync({
         address: assemblyCore[config.chainId],
-        args: [item.id, BigInt(1), variableOtomTokenIds, []],
+        args: [item.id, BigInt(1), variableOtomTokenIds, [], '0x'],
       });
     } catch (error) {
       toast.error(`An error occurred while crafting ${item.name}, please try again.`);
