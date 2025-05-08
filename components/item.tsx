@@ -20,7 +20,7 @@ import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { LightningBoltIcon, QuestionMarkCircledIcon } from '@radix-ui/react-icons';
 import Image from 'next/image';
-import { FC, PropsWithChildren, useEffect } from 'react';
+import { FC, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useAccount, useWaitForTransactionReceipt } from 'wagmi';
 
@@ -82,7 +82,7 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
   }
 
   return (
-    <li className="grid grid-rows-[1fr_auto] gap-1">
+    <li className="grid w-[300px] shrink-0 grid-rows-[1fr_auto] gap-1">
       <Card className="relative w-full">
         {isCraftable && address && (
           <CraftItemButton
@@ -530,10 +530,6 @@ const VariableDropZone: FC<{
       </TooltipContent>
     </Tooltip>
   );
-};
-
-export const BlueprintComponentsGrid: FC<PropsWithChildren> = ({ children }) => {
-  return <ul className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-2">{children}</ul>;
 };
 
 function getRequiredDropZoneId(itemId: bigint | string, index: number): string {

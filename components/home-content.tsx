@@ -1,12 +1,7 @@
 'use client';
 
 import { useGetCraftableItems, useGetItemsForUser, useGetOtomItemsForUser } from '@/app/api/hooks';
-import {
-  BlueprintComponentsGrid,
-  ItemToCraftCard,
-  OtomItemCard,
-  OwnedItemCard,
-} from '@/components/item';
+import { ItemToCraftCard, OtomItemCard, OwnedItemCard } from '@/components/item';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -38,21 +33,26 @@ const ItemsToCraft: FC<{
   }
 
   return (
-    <BlueprintComponentsGrid>
-      {data.map((item) => {
-        const droppedItemsForThisCard = droppedItemsState[String(item.id)] || {};
-        return (
-          <ItemToCraftCard
-            key={item.id}
-            item={item}
-            droppedVariableItems={droppedItemsForThisCard}
-            onDropVariable={onDrop}
-            droppedOnRequiredSlots={droppedOnRequiredSlots}
-            onClearRequired={onClearRequired}
-          />
-        );
-      })}
-    </BlueprintComponentsGrid>
+    <div className="w-full overflow-hidden">
+      <div className="overflow-x-auto">
+        <ul className="flex flex-nowrap gap-2 pb-4">
+          {data.map((item) => {
+            const droppedItemsForThisCard = droppedItemsState[String(item.id)] || {};
+            return (
+              <li key={item.id} className="flex-shrink-0">
+                <ItemToCraftCard
+                  item={item}
+                  droppedVariableItems={droppedItemsForThisCard}
+                  onDropVariable={onDrop}
+                  droppedOnRequiredSlots={droppedOnRequiredSlots}
+                  onClearRequired={onClearRequired}
+                />
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </div>
   );
 };
 
@@ -183,13 +183,13 @@ const InventorySkeleton: FC = () => {
 
 const ItemsToCraftSkeleton: FC = () => {
   return (
-    <BlueprintComponentsGrid>
+    <ul className="flex gap-2">
       {Array.from({ length: 4 }).map((_, index) => (
-        <li key={index}>
+        <li key={index} className="w-full sm:w-sm">
           <Skeleton className="h-96 w-full" />
         </li>
       ))}
-    </BlueprintComponentsGrid>
+    </ul>
   );
 };
 
@@ -343,7 +343,7 @@ export const HomeContent = () => {
       <main className="flex flex-col justify-start gap-8 py-12">
         <DndContext onDragEnd={handleDragEnd}>
           <div className="flex flex-col gap-16">
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 overflow-hidden">
               <div className="flex items-baseline justify-between gap-2">
                 <h2 className="text-primary font-bold tracking-wide uppercase">Items to craft</h2>
                 <InlineLink
