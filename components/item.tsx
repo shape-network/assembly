@@ -30,6 +30,7 @@ type ItemToCraftCardProps = {
   onDropVariable: (itemId: string, index: number, item: OtomItem | null) => void;
   droppedOnRequiredSlots: Set<string>;
   onClearRequired: (itemId: string) => void;
+  onCraftSuccess?: (itemId: string) => void;
 };
 
 export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
@@ -38,13 +39,14 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
   onDropVariable,
   droppedOnRequiredSlots,
   onClearRequired,
+  onCraftSuccess,
 }) => {
   const { address } = useAccount();
   const { data: inventory } = useGetOtomItemsForUser();
 
-  function isElementOwned(name: string): boolean {
+  function isElementOwned(otomTokenId: bigint): boolean {
     if (!inventory) return false;
-    return inventory.some((i) => i.name === name);
+    return inventory.some((i) => i.tokenId === otomTokenId.toString());
   }
 
   const requiredBlueprints = item.blueprint.filter((i) => i.componentType !== 'variable_otom');
@@ -89,6 +91,7 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
             item={item}
             className="absolute top-2 right-2 z-10 h-8 px-3"
             droppedVariableItems={droppedVariableItems}
+            onCraftSuccess={onCraftSuccess}
           />
         )}
 
@@ -134,7 +137,7 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
 
               <div className="flex flex-wrap gap-1">
                 {requiredBlueprints.map((component, i) => {
-                  const isOwned = isElementOwned(component.name);
+                  const isOwned = isElementOwned(component.itemIdOrOtomTokenId);
                   const dropId = getRequiredDropZoneId(item.id, i);
                   return (
                     <RequiredDropZone
@@ -237,7 +240,9 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({
 
   const isRequiredInBlueprint = craftableItems?.some((item) =>
     item.blueprint.some(
-      (b) => b.componentType !== 'variable_otom' && b.name === representativeItem.name
+      (b) =>
+        b.componentType !== 'variable_otom' &&
+        b.itemIdOrOtomTokenId.toString() === representativeItem.tokenId
     )
   );
 
@@ -314,7 +319,8 @@ const CraftItemButton: FC<{
   item: Item;
   className?: string;
   droppedVariableItems?: Record<number, OtomItem | null>;
-}> = ({ item, className, droppedVariableItems }) => {
+  onCraftSuccess?: (itemId: string) => void;
+}> = ({ item, className, droppedVariableItems, onCraftSuccess }) => {
   const { data: hash, writeContractAsync, isPending } = useWriteAssemblyCoreContractCraftItem();
   const { refetch: refetchOtomItems } = useGetOtomItemsForUser();
 
@@ -353,13 +359,25 @@ const CraftItemButton: FC<{
       toast.success(`${item.name} crafted successfully!`);
       toast.dismiss('loading');
       refetchOtomItems();
+      if (onCraftSuccess) {
+        onCraftSuccess(String(item.id));
+      }
     }
 
     if (isTxError) {
       toast.error(`An error occurred while crafting ${item.name}, please try again.`);
       toast.dismiss('loading');
     }
-  }, [hash, refetchOtomItems, isTxConfirming, isTxConfirmed, isTxError, item.name]);
+  }, [
+    hash,
+    refetchOtomItems,
+    isTxConfirming,
+    isTxConfirmed,
+    isTxError,
+    item.name,
+    onCraftSuccess,
+    item.id,
+  ]);
 
   const disabled = isPending || isTxConfirming;
 

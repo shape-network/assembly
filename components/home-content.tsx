@@ -17,10 +17,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { WalletConnect } from '@/components/wallet-connect';
 import { paths } from '@/lib/paths';
 import type { OtomItem } from '@/lib/types';
-import { DndContext, type DragEndEvent } from '@dnd-kit/core';
+import { DndContext, DragOverlay, type DragEndEvent, type DragStartEvent } from '@dnd-kit/core';
 import { ExternalLinkIcon } from '@radix-ui/react-icons';
 import Link from 'next/link';
-import { type FC, useDeferredValue, useMemo, useState } from 'react';
+import { useDeferredValue, useMemo, useState, type FC } from 'react';
 import { useAccount } from 'wagmi';
 
 const ItemsToCraft: FC<{
@@ -28,7 +28,8 @@ const ItemsToCraft: FC<{
   onDrop: (itemId: string, index: number, item: OtomItem | null) => void;
   droppedOnRequiredSlots: Set<string>;
   onClearRequired: (itemId: string) => void;
-}> = ({ droppedItemsState, onDrop, droppedOnRequiredSlots, onClearRequired }) => {
+  onCraftSuccess?: (itemId: string) => void;
+}> = ({ droppedItemsState, onDrop, droppedOnRequiredSlots, onClearRequired, onCraftSuccess }) => {
   const { data, isLoading, isError } = useGetCraftableItems();
 
   if (isLoading) {
@@ -51,6 +52,7 @@ const ItemsToCraft: FC<{
             onDropVariable={onDrop}
             droppedOnRequiredSlots={droppedOnRequiredSlots}
             onClearRequired={onClearRequired}
+            onCraftSuccess={onCraftSuccess}
           />
         );
       })}
@@ -205,6 +207,7 @@ export const HomeContent = () => {
   const [droppedOnRequiredSlots, setDroppedOnRequiredSlots] = useState<Set<string>>(new Set());
   const [usedRequiredItems, setUsedRequiredItems] = useState<Set<string>>(new Set());
   const [requiredSlotToOtomMap, setRequiredSlotToOtomMap] = useState<Record<string, string>>({});
+  const [activeItem, setActiveItem] = useState<OtomItem | null>(null);
 
   function handleDrop(itemId: string, index: number, droppedItem: OtomItem | null) {
     setDroppedItemsState((prev) => {
@@ -239,8 +242,13 @@ export const HomeContent = () => {
     }
   }
 
+  function handleCraftSuccess(itemId: string) {
+    handleClearRequired(itemId);
+  }
+
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
+    setActiveItem(null);
 
     if (over) {
       const droppedItemData = active.data.current as OtomItem | null;
@@ -321,6 +329,14 @@ export const HomeContent = () => {
     }
   }
 
+  function handleDragStart(event: DragStartEvent) {
+    const { active } = event;
+    const droppedItemData = active.data.current as OtomItem | null;
+    if (droppedItemData) {
+      setActiveItem(droppedItemData);
+    }
+  }
+
   return (
     <div className="mx-auto grid min-h-screen max-w-7xl grid-rows-[auto_1fr] gap-4 p-5">
       <header className="flex items-center justify-between">
@@ -345,7 +361,7 @@ export const HomeContent = () => {
       </header>
 
       <main className="flex flex-col justify-start gap-8 overflow-x-hidden py-12">
-        <DndContext onDragEnd={handleDragEnd}>
+        <DndContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
           <div className="flex flex-col gap-16">
             <div className="flex flex-col gap-2">
               <Tabs defaultValue="items-to-craft">
@@ -369,6 +385,7 @@ export const HomeContent = () => {
                     onDrop={handleDrop}
                     droppedOnRequiredSlots={droppedOnRequiredSlots}
                     onClearRequired={handleClearRequired}
+                    onCraftSuccess={handleCraftSuccess}
                   />
                 </TabsContent>
 
@@ -416,6 +433,16 @@ export const HomeContent = () => {
               </div>
             )}
           </div>
+
+          <DragOverlay zIndex={50}>
+            {activeItem && (
+              <div className="bg-card size-15 rounded-md border p-1 shadow-md">
+                <div className="bg-muted flex size-full items-center justify-center">
+                  {activeItem.name.substring(0, 2)}
+                </div>
+              </div>
+            )}
+          </DragOverlay>
         </DndContext>
       </main>
     </div>
