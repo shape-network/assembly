@@ -42,9 +42,9 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
   const { address } = useAccount();
   const { data: inventory } = useGetOtomItemsForUser();
 
-  function isElementOwned(name: string): boolean {
+  function isElementOwned(otomTokenId: bigint): boolean {
     if (!inventory) return false;
-    return inventory.some((i) => i.name === name);
+    return inventory.some((i) => i.tokenId === otomTokenId.toString());
   }
 
   const requiredBlueprints = item.blueprint.filter((i) => i.componentType !== 'variable_otom');
@@ -134,7 +134,7 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
 
               <div className="flex flex-wrap gap-1">
                 {requiredBlueprints.map((component, i) => {
-                  const isOwned = isElementOwned(component.name);
+                  const isOwned = isElementOwned(component.itemIdOrOtomTokenId);
                   const dropId = getRequiredDropZoneId(item.id, i);
                   return (
                     <RequiredDropZone
@@ -237,7 +237,9 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({
 
   const isRequiredInBlueprint = craftableItems?.some((item) =>
     item.blueprint.some(
-      (b) => b.componentType !== 'variable_otom' && b.name === representativeItem.name
+      (b) =>
+        b.componentType !== 'variable_otom' &&
+        b.itemIdOrOtomTokenId.toString() === representativeItem.tokenId
     )
   );
 
