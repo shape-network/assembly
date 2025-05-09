@@ -28,7 +28,8 @@ const ItemsToCraft: FC<{
   onDrop: (itemId: string, index: number, item: OtomItem | null) => void;
   droppedOnRequiredSlots: Set<string>;
   onClearRequired: (itemId: string) => void;
-}> = ({ droppedItemsState, onDrop, droppedOnRequiredSlots, onClearRequired }) => {
+  onCraftSuccess?: (itemId: string) => void;
+}> = ({ droppedItemsState, onDrop, droppedOnRequiredSlots, onClearRequired, onCraftSuccess }) => {
   const { data, isLoading, isError } = useGetCraftableItems();
 
   if (isLoading) {
@@ -51,6 +52,7 @@ const ItemsToCraft: FC<{
             onDropVariable={onDrop}
             droppedOnRequiredSlots={droppedOnRequiredSlots}
             onClearRequired={onClearRequired}
+            onCraftSuccess={onCraftSuccess}
           />
         );
       })}
@@ -240,6 +242,10 @@ export const HomeContent = () => {
     }
   }
 
+  function handleCraftSuccess(itemId: string) {
+    handleClearRequired(itemId);
+  }
+
   function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     setActiveItem(null);
@@ -379,6 +385,7 @@ export const HomeContent = () => {
                     onDrop={handleDrop}
                     droppedOnRequiredSlots={droppedOnRequiredSlots}
                     onClearRequired={handleClearRequired}
+                    onCraftSuccess={handleCraftSuccess}
                   />
                 </TabsContent>
 
