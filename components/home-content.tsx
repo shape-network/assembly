@@ -15,6 +15,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { WalletConnect } from '@/components/wallet-connect';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { paths } from '@/lib/paths';
 import type { OtomItem } from '@/lib/types';
 import { DndContext, DragOverlay, type DragEndEvent, type DragStartEvent } from '@dnd-kit/core';
@@ -335,6 +336,48 @@ export const HomeContent = () => {
     if (droppedItemData) {
       setActiveItem(droppedItemData);
     }
+  }
+
+  const isMobile = useMediaQuery('sm');
+
+  if (isMobile) {
+    return (
+      <div className="mx-auto grid min-h-screen max-w-7xl grid-rows-[auto_1fr] p-5">
+        <header className="flex items-center justify-between">
+          <div className="relative">
+            <h1 className="text-primary text-2xl font-semibold tracking-wide uppercase">
+              <Link href={paths.home}>Assembly</Link>
+            </h1>
+            <span className="text-muted-foreground/50 absolute -bottom-5 left-0 text-sm whitespace-nowrap">
+              An otom-based item crafter
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button asChild variant="link">
+              <a href={paths.otom} target="_blank" rel="noopener noreferrer">
+                otom.xyz
+              </a>
+            </Button>
+
+            <WalletConnect />
+          </div>
+        </header>
+
+        <div className="grid place-items-center pb-20">
+          <div className="items-centers flex flex-col gap-4">
+            <p className="text-primary mx-auto max-w-md text-center text-2xl font-semibold tracking-wide text-balance uppercase">
+              Assembly is coming to mobile very soon!
+            </p>
+
+            <p className="text-muted-foreground text-center text-lg text-balance">
+              Builder? Contributions are welcome,{' '}
+              <InlineLink href={paths.repo}>Assembly is Open-Source</InlineLink>!
+            </p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
