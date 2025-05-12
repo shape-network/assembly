@@ -62,7 +62,6 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
     requiredBlueprints.every(({ componentType, itemIdOrOtomTokenId }, index) => {
       const dropId = getRequiredDropZoneId(item.id, index);
       const isDropped = droppedOnRequiredSlots.has(dropId);
-
       if (componentType !== 'variable_otom') {
         const requiredTokenId = String(itemIdOrOtomTokenId);
         const hasRequiredComponent =
@@ -71,7 +70,9 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
       } else {
         return false;
       }
-    });
+    }) &&
+    variableBlueprints.length === Object.keys(droppedVariableItems).length &&
+    variableBlueprints.every((_, i) => droppedVariableItems[i] !== null);
 
   function handleClearRequiredClick() {
     onClearRequired(String(item.id));
