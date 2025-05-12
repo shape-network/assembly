@@ -162,6 +162,7 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
                       <TooltipTrigger asChild>
                         <QuestionMarkCircledIcon className="text-muted-foreground/50 size-4" />
                       </TooltipTrigger>
+
                       <TooltipContent>
                         <p>
                           Enhance the item with otoms that match specific criteria. The higher the
