@@ -266,7 +266,7 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({
             areAllItemsUsed
               ? 'bg-primary text-primary-foreground'
               : isRequiredInBlueprint
-                ? 'border-primary text-primary'
+                ? 'border-primary/50 text-primary border-dashed'
                 : 'border-border text-muted-foreground font-normal',
             areAllItemsUsed && 'cursor-not-allowed'
           )}
@@ -476,7 +476,7 @@ const RequiredDropZone: FC<{
         isDropped
           ? 'bg-primary text-primary-foreground font-semibold'
           : isOwned
-            ? 'border-primary font-semibold'
+            ? 'border-primary/50 border-dashed font-semibold'
             : 'text-muted-foreground/50 border-border font-normal',
         isOver && canDrop && 'ring-primary ring-2 ring-offset-2',
         isOver && !canDrop && 'ring-destructive ring-2 ring-offset-2'
