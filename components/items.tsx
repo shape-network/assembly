@@ -62,7 +62,6 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
     requiredBlueprints.every(({ componentType, itemIdOrOtomTokenId }, index) => {
       const dropId = getRequiredDropZoneId(item.id, index);
       const isDropped = droppedOnRequiredSlots.has(dropId);
-
       if (componentType !== 'variable_otom') {
         const requiredTokenId = String(itemIdOrOtomTokenId);
         const hasRequiredComponent =
@@ -71,7 +70,9 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
       } else {
         return false;
       }
-    });
+    }) &&
+    variableBlueprints.length === Object.keys(droppedVariableItems).length &&
+    variableBlueprints.every((_, i) => droppedVariableItems[i] !== null);
 
   function handleClearRequiredClick() {
     onClearRequired(String(item.id));
@@ -161,8 +162,12 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
                       <TooltipTrigger asChild>
                         <QuestionMarkCircledIcon className="text-muted-foreground/50 size-4" />
                       </TooltipTrigger>
+
                       <TooltipContent>
-                        <p>Enhance {item.name} with otoms that match specific criteria</p>
+                        <p>
+                          Enhance the item with otoms that match specific criteria. The higher the
+                          value, the more powerful the item will be.
+                        </p>
                       </TooltipContent>
                     </Tooltip>
                   </div>
