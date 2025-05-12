@@ -285,6 +285,7 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({
       </TooltipTrigger>
 
       <TooltipContent className="max-w-[300px]">
+        <p className="text-base font-semibold">{representativeItem.name}</p>
         <p>Hardness: {representativeItem.hardness.toFixed(3)}</p>
         <p>Toughness: {representativeItem.toughness.toFixed(3)}</p>
         <p>Ductility: {representativeItem.ductility.toFixed(3)}</p>
@@ -301,7 +302,7 @@ export const ElementName: FC<{ otom: OtomItem | Molecule; className?: string }> 
   const isAtom = isOtomAtom(otom);
 
   return (
-    <p className={cn('select-none', className)}>
+    <div className={cn('relative p-0.5 select-none', className)}>
       <span className="flex items-center">
         {isAtom && (
           <span className="mr-0.5 inline-block text-right text-xs">
@@ -314,9 +315,9 @@ export const ElementName: FC<{ otom: OtomItem | Molecule; className?: string }> 
           </span>
         )}
 
-        <span className="text-lg">{otom.name}</span>
+        <span className="max-w-10 truncate">{otom.name}</span>
       </span>
-    </p>
+    </div>
   );
 };
 
