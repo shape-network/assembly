@@ -17,8 +17,11 @@ async function getCraftItems(): Promise<Item[]> {
     args: [BigInt(0), BigInt(100)], // TODO: add proper pagination
   });
 
+  // FIXME: TESTNET ONLY, REMOVE FOR MAINNET
+  const filteredResults = results.filter((r) => r.id === BigInt(6) || r.id === BigInt(7));
+
   const items = await Promise.all(
-    results.map(async (r) => ({
+    filteredResults.map(async (r) => ({
       id: r.id,
       name: r.name,
       description: r.description,
