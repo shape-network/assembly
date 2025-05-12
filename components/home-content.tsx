@@ -434,7 +434,7 @@ export const HomeContent = () => {
             )}
           </div>
 
-          <DragOverlay zIndex={50}>
+          <DragOverlay zIndex={50} dropAnimation={null}>
             {activeItem && (
               <div className="bg-card size-15 rounded-md border p-1 shadow-md">
                 <div className="bg-muted flex size-full items-center justify-center">
