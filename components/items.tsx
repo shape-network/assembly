@@ -22,7 +22,7 @@ import { LightningBoltIcon, QuestionMarkCircledIcon } from '@radix-ui/react-icon
 import Image from 'next/image';
 import { FC, useEffect } from 'react';
 import { toast } from 'sonner';
-import { useAccount, useWaitForTransactionReceipt } from 'wagmi';
+import { useWaitForTransactionReceipt } from 'wagmi';
 
 type ItemToCraftCardProps = {
   item: Item;
@@ -41,7 +41,6 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
   onClearRequired,
   onCraftSuccess,
 }) => {
-  const { address } = useAccount();
   const { data: inventory } = useGetOtomItemsForUser();
 
   function isElementOwned(otomTokenId: bigint): boolean {
@@ -87,14 +86,13 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
   return (
     <li className="grid w-[300px] shrink-0 grid-rows-[1fr_auto] gap-1">
       <Card className="relative w-full">
-        {isCraftable && address && (
-          <CraftItemButton
-            item={item}
-            className="absolute top-2 right-2 z-10 h-8 px-3"
-            droppedVariableItems={droppedVariableItems}
-            onCraftSuccess={onCraftSuccess}
-          />
-        )}
+        <CraftItemButton
+          isCraftable={isCraftable}
+          item={item}
+          className="absolute top-2 right-2 z-10 h-8 px-3"
+          droppedVariableItems={droppedVariableItems}
+          onCraftSuccess={onCraftSuccess}
+        />
 
         <CardHeader className="relative">
           <CardTitle>{item.name}</CardTitle>
@@ -326,7 +324,8 @@ const CraftItemButton: FC<{
   className?: string;
   droppedVariableItems?: Record<number, OtomItem | null>;
   onCraftSuccess?: (itemId: string) => void;
-}> = ({ item, className, droppedVariableItems, onCraftSuccess }) => {
+  isCraftable?: boolean;
+}> = ({ item, className, droppedVariableItems, onCraftSuccess, isCraftable }) => {
   const { data: hash, writeContractAsync, isPending } = useWriteAssemblyCoreContractCraftItem();
   const { refetch: refetchOtomItems } = useGetOtomItemsForUser();
 
@@ -385,10 +384,14 @@ const CraftItemButton: FC<{
     item.id,
   ]);
 
-  const disabled = isPending || isTxConfirming;
+  const disabled = !isCraftable || isPending || isTxConfirming;
 
   return (
-    <Button disabled={disabled} onClick={handleCraftItem} className={className}>
+    <Button
+      disabled={disabled}
+      onClick={handleCraftItem}
+      className={cn('disabled:opacity-15', className)}
+    >
       {isPending || isTxConfirming ? 'Crafting...' : 'Craft'}
     </Button>
   );
