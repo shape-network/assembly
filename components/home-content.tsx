@@ -255,7 +255,7 @@ export const HomeContent = () => {
       const dropZoneId = String(over.id);
       const dropZoneData = over.data.current as {
         type: string;
-        requiredName?: string;
+        requiredTokenId?: string;
         index?: number;
       };
       const draggedItemId = String(active.id);
@@ -263,29 +263,10 @@ export const HomeContent = () => {
       if (!droppedItemData || !dropZoneData) return;
 
       if (dropZoneData?.type === 'required') {
-        if (droppedItemData?.name === dropZoneData?.requiredName) {
+        if (droppedItemData?.tokenId === dropZoneData?.requiredTokenId) {
           setDroppedOnRequiredSlots((prev) => new Set(prev).add(dropZoneId));
           setUsedRequiredItems((prev) => new Set(prev).add(draggedItemId));
           setRequiredSlotToOtomMap((prev) => ({ ...prev, [dropZoneId]: draggedItemId }));
-        } else {
-          setDroppedOnRequiredSlots((prev) => {
-            const newSet = new Set(prev);
-            newSet.delete(dropZoneId);
-            return newSet;
-          });
-          const otomIdToRemove = requiredSlotToOtomMap[dropZoneId];
-          if (otomIdToRemove) {
-            setUsedRequiredItems((prev) => {
-              const newSet = new Set(prev);
-              newSet.delete(otomIdToRemove);
-              return newSet;
-            });
-            setRequiredSlotToOtomMap((prev) => {
-              const newMap = { ...prev };
-              delete newMap[dropZoneId];
-              return newMap;
-            });
-          }
         }
       } else if (dropZoneData?.type === 'variable') {
         const parts = dropZoneId.split('-');

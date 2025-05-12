@@ -458,7 +458,7 @@ const RequiredDropZone: FC<{
 }> = ({ id, component, isOwned, isDropped }) => {
   const { isOver, setNodeRef, active } = useDroppable({
     id: id,
-    data: { requiredName: component.name, type: 'required' },
+    data: { requiredTokenId: String(component.itemIdOrOtomTokenId), type: 'required' },
   });
 
   const canDrop = active?.data.current?.name === component.name;
