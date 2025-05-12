@@ -163,7 +163,10 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
                         <QuestionMarkCircledIcon className="text-muted-foreground/50 size-4" />
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>Enhance {item.name} with otoms that match specific criteria</p>
+                        <p>
+                          Enhance the item with otoms that match specific criteria. The higher the
+                          value, the more powerful the item will be.
+                        </p>
                       </TooltipContent>
                     </Tooltip>
                   </div>
