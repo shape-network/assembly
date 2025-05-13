@@ -4,6 +4,8 @@ import { alchemy } from '@/lib/clients';
 import { config } from '@/lib/config';
 import { BlueprintComponent, ComponentType, RawBlueprintComponent } from '@/lib/types';
 
+const PRECISION_FACTOR = 1 * 1e18;
+
 export function getBlueprintComponentType(componentType: number): ComponentType {
   switch (componentType) {
     case 0:
@@ -49,8 +51,8 @@ export async function getBlueprintForItem(
     componentType: getBlueprintComponentType(blueprint.componentType),
     criteria: blueprint.criteria.map((c) => ({
       propertyType: c.propertyType,
-      minValue: c.minValue,
-      maxValue: c.maxValue,
+      minValue: Number(c.minValue) / PRECISION_FACTOR,
+      maxValue: Number(c.maxValue) / PRECISION_FACTOR,
       boolValue: c.boolValue,
       checkBoolValue: c.checkBoolValue,
       stringValue: c.stringValue,
