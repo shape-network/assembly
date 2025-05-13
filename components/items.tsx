@@ -461,7 +461,9 @@ const RequiredDropZone: FC<{
     data: { requiredTokenId: String(component.itemIdOrOtomTokenId), type: 'required' },
   });
 
-  const canDrop = active?.data.current?.requiredTokenId === String(component.itemIdOrOtomTokenId);
+  const draggedElement = active?.data.current as OtomItem | null;
+
+  const canDrop = draggedElement?.tokenId === String(component.itemIdOrOtomTokenId);
 
   const { data: molecule } = useGetMoleculesFromOtomTokenId({
     otomTokenId: String(component.itemIdOrOtomTokenId),
