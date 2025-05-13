@@ -123,7 +123,9 @@
                 { "internalType": "bool", "name": "boolValue", "type": "bool" },
                 { "internalType": "bool", "name": "checkBoolValue", "type": "bool" },
                 { "internalType": "string", "name": "stringValue", "type": "string" },
-                { "internalType": "bool", "name": "checkStringValue", "type": "bool" }
+                { "internalType": "bool", "name": "checkStringValue", "type": "bool" },
+                { "internalType": "bytes32", "name": "bytes32Value", "type": "bytes32" },
+                { "internalType": "bool", "name": "checkBytes32Value", "type": "bool" }
               ],
               "internalType": "struct PropertyCriterion[]",
               "name": "criteria",
@@ -302,7 +304,9 @@
                 { "internalType": "bool", "name": "boolValue", "type": "bool" },
                 { "internalType": "bool", "name": "checkBoolValue", "type": "bool" },
                 { "internalType": "string", "name": "stringValue", "type": "string" },
-                { "internalType": "bool", "name": "checkStringValue", "type": "bool" }
+                { "internalType": "bool", "name": "checkStringValue", "type": "bool" },
+                { "internalType": "bytes32", "name": "bytes32Value", "type": "bytes32" },
+                { "internalType": "bool", "name": "checkBytes32Value", "type": "bool" }
               ],
               "internalType": "struct PropertyCriterion[]",
               "name": "criteria",
@@ -351,7 +355,9 @@
                 { "internalType": "bool", "name": "boolValue", "type": "bool" },
                 { "internalType": "bool", "name": "checkBoolValue", "type": "bool" },
                 { "internalType": "string", "name": "stringValue", "type": "string" },
-                { "internalType": "bool", "name": "checkStringValue", "type": "bool" }
+                { "internalType": "bool", "name": "checkStringValue", "type": "bool" },
+                { "internalType": "bytes32", "name": "bytes32Value", "type": "bytes32" },
+                { "internalType": "bool", "name": "checkBytes32Value", "type": "bool" }
               ],
               "internalType": "struct PropertyCriterion[]",
               "name": "criteria",
@@ -433,7 +439,9 @@
                     { "internalType": "bool", "name": "boolValue", "type": "bool" },
                     { "internalType": "bool", "name": "checkBoolValue", "type": "bool" },
                     { "internalType": "string", "name": "stringValue", "type": "string" },
-                    { "internalType": "bool", "name": "checkStringValue", "type": "bool" }
+                    { "internalType": "bool", "name": "checkStringValue", "type": "bool" },
+                    { "internalType": "bytes32", "name": "bytes32Value", "type": "bytes32" },
+                    { "internalType": "bool", "name": "checkBytes32Value", "type": "bool" }
                   ],
                   "internalType": "struct PropertyCriterion[]",
                   "name": "criteria",
@@ -599,7 +607,9 @@
                 { "internalType": "bool", "name": "boolValue", "type": "bool" },
                 { "internalType": "bool", "name": "checkBoolValue", "type": "bool" },
                 { "internalType": "string", "name": "stringValue", "type": "string" },
-                { "internalType": "bool", "name": "checkStringValue", "type": "bool" }
+                { "internalType": "bool", "name": "checkStringValue", "type": "bool" },
+                { "internalType": "bytes32", "name": "bytes32Value", "type": "bytes32" },
+                { "internalType": "bool", "name": "checkBytes32Value", "type": "bool" }
               ],
               "internalType": "struct PropertyCriterion[]",
               "name": "criteria",
@@ -635,29 +645,8 @@
     },
     {
       "inputs": [],
-      "name": "otomItems",
-      "outputs": [{ "internalType": "contract IOtomItems", "name": "", "type": "address" }],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "otoms",
-      "outputs": [{ "internalType": "contract IOtomsV2", "name": "", "type": "address" }],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
       "name": "owner",
       "outputs": [{ "internalType": "address", "name": "", "type": "address" }],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "renderer",
-      "outputs": [{ "internalType": "contract IOtomItemsRenderer", "name": "", "type": "address" }],
       "stateMutability": "view",
       "type": "function"
     },
@@ -753,7 +742,9 @@
                 { "internalType": "bool", "name": "boolValue", "type": "bool" },
                 { "internalType": "bool", "name": "checkBoolValue", "type": "bool" },
                 { "internalType": "string", "name": "stringValue", "type": "string" },
-                { "internalType": "bool", "name": "checkStringValue", "type": "bool" }
+                { "internalType": "bool", "name": "checkStringValue", "type": "bool" },
+                { "internalType": "bytes32", "name": "bytes32Value", "type": "bytes32" },
+                { "internalType": "bool", "name": "checkBytes32Value", "type": "bool" }
               ],
               "internalType": "struct PropertyCriterion[]",
               "name": "criteria",
@@ -803,7 +794,9 @@
                 { "internalType": "bool", "name": "boolValue", "type": "bool" },
                 { "internalType": "bool", "name": "checkBoolValue", "type": "bool" },
                 { "internalType": "string", "name": "stringValue", "type": "string" },
-                { "internalType": "bool", "name": "checkStringValue", "type": "bool" }
+                { "internalType": "bool", "name": "checkStringValue", "type": "bool" },
+                { "internalType": "bytes32", "name": "bytes32Value", "type": "bytes32" },
+                { "internalType": "bool", "name": "checkBytes32Value", "type": "bool" }
               ],
               "internalType": "struct PropertyCriterion[]",
               "name": "criteria",
@@ -843,15 +836,6 @@
       "name": "useItem",
       "outputs": [],
       "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "validator",
-      "outputs": [
-        { "internalType": "contract IOtomItemsValidator", "name": "", "type": "address" }
-      ],
-      "stateMutability": "view",
       "type": "function"
     }
   ]
