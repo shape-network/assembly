@@ -18,7 +18,7 @@ async function getCraftItems(): Promise<Item[]> {
   });
 
   // FIXME: TESTNET ONLY, REMOVE FOR MAINNET
-  const filteredResults = results.filter((r) => r.id === BigInt(6) || r.id === BigInt(7));
+  const filteredResults = results.filter((r) => r.id === BigInt(2) || r.id === BigInt(3));
 
   const items = await Promise.all(
     filteredResults.map(async (r) => ({
