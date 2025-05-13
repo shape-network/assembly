@@ -180,6 +180,12 @@ export const assemblyCoreContractAbi = [
               { name: 'checkBoolValue', internalType: 'bool', type: 'bool' },
               { name: 'stringValue', internalType: 'string', type: 'string' },
               { name: 'checkStringValue', internalType: 'bool', type: 'bool' },
+              {
+                name: 'bytes32Value',
+                internalType: 'bytes32',
+                type: 'bytes32',
+              },
+              { name: 'checkBytes32Value', internalType: 'bool', type: 'bool' },
             ],
           },
         ],
@@ -479,6 +485,12 @@ export const assemblyCoreContractAbi = [
               { name: 'checkBoolValue', internalType: 'bool', type: 'bool' },
               { name: 'stringValue', internalType: 'string', type: 'string' },
               { name: 'checkStringValue', internalType: 'bool', type: 'bool' },
+              {
+                name: 'bytes32Value',
+                internalType: 'bytes32',
+                type: 'bytes32',
+              },
+              { name: 'checkBytes32Value', internalType: 'bool', type: 'bool' },
             ],
           },
         ],
@@ -544,6 +556,12 @@ export const assemblyCoreContractAbi = [
               { name: 'checkBoolValue', internalType: 'bool', type: 'bool' },
               { name: 'stringValue', internalType: 'string', type: 'string' },
               { name: 'checkStringValue', internalType: 'bool', type: 'bool' },
+              {
+                name: 'bytes32Value',
+                internalType: 'bytes32',
+                type: 'bytes32',
+              },
+              { name: 'checkBytes32Value', internalType: 'bool', type: 'bool' },
             ],
           },
         ],
@@ -654,6 +672,16 @@ export const assemblyCoreContractAbi = [
                   },
                   {
                     name: 'checkStringValue',
+                    internalType: 'bool',
+                    type: 'bool',
+                  },
+                  {
+                    name: 'bytes32Value',
+                    internalType: 'bytes32',
+                    type: 'bytes32',
+                  },
+                  {
+                    name: 'checkBytes32Value',
                     internalType: 'bool',
                     type: 'bool',
                   },
@@ -840,6 +868,12 @@ export const assemblyCoreContractAbi = [
               { name: 'checkBoolValue', internalType: 'bool', type: 'bool' },
               { name: 'stringValue', internalType: 'string', type: 'string' },
               { name: 'checkStringValue', internalType: 'bool', type: 'bool' },
+              {
+                name: 'bytes32Value',
+                internalType: 'bytes32',
+                type: 'bytes32',
+              },
+              { name: 'checkBytes32Value', internalType: 'bool', type: 'bool' },
             ],
           },
         ],
@@ -869,37 +903,8 @@ export const assemblyCoreContractAbi = [
   {
     type: 'function',
     inputs: [],
-    name: 'otomItems',
-    outputs: [
-      { name: '', internalType: 'contract IOtomItems', type: 'address' },
-    ],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'otoms',
-    outputs: [{ name: '', internalType: 'contract IOtomsV2', type: 'address' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
     name: 'owner',
     outputs: [{ name: '', internalType: 'address', type: 'address' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'renderer',
-    outputs: [
-      {
-        name: '',
-        internalType: 'contract IOtomItemsRenderer',
-        type: 'address',
-      },
-    ],
     stateMutability: 'view',
   },
   {
@@ -1020,6 +1025,12 @@ export const assemblyCoreContractAbi = [
               { name: 'checkBoolValue', internalType: 'bool', type: 'bool' },
               { name: 'stringValue', internalType: 'string', type: 'string' },
               { name: 'checkStringValue', internalType: 'bool', type: 'bool' },
+              {
+                name: 'bytes32Value',
+                internalType: 'bytes32',
+                type: 'bytes32',
+              },
+              { name: 'checkBytes32Value', internalType: 'bool', type: 'bool' },
             ],
           },
         ],
@@ -1086,6 +1097,12 @@ export const assemblyCoreContractAbi = [
               { name: 'checkBoolValue', internalType: 'bool', type: 'bool' },
               { name: 'stringValue', internalType: 'string', type: 'string' },
               { name: 'checkStringValue', internalType: 'bool', type: 'bool' },
+              {
+                name: 'bytes32Value',
+                internalType: 'bytes32',
+                type: 'bytes32',
+              },
+              { name: 'checkBytes32Value', internalType: 'bool', type: 'bool' },
             ],
           },
         ],
@@ -1119,19 +1136,6 @@ export const assemblyCoreContractAbi = [
     name: 'useItem',
     outputs: [],
     stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'validator',
-    outputs: [
-      {
-        name: '',
-        internalType: 'contract IOtomItemsValidator',
-        type: 'address',
-      },
-    ],
-    stateMutability: 'view',
   },
 ] as const
 
@@ -5310,48 +5314,12 @@ export const useReadAssemblyCoreContractNonFungibleTokenToTier =
   })
 
 /**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link assemblyCoreContractAbi}__ and `functionName` set to `"otomItems"`
- */
-export const useReadAssemblyCoreContractOtomItems =
-  /*#__PURE__*/ createUseReadContract({
-    abi: assemblyCoreContractAbi,
-    functionName: 'otomItems',
-  })
-
-/**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link assemblyCoreContractAbi}__ and `functionName` set to `"otoms"`
- */
-export const useReadAssemblyCoreContractOtoms =
-  /*#__PURE__*/ createUseReadContract({
-    abi: assemblyCoreContractAbi,
-    functionName: 'otoms',
-  })
-
-/**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link assemblyCoreContractAbi}__ and `functionName` set to `"owner"`
  */
 export const useReadAssemblyCoreContractOwner =
   /*#__PURE__*/ createUseReadContract({
     abi: assemblyCoreContractAbi,
     functionName: 'owner',
-  })
-
-/**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link assemblyCoreContractAbi}__ and `functionName` set to `"renderer"`
- */
-export const useReadAssemblyCoreContractRenderer =
-  /*#__PURE__*/ createUseReadContract({
-    abi: assemblyCoreContractAbi,
-    functionName: 'renderer',
-  })
-
-/**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link assemblyCoreContractAbi}__ and `functionName` set to `"validator"`
- */
-export const useReadAssemblyCoreContractValidator =
-  /*#__PURE__*/ createUseReadContract({
-    abi: assemblyCoreContractAbi,
-    functionName: 'validator',
   })
 
 /**
