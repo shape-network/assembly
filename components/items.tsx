@@ -30,7 +30,7 @@ type ItemToCraftCardProps = {
   onDropVariable: (itemId: string, index: number, item: OtomItem | null) => void;
   droppedOnRequiredSlots: Set<string>;
   onClearRequired: (itemId: string) => void;
-  onCraftSuccess?: (itemId: string) => void;
+  onCraftSuccess: (itemId: string) => void;
 };
 
 export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
@@ -83,6 +83,12 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
     });
   }
 
+  function handleSuccess(itemId: string) {
+    onCraftSuccess(itemId);
+    handleClearRequiredClick();
+    handleClearVariableClick();
+  }
+
   return (
     <li className="grid w-[300px] shrink-0 grid-rows-[1fr_auto] gap-1">
       <Card className="relative w-full">
@@ -91,7 +97,7 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
           item={item}
           className="absolute top-2 right-2 z-10 h-8 px-3"
           droppedVariableItems={droppedVariableItems}
-          onCraftSuccess={onCraftSuccess}
+          onCraftSuccess={handleSuccess}
         />
 
         <CardHeader className="relative">

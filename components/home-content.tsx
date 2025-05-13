@@ -28,7 +28,7 @@ const ItemsToCraft: FC<{
   onDrop: (itemId: string, index: number, item: OtomItem | null) => void;
   droppedOnRequiredSlots: Set<string>;
   onClearRequired: (itemId: string) => void;
-  onCraftSuccess?: (itemId: string) => void;
+  onCraftSuccess: (itemId: string) => void;
 }> = ({ droppedItemsState, onDrop, droppedOnRequiredSlots, onClearRequired, onCraftSuccess }) => {
   const { data, isLoading, isError } = useGetCraftableItems();
 
