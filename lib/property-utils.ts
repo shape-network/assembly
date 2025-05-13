@@ -10,48 +10,53 @@ export const PROPERTY_TYPE_MAP: Record<
   number, // Corresponds to PropertyType enum value
   { path: PropertyPath; type: 'number' | 'boolean' | 'string' }
 > = {
-  // --- Molecule Properties (PropertyType 0-6) ---
-  0: { path: ['activation_energy'], type: 'number' }, // ACTIVATION_ENERGY
-  1: { path: ['radius'], type: 'number' }, // MOLECULE_RADIUS (OtomItem.radius)
-  2: { path: ['electrical_conductivity'], type: 'number' }, // ELECTRICAL_CONDUCTIVITY
-  3: { path: ['thermal_conductivity'], type: 'number' }, // THERMAL_CONDUCTIVITY
-  4: { path: ['toughness'], type: 'number' }, // TOUGHNESS
-  5: { path: ['hardness'], type: 'number' }, // HARDNESS
-  6: { path: ['ductility'], type: 'number' }, // DUCTILITY
-  // --- Atom Properties (PropertyType 7-12) ---
-  7: { path: ['giving_atoms', 0, 'radius'], type: 'number' }, // ATOM_RADIUS
-  8: { path: ['giving_atoms', 0, 'volume'], type: 'number' }, // VOLUME
-  9: { path: ['giving_atoms', 0, 'mass'], type: 'number' }, // MASS
-  10: { path: ['giving_atoms', 0, 'density'], type: 'number' }, // DENSITY
-  11: { path: ['giving_atoms', 0, 'electronegativity'], type: 'number' }, // ELECTRONEGATIVITY
-  12: { path: ['giving_atoms', 0, 'metallic'], type: 'boolean' }, // METALLIC
-  // --- Nuclear Properties (PropertyType 13-17) ---
-  13: { path: ['giving_atoms', 0, 'nucleus', 'protons'], type: 'number' }, // PROTONS
-  14: { path: ['giving_atoms', 0, 'nucleus', 'neutrons'], type: 'number' }, // NEUTRONS
-  15: { path: ['giving_atoms', 0, 'nucleus', 'nucleons'], type: 'number' }, // NUCLEONS
-  16: { path: ['giving_atoms', 0, 'nucleus', 'stability'], type: 'number' }, // STABILITY
-  17: { path: ['giving_atoms', 0, 'nucleus', 'decay_type'], type: 'string' }, // DECAY_TYPE
+  // --- Universe Properties (PropertyType 0) ---
+  0: { path: ['universeHash'], type: 'string' },
+  // --- Molecule Properties (PropertyType 1-8) ---
+  1: { path: ['name'], type: 'string' },
+  2: { path: ['activation_energy'], type: 'number' },
+  3: { path: ['radius'], type: 'number' },
+  4: { path: ['electrical_conductivity'], type: 'number' },
+  5: { path: ['thermal_conductivity'], type: 'number' },
+  6: { path: ['toughness'], type: 'number' },
+  7: { path: ['hardness'], type: 'number' },
+  8: { path: ['ductility'], type: 'number' },
+  // --- Atom Properties (PropertyType 9-14) ---
+  9: { path: ['giving_atoms', 0, 'radius'], type: 'number' },
+  10: { path: ['giving_atoms', 0, 'volume'], type: 'number' },
+  11: { path: ['giving_atoms', 0, 'mass'], type: 'number' },
+  12: { path: ['giving_atoms', 0, 'density'], type: 'number' },
+  13: { path: ['giving_atoms', 0, 'electronegativity'], type: 'number' },
+  14: { path: ['giving_atoms', 0, 'metallic'], type: 'boolean' },
+  // --- Nuclear Properties (PropertyType 15-19) ---
+  15: { path: ['giving_atoms', 0, 'nucleus', 'protons'], type: 'number' },
+  16: { path: ['giving_atoms', 0, 'nucleus', 'neutrons'], type: 'number' },
+  17: { path: ['giving_atoms', 0, 'nucleus', 'nucleons'], type: 'number' },
+  18: { path: ['giving_atoms', 0, 'nucleus', 'stability'], type: 'number' },
+  19: { path: ['giving_atoms', 0, 'nucleus', 'decay_type'], type: 'string' },
 };
 
 const PROPERTY_NAME_MAP: Record<number, string> = {
-  0: 'Activation Energy',
-  1: 'Molecule Radius',
-  2: 'Electrical Conductivity',
-  3: 'Thermal Conductivity',
-  4: 'Toughness',
-  5: 'Hardness',
-  6: 'Ductility',
-  7: 'Atom Radius',
-  8: 'Volume',
-  9: 'Mass',
-  10: 'Density',
-  11: 'Electronegativity',
-  12: 'Metallic',
-  13: 'Protons',
-  14: 'Neutrons',
-  15: 'Nucleons',
-  16: 'Stability',
-  17: 'Decay Type',
+  0: 'Universe Hash',
+  1: 'Molecule Name',
+  2: 'Activation Energy',
+  3: 'Molecule Radius',
+  4: 'Electrical Conductivity',
+  5: 'Thermal Conductivity',
+  6: 'Toughness',
+  7: 'Hardness',
+  8: 'Ductility',
+  9: 'Atom Radius',
+  10: 'Volume',
+  11: 'Mass',
+  12: 'Density',
+  13: 'Electronegativity',
+  14: 'Metallic',
+  15: 'Protons',
+  16: 'Neutrons',
+  17: 'Nucleons',
+  18: 'Stability',
+  19: 'Decay Type',
 };
 
 export function formatPropertyName(propertyType: number): string {

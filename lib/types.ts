@@ -11,8 +11,8 @@ export type BlueprintComponent = {
   name: string;
   criteria: {
     propertyType: number;
-    minValue?: bigint;
-    maxValue?: bigint;
+    minValue?: number;
+    maxValue?: number;
     boolValue?: boolean;
     checkBoolValue?: boolean;
     stringValue?: string;

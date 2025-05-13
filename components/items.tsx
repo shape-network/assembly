@@ -541,12 +541,12 @@ const VariableDropZone: FC<{
                 ) : (
                   <>
                     Range:{' '}
-                    {typeof c.minValue === 'bigint' && c.minValue > BigInt(10000)
-                      ? `${Number(c.minValue).toExponential(2)}`
+                    {typeof c.minValue === 'number' && c.minValue > 10000
+                      ? `${c.minValue.toExponential(2)}`
                       : String(c.minValue)}{' '}
                     -{' '}
-                    {typeof c.maxValue === 'bigint' && c.maxValue > BigInt(10000)
-                      ? `${Number(c.maxValue).toExponential(2)}`
+                    {typeof c.maxValue === 'number' && c.maxValue > 10000
+                      ? `${c.maxValue.toExponential(2)}`
                       : String(c.maxValue)}
                   </>
                 )}
