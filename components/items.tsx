@@ -22,7 +22,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { QuestionMarkCircledIcon } from '@radix-ui/react-icons';
 import { useAtom } from 'jotai';
 import Image from 'next/image';
-import { FC, useEffect } from 'react';
+import { FC, useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { useWaitForTransactionReceipt } from 'wagmi';
 
@@ -123,11 +123,14 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
     });
   }
 
-  function handleSuccess(itemId: string) {
-    onCraftSuccess(itemId);
-    handleClearRequiredClick();
-    handleClearVariableClick();
-  }
+  const handleSuccess = useCallback(
+    (itemId: string) => {
+      onCraftSuccess(itemId);
+      handleClearRequiredClick();
+      handleClearVariableClick();
+    },
+    [onCraftSuccess]
+  );
 
   return (
     <li className="grid w-[300px] shrink-0 grid-rows-[1fr_auto] gap-1">
@@ -396,10 +399,15 @@ const CraftItemButton: FC<{
   onCraftSuccess?: (itemId: string) => void;
   isCraftable?: boolean;
 }> = ({ item, className, droppedVariableItems, onCraftSuccess, isCraftable }) => {
-  const { data: hash, writeContractAsync, isPending } = useWriteAssemblyCoreContractCraftItem();
+  const { data: hash, writeContractAsync } = useWriteAssemblyCoreContractCraftItem();
   const { refetch: refetchOtomItems } = useGetOtomItemsForUser();
 
+  const [craftingStatus, setCraftingStatus] = useState<'idle' | 'pending' | 'success' | 'error'>(
+    'idle'
+  );
+
   async function handleCraftItem() {
+    setCraftingStatus('pending');
     const variableOtomTokenIds = item.blueprint
       .filter((bp) => bp.componentType === 'variable_otom')
       .map((_, index) => {
@@ -415,6 +423,7 @@ const CraftItemButton: FC<{
         args: [item.id, BigInt(1), variableOtomTokenIds, [], '0x'],
       });
     } catch (error) {
+      setCraftingStatus('error');
       toast.error(`An error occurred while crafting ${item.name}, please try again.`);
       console.error(error);
     }
@@ -425,12 +434,16 @@ const CraftItemButton: FC<{
     isError: isTxError,
     isSuccess: isTxConfirmed,
   } = useWaitForTransactionReceipt({ hash, query: { enabled: !!hash } });
+
   useEffect(() => {
-    if (hash && isTxConfirming) {
+    if (hash && isTxConfirming && craftingStatus === 'pending') {
       toast.loading('Item is being crafted...', { id: 'loading' });
     }
+  }, [hash, isTxConfirming, craftingStatus]);
 
-    if (isTxConfirmed) {
+  useEffect(() => {
+    if (isTxConfirmed && craftingStatus === 'pending') {
+      setCraftingStatus('success');
       toast.success(`${item.name} crafted successfully!`);
       toast.dismiss('loading');
       refetchOtomItems();
@@ -438,23 +451,17 @@ const CraftItemButton: FC<{
         onCraftSuccess(String(item.id));
       }
     }
+  }, [isTxConfirmed, craftingStatus, onCraftSuccess, refetchOtomItems]);
 
-    if (isTxError) {
+  useEffect(() => {
+    if (isTxError && craftingStatus === 'pending') {
+      setCraftingStatus('error');
       toast.error(`An error occurred while crafting ${item.name}, please try again.`);
       toast.dismiss('loading');
     }
-  }, [
-    hash,
-    refetchOtomItems,
-    isTxConfirming,
-    isTxConfirmed,
-    isTxError,
-    item.name,
-    onCraftSuccess,
-    item.id,
-  ]);
+  }, [isTxError, craftingStatus, item.name]);
 
-  const disabled = !isCraftable || isPending || isTxConfirming;
+  const disabled = !isCraftable || craftingStatus === 'pending' || isTxConfirming;
 
   return (
     <Button
@@ -462,7 +469,7 @@ const CraftItemButton: FC<{
       onClick={handleCraftItem}
       className={cn('disabled:opacity-15', className)}
     >
-      {isPending || isTxConfirming ? 'Crafting...' : 'Craft'}
+      {craftingStatus === 'pending' || isTxConfirming ? 'Crafting...' : 'Craft'}
     </Button>
   );
 };

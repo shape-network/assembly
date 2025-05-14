@@ -36,23 +36,26 @@ export const HomeContent = () => {
   }, []);
 
   function handleClearRequired(itemId: string) {
-    const slotsToClear = new Set<string>();
-    const otomsToUnuse = new Set<string>();
-    const mapUpdates = { ...requiredSlotToOtomMap };
-
-    for (const slotId in mapUpdates) {
-      if (slotId.startsWith(`required-${itemId}-`)) {
-        slotsToClear.add(slotId);
-        otomsToUnuse.add(mapUpdates[slotId]);
-        delete mapUpdates[slotId];
+    setRequiredSlotToOtomMap((prev) => {
+      const slotsToClear = new Set<string>();
+      const otomsToUnuse = new Set<string>();
+      const mapUpdates = { ...prev };
+      for (const slotId in mapUpdates) {
+        if (slotId.startsWith(`required-${itemId}-`)) {
+          slotsToClear.add(slotId);
+          otomsToUnuse.add(mapUpdates[slotId]);
+          delete mapUpdates[slotId];
+        }
       }
-    }
-
-    if (slotsToClear.size > 0) {
-      setRequiredSlotToOtomMap(mapUpdates);
-      setDroppedOnRequiredSlots((prev) => new Set([...prev].filter((id) => !slotsToClear.has(id))));
-      setUsedRequiredItems((prev) => new Set([...prev].filter((id) => !otomsToUnuse.has(id))));
-    }
+      if (slotsToClear.size === 0) return prev;
+      setDroppedOnRequiredSlots(
+        (prevSet) => new Set([...prevSet].filter((id) => !slotsToClear.has(id)))
+      );
+      setUsedRequiredItems(
+        (prevSet) => new Set([...prevSet].filter((id) => !otomsToUnuse.has(id)))
+      );
+      return mapUpdates;
+    });
   }
 
   function handleCraftSuccess(itemId: string) {
