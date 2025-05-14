@@ -24,6 +24,43 @@ import { FC, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useWaitForTransactionReceipt } from 'wagmi';
 
+export const ItemsToCraft: FC<{
+  droppedItemsState: Record<string, Record<number, OtomItem | null>>;
+  onDrop: (itemId: string, index: number, item: OtomItem | null) => void;
+  droppedOnRequiredSlots: Set<string>;
+  onClearRequired: (itemId: string) => void;
+  onCraftSuccess: (itemId: string) => void;
+}> = ({ droppedItemsState, onDrop, droppedOnRequiredSlots, onClearRequired, onCraftSuccess }) => {
+  const { data, isLoading, isError } = useGetCraftableItems();
+
+  if (isLoading) {
+    return <ItemsToCraftSkeleton />;
+  }
+
+  if (!data || isError) {
+    return <p>Error loading items to craft.</p>;
+  }
+
+  return (
+    <HorizontallScrollWrapper>
+      {data.map((item) => {
+        const droppedItemsForThisCard = droppedItemsState[String(item.id)] || {};
+        return (
+          <ItemToCraftCard
+            key={item.id}
+            item={item}
+            droppedVariableItems={droppedItemsForThisCard}
+            onDropVariable={onDrop}
+            droppedOnRequiredSlots={droppedOnRequiredSlots}
+            onClearRequired={onClearRequired}
+            onCraftSuccess={onCraftSuccess}
+          />
+        );
+      })}
+    </HorizontallScrollWrapper>
+  );
+};
+
 type ItemToCraftCardProps = {
   item: Item;
   droppedVariableItems: Record<number, OtomItem | null>;
@@ -33,7 +70,7 @@ type ItemToCraftCardProps = {
   onCraftSuccess: (itemId: string) => void;
 };
 
-export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
+const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
   item,
   droppedVariableItems,
   onDropVariable,
@@ -605,5 +642,27 @@ export const HorizontallScrollWrapper: FC<{ children: React.ReactNode }> = ({ ch
         <ul className="flex flex-nowrap gap-2 pb-4">{children}</ul>
       </div>
     </div>
+  );
+};
+
+export const InventorySkeleton: FC = () => {
+  return (
+    <div className="flex flex-wrap items-start gap-2">
+      {Array.from({ length: 25 }).map((_, index) => (
+        <Skeleton key={index} className="size-15" />
+      ))}
+    </div>
+  );
+};
+
+export const ItemsToCraftSkeleton: FC = () => {
+  return (
+    <HorizontallScrollWrapper>
+      {Array.from({ length: 4 }).map((_, index) => (
+        <li key={index} className="w-xs flex-shrink-0 sm:w-[300px]">
+          <Skeleton className="h-[578px] w-full" />
+        </li>
+      ))}
+    </HorizontallScrollWrapper>
   );
 };
