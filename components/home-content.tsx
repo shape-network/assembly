@@ -11,7 +11,7 @@ import type { OtomItem } from '@/lib/types';
 import { DndContext, DragOverlay, type DragEndEvent, type DragStartEvent } from '@dnd-kit/core';
 import { ExternalLinkIcon } from '@radix-ui/react-icons';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useAccount } from 'wagmi';
 
 export const HomeContent = () => {
@@ -24,18 +24,16 @@ export const HomeContent = () => {
   const [requiredSlotToOtomMap, setRequiredSlotToOtomMap] = useState<Record<string, string>>({});
   const [activeItem, setActiveItem] = useState<OtomItem | null>(null);
 
-  function handleDrop(itemId: string, index: number, droppedItem: OtomItem | null) {
+  const handleDrop = useCallback((itemId: string, index: number, droppedItem: OtomItem | null) => {
     setDroppedItemsState((prev) => {
       const newState = { ...prev };
       if (!newState[itemId]) {
         newState[itemId] = {};
       }
       newState[itemId][index] = droppedItem;
-      if (droppedItem === null && Object.values(newState[itemId]).every((v) => v === null)) {
-      }
       return newState;
     });
-  }
+  }, []);
 
   function handleClearRequired(itemId: string) {
     const slotsToClear = new Set<string>();
@@ -61,77 +59,82 @@ export const HomeContent = () => {
     handleClearRequired(itemId);
   }
 
-  function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
-    setActiveItem(null);
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      setActiveItem(null);
 
-    if (over) {
-      const droppedItemData = active.data.current as OtomItem | null;
-      const dropZoneId = String(over.id);
-      const dropZoneData = over.data.current as {
-        type: string;
-        requiredTokenId?: string;
-        index?: number;
-      };
-      const draggedItemId = String(active.id);
+      if (over) {
+        const droppedItemData = active.data.current as OtomItem | null;
+        const dropZoneId = String(over.id);
+        const dropZoneData = over.data.current as {
+          type: string;
+          requiredTokenId?: string;
+          index?: number;
+        };
+        const draggedItemId = String(active.id);
 
-      if (!droppedItemData || !dropZoneData) return;
+        if (!droppedItemData || !dropZoneData) return;
 
-      if (dropZoneData?.type === 'required') {
-        if (droppedItemData?.tokenId === dropZoneData?.requiredTokenId) {
-          setDroppedOnRequiredSlots((prev) => new Set(prev).add(dropZoneId));
-          setUsedRequiredItems((prev) => new Set(prev).add(draggedItemId));
-          setRequiredSlotToOtomMap((prev) => ({ ...prev, [dropZoneId]: draggedItemId }));
-        }
-      } else if (dropZoneData?.type === 'variable') {
-        const parts = dropZoneId.split('-');
-        if (parts.length === 3 && parts[0] === 'variable') {
-          const itemId = parts[1];
-          const index = parseInt(parts[2], 10);
-          if (!isNaN(index)) {
-            handleDrop(itemId, index, droppedItemData);
-          } else {
-            console.error('Could not parse index from drop zone ID:', dropZoneId);
+        if (dropZoneData?.type === 'required') {
+          if (droppedItemData?.tokenId === dropZoneData?.requiredTokenId) {
+            setDroppedOnRequiredSlots((prev) => new Set(prev).add(dropZoneId));
+            setUsedRequiredItems((prev) => new Set(prev).add(draggedItemId));
+            setRequiredSlotToOtomMap((prev) => ({ ...prev, [dropZoneId]: draggedItemId }));
           }
-        } else {
-          console.error('Could not parse item ID and index from drop zone ID:', dropZoneId);
+        } else if (dropZoneData?.type === 'variable') {
+          const parts = dropZoneId.split('-');
+          if (parts.length === 3 && parts[0] === 'variable') {
+            const itemId = parts[1];
+            const index = parseInt(parts[2], 10);
+            if (!isNaN(index)) {
+              handleDrop(itemId, index, droppedItemData);
+            } else {
+              console.error('Could not parse index from drop zone ID:', dropZoneId);
+            }
+          } else {
+            console.error('Could not parse item ID and index from drop zone ID:', dropZoneId);
+          }
         }
-      }
-    } else {
-      let slotIdToClear: string | null = null;
-      for (const slotId in requiredSlotToOtomMap) {
-        if (requiredSlotToOtomMap[slotId] === String(active.id)) {
-          slotIdToClear = slotId;
-          break;
+      } else {
+        let slotIdToClear: string | null = null;
+        for (const slotId in requiredSlotToOtomMap) {
+          if (requiredSlotToOtomMap[slotId] === String(active.id)) {
+            slotIdToClear = slotId;
+            break;
+          }
         }
-      }
-      if (slotIdToClear) {
-        setDroppedOnRequiredSlots((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(slotIdToClear!);
-          return newSet;
-        });
-        setUsedRequiredItems((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(String(active.id));
-          return newSet;
-        });
-        setRequiredSlotToOtomMap((prev) => {
-          const newMap = { ...prev };
-          delete newMap[slotIdToClear!];
-          return newMap;
-        });
-      }
-    }
-  }
 
-  function handleDragStart(event: DragStartEvent) {
+        if (slotIdToClear) {
+          const finalSlotIdToClear = slotIdToClear;
+          setDroppedOnRequiredSlots((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(finalSlotIdToClear);
+            return newSet;
+          });
+          setUsedRequiredItems((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(String(active.id));
+            return newSet;
+          });
+          setRequiredSlotToOtomMap((prev) => {
+            const newMap = { ...prev };
+            delete newMap[finalSlotIdToClear];
+            return newMap;
+          });
+        }
+      }
+    },
+    [handleDrop, requiredSlotToOtomMap]
+  );
+
+  const handleDragStart = useCallback((event: DragStartEvent) => {
     const { active } = event;
     const droppedItemData = active.data.current as OtomItem | null;
     if (droppedItemData) {
       setActiveItem(droppedItemData);
     }
-  }
+  }, []);
 
   return (
     <div className="mx-auto grid min-h-screen max-w-7xl grid-rows-[auto_1fr] gap-4 sm:p-5">
