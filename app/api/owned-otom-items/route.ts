@@ -2,7 +2,7 @@ import { getMoleculesByIds, getPagedNftsForOwner } from '@/app/api/fetchers';
 import { otomsCore } from '@/lib/addresses';
 import { config } from '@/lib/config';
 import { Molecule, OtomItem } from '@/lib/types';
-import { universeSeedToHash } from '@/lib/utils';
+import { isNotNullish, universeSeedToHash } from '@/lib/utils';
 import { OwnedNftsResponse } from 'alchemy-sdk';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
@@ -90,7 +90,7 @@ export async function POST(request: Request) {
     });
 
     const inventory: { elements: OtomItem[]; cursor?: string } = {
-      elements: otomItems,
+      elements: otomItems.filter(isNotNullish),
       cursor: nfts.pageKey,
     };
 
