@@ -212,15 +212,18 @@ export const HomeContent = () => {
                 <div className="flex flex-col gap-4">
                   <p>
                     Assembly is an open-source item crafting tool on{' '}
-                    <InlineLink href={paths.otom}>Shape</InlineLink>, based on the world of{' '}
+                    <InlineLink href={paths.shape}>Shape</InlineLink>, based on the world of{' '}
                     <InlineLink href={paths.otom}>Otoms</InlineLink>.
                   </p>
                   <p>
-                    It&apos;s In esse ullamco in mollit mollit irure laboris irure consectetur
-                    aliqua cillum velit duis commodo incididunt. Quis anim consectetur fugiat dolore
-                    occaecat nulla ipsum enim laborum ut sint ut.
+                    Composability is at the heart of Assembly. By combining multiple elements new
+                    items can be formed, that can be used in other projects.
                   </p>
-                  <InlineLink className="self-start" href={paths.otom}>
+                  <p>
+                    This project is completely open, anyone can contribute to improve the code or
+                    submit their own item for people to craft.
+                  </p>
+                  <InlineLink className="self-start" href={paths.repo}>
                     View source code
                   </InlineLink>
                 </div>
