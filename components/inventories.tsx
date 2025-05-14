@@ -13,6 +13,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { isOtomAtom } from '@/lib/otoms';
 import { paths } from '@/lib/paths';
 import type { OtomItem } from '@/lib/types';
+import { cn } from '@/lib/utils';
 import { useDeferredValue, useEffect, useMemo, useState, type FC } from 'react';
 import { useInView } from 'react-intersection-observer';
 
@@ -28,6 +29,8 @@ export const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedReq
 
   const [moleculesRef, moleculesInView] = useInView();
   const [otomsRef, otomsInView] = useInView();
+
+  const [bottomSentinelRef, isBottomSentinelInView] = useInView();
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
     useGetOtomItemsForUser();
@@ -97,7 +100,7 @@ export const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedReq
         </div>
       )}
 
-      <ScrollArea className="h-full max-h-[50vh] flex-col sm:max-h-[36vh]">
+      <ScrollArea className="relative h-full max-h-[50vh] flex-col sm:max-h-[36vh]">
         <p className="text-muted-foreground mb-4 text-sm italic">
           Drag elements into the desired slot to craft an item.
         </p>
@@ -150,6 +153,15 @@ export const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedReq
         {deferredSearchTerm && isInventoryEmpty && (
           <p className="text-muted-foreground py-4 text-sm">{`No otoms found matching "${deferredSearchTerm}".`}</p>
         )}
+
+        <div ref={bottomSentinelRef} className="h-px" />
+
+        <div
+          className={cn(
+            'from-background via-background/50 absolute inset-x-0 bottom-0 h-4 w-full bg-gradient-to-t to-transparent transition-opacity',
+            isBottomSentinelInView ? 'opacity-0' : 'opacity-100'
+          )}
+        />
       </ScrollArea>
     </div>
   );
