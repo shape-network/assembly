@@ -23,26 +23,15 @@ export const Providers = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// if (typeof window !== 'undefined') {
-//   posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY ?? '', {
-//     api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
-//     capture_pageview: false,
-//     capture_pageleave: true, // Enable pageleave capture
-//     loaded: (posthog) => {
-//       if (process.env.NODE_ENV === 'development') posthog.debug();
-//     },
-//   });
-// }
-// export const CSPostHogProvider = ({ children }: PropsWithChildren) => {
-//   return <PostHogProvider client={posthog}>{children}</PostHogProvider>;
-// };
-
 export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY as string, {
       api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com',
-      person_profiles: 'identified_only', // or 'always' to create profiles for anonymous users as well
-      capture_pageview: false, // Disable automatic pageview capture, as we capture manually
+      capture_pageview: false,
+      capture_pageleave: true,
+      loaded: (posthog) => {
+        if (process.env.NODE_ENV === 'development') posthog.debug();
+      },
     });
   }, []);
 
@@ -59,7 +48,6 @@ function PostHogPageView() {
   const searchParams = useSearchParams();
   const posthog = usePostHog();
 
-  // Track pageviews
   useEffect(() => {
     if (pathname && posthog) {
       let url = window.origin + pathname;
