@@ -12,25 +12,25 @@ export const otomsDatabase = {
 
 export const assemblyCore = {
   [shapeSepolia.id]: '0x488B5bAEA1Eb28F48c279C9Ac4e3312790813C2e',
-  [shape.id]: '0x0000000000000000000000000000000000000000',
+  [shape.id]: '0x62670B7C24FFECc79B2d5ed77BeA31F05A589Bd3',
 } as const;
 
 export const assemblyValidation = {
   [shapeSepolia.id]: '0x93Fa83908Da09aa2ED8a3A478dB264d2a10e972d',
-  [shape.id]: '0x0000000000000000000000000000000000000000',
+  [shape.id]: '0x6BcDF5A1C3FC5e22809103C1a3Bf0dde017ae66f',
 } as const;
 
 export const assemblyTracking = {
   [shapeSepolia.id]: '0xd0424C0365C95F6f6174ceB0D7c24b99C09adc2B',
-  [shape.id]: '0x0000000000000000000000000000000000000000',
+  [shape.id]: '0xcDC2D10Af227E69a2f68e8d99B33B957F44F5A7b',
 } as const;
 
 export const assemblyItems = {
   [shapeSepolia.id]: '0x489B90261Ccf74E4D3883fd8B2C6A19f6E8B2b06',
-  [shape.id]: '0x0000000000000000000000000000000000000000',
+  [shape.id]: '0x65Aa21f6CC2527874313Bf23BeCB7EA565264B83',
 } as const;
 
 export const assemblyRenderer = {
   [shapeSepolia.id]: '0xBAB24914d5f73006CcEFd6d87De9890c99d3C1CD',
-  [shape.id]: '0x0000000000000000000000000000000000000000',
+  [shape.id]: '0x6Bb1dd5574Faf83b0591B7db047eb553Fe9ad1a4',
 } as const;
