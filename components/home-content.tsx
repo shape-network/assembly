@@ -134,19 +134,19 @@ export const HomeContent = () => {
   }
 
   return (
-    <div className="mx-auto grid min-h-screen max-w-7xl grid-rows-[auto_1fr] gap-4 p-5">
-      <header className="flex items-center justify-between">
+    <div className="mx-auto grid min-h-screen max-w-7xl grid-rows-[auto_1fr] gap-4 sm:p-5">
+      <header className="flex items-center justify-between p-5 sm:p-0">
         <div className="relative">
           <h1 className="text-primary text-2xl font-semibold tracking-wide uppercase">
             <Link href={paths.home}>Assembly</Link>
           </h1>
-          <span className="text-muted-foreground/50 absolute -bottom-5 left-0 text-sm whitespace-nowrap">
+          <span className="text-muted-foreground/50 absolute -bottom-8 left-0 text-sm whitespace-nowrap sm:-bottom-5">
             An otom-based item crafter
           </span>
         </div>
 
         <div className="flex items-center gap-2">
-          <Button asChild variant="link">
+          <Button asChild variant="link" className="hidden sm:flex">
             <a href={paths.otom} target="_blank" rel="noopener noreferrer">
               otom.xyz
             </a>
@@ -156,7 +156,7 @@ export const HomeContent = () => {
         </div>
       </header>
 
-      <main className="flex flex-col justify-start gap-8 overflow-x-hidden py-12">
+      <main className="flex flex-col justify-start gap-8 overflow-x-hidden px-2 py-12 sm:px-0">
         <DndContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
           <div className="flex flex-col gap-16">
             <div className="flex flex-col gap-2">
@@ -169,7 +169,7 @@ export const HomeContent = () => {
 
                   <InlineLink
                     href={paths.repo}
-                    className="text-muted-foreground/50 text-sm no-underline hover:underline"
+                    className="text-muted-foreground/50 hidden text-sm no-underline hover:underline sm:inline-flex"
                   >
                     Propose your own <ExternalLinkIcon className="size-4" />
                   </InlineLink>
