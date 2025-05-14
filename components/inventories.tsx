@@ -71,22 +71,22 @@ export const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedReq
         </div>
       )}
 
-      <p className="text-muted-foreground text-sm italic">
-        Drag elements into the desired slot to craft an item.
-      </p>
+      <ScrollArea className="h-full max-h-[50vh] flex-col sm:max-h-[36vh]">
+        <p className="text-muted-foreground mb-4 text-sm italic">
+          Drag elements into the desired slot to craft an item.
+        </p>
 
-      <Input
-        type="search"
-        placeholder="Search owned otoms (eg Ju)"
-        className="max-w-xs"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        disabled={!rawInventory || rawInventory.length === 0}
-      />
+        <Input
+          type="search"
+          placeholder="Search owned otoms (eg Ju)"
+          className="mb-4 max-w-xs"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          disabled={!rawInventory || rawInventory.length === 0}
+        />
 
-      <ScrollArea className="h-full max-h-[50vh] sm:max-h-[36vh]">
         {groupedInventory.length > 0 ? (
-          <ul className="flex flex-wrap items-start gap-2 rounded">
+          <ul className="grid grid-cols-[repeat(auto-fill,minmax(64px,1fr))] items-start gap-2 rounded sm:flex sm:flex-wrap">
             {groupedInventory.map((group) => (
               <OtomItemCard
                 key={group.representativeItem.tokenId}
