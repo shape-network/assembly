@@ -118,6 +118,10 @@ const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedRequiredIt
           </div>
         ))}
 
+      <p className="text-muted-foreground text-sm italic">
+        Drag elements into the desired slot to craft an item.
+      </p>
+
       <Input
         type="search"
         placeholder="Search owned otoms (eg Ju)"
