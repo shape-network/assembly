@@ -106,9 +106,7 @@ export async function POST(request: Request) {
     })
   );
 
-  const response = {
-    items: items.filter(isNotNullish),
-  };
+  const response = items.filter(isNotNullish);
 
-  return NextResponse.json(superjson.stringify(response));
+  return new NextResponse(superjson.stringify(response));
 }

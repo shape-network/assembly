@@ -51,8 +51,8 @@ export function useGetItemsForUser() {
         method: 'POST',
         body: JSON.stringify({ address }),
       });
-      const data = await response.json();
-      return superjson.parse(data);
+      const data = await response.text();
+      return superjson.parse<OwnedItem[]>(data);
     },
     enabled: !!address,
   });
