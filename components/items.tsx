@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useWriteAssemblyCoreContractCraftItem } from '@/generated';
 import { assemblyCore } from '@/lib/addresses';
+import { hoveredOtomIdAtom } from '@/lib/atoms';
 import { config } from '@/lib/config';
 import { isOtomAtom } from '@/lib/otoms';
 import { checkCriteria, formatPropertyName } from '@/lib/property-utils';
@@ -19,6 +20,7 @@ import { cn, isNotNullish } from '@/lib/utils';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { LightningBoltIcon, QuestionMarkCircledIcon } from '@radix-ui/react-icons';
+import { useAtom } from 'jotai';
 import Image from 'next/image';
 import { FC, useEffect } from 'react';
 import { toast } from 'sonner';
@@ -236,10 +238,6 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
                         index={i}
                         criteria={vb.criteria}
                         droppedItem={droppedItem}
-                        onDrop={(_itemId, index, theDroppedItem) =>
-                          onDropVariable(String(item.id), index, theDroppedItem)
-                        }
-                        itemName={item.name}
                       />
                     );
                   })}
@@ -269,6 +267,7 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({
   usedTokenIds,
 }) => {
   const { data: craftableItems } = useGetCraftableItems();
+  const [hoveredTokenId, setHoveredTokenId] = useAtom(hoveredOtomIdAtom);
 
   const draggableItem = allItems.find((item) => !usedTokenIds.has(item.tokenId));
   const areAllItemsUsed = allItems.every((item) => usedTokenIds.has(item.tokenId));
@@ -292,6 +291,16 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({
     )
   );
 
+  const handleMouseEnter = () => {
+    if (isRequiredInBlueprint && !areAllItemsUsed) {
+      setHoveredTokenId(representativeItem.tokenId);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setHoveredTokenId(null);
+  };
+
   const mass =
     representativeItem.giving_atoms.reduce((acc, atom) => acc + atom.mass, 0) +
     representativeItem.receiving_atoms.reduce((acc, atom) => acc + atom.mass, 0);
@@ -306,6 +315,8 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({
           style={style}
           {...listeners}
           {...attributes}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
           className={cn(
             'relative cursor-pointer touch-none py-0 font-semibold transition-colors',
             areAllItemsUsed
@@ -313,7 +324,8 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({
               : isRequiredInBlueprint
                 ? 'border-primary text-primary border-dashed'
                 : 'border-border text-muted-foreground font-normal',
-            areAllItemsUsed && 'cursor-not-allowed'
+            areAllItemsUsed && 'cursor-not-allowed',
+            hoveredTokenId === representativeItem.tokenId && !areAllItemsUsed && 'bg-primary/15'
           )}
         >
           <CardContent className="grid size-15 place-items-center px-0">
@@ -517,6 +529,8 @@ const RequiredDropZone: FC<{
     id: id,
     data: { requiredTokenId: String(component.itemIdOrOtomTokenId), type: 'required' },
   });
+  const [hoveredTokenId, setHoveredTokenId] = useAtom(hoveredOtomIdAtom);
+  const isHoveredTarget = hoveredTokenId === String(component.itemIdOrOtomTokenId);
 
   const draggedElement = active?.data.current as OtomItem | null;
 
@@ -529,18 +543,31 @@ const RequiredDropZone: FC<{
 
   const isMolecule = molecule ? !isOtomAtom(molecule) : false;
 
+  const handleMouseEnter = () => {
+    if (isOwned) {
+      setHoveredTokenId(String(component.itemIdOrOtomTokenId));
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setHoveredTokenId(null);
+  };
+
   return (
     <Card
       ref={setNodeRef}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       className={cn(
-        'relative py-0 transition-colors select-none',
+        'relative py-0 transition-[colors,transform] select-none',
         isDropped
           ? 'bg-primary text-primary-foreground font-semibold'
           : isOwned
             ? 'border-primary border-dashed font-semibold'
             : 'text-muted-foreground/50 border-border font-normal',
         isOver && canDrop && 'ring-primary ring-2 ring-offset-2',
-        isOver && !canDrop && 'ring-destructive ring-2 ring-offset-2'
+        isOver && !canDrop && 'ring-destructive ring-2 ring-offset-2',
+        isHoveredTarget && !isDropped && 'bg-primary/15'
       )}
     >
       <CardContent className="grid size-15 place-items-center px-0">
@@ -570,8 +597,6 @@ const VariableDropZone: FC<{
   index: number;
   criteria: BlueprintComponent['criteria'];
   droppedItem: OtomItem | null;
-  onDrop: (itemId: string, index: number, item: OtomItem | null) => void;
-  itemName: string;
 }> = ({ id, index, criteria, droppedItem }) => {
   const { isOver, setNodeRef, active } = useDroppable({
     id: id,
