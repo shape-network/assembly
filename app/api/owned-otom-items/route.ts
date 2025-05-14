@@ -7,17 +7,15 @@ import { OwnedNftsResponse } from 'alchemy-sdk';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
-type GetInventoryInput = {
-  address: string;
-  cursor?: string;
-};
-
-async function getNftsForUser({ address, cursor }: GetInventoryInput): Promise<OwnedNftsResponse> {
+async function getNftsForUser({
+  address,
+  pageKey,
+}: z.infer<typeof GetInventoryInputSchema>): Promise<OwnedNftsResponse> {
   try {
     const response = await getPagedNftsForOwner({
       owner: address,
       contractAddresses: [otomsCore[config.chainId]],
-      cursor,
+      cursor: pageKey,
     });
 
     return response;
@@ -44,7 +42,7 @@ async function getMolecules({
 
 const GetInventoryInputSchema = z.object({
   address: z.string(),
-  cursor: z.string().optional(),
+  pageKey: z.string().optional(),
 });
 
 export async function POST(request: Request) {
@@ -58,9 +56,9 @@ export async function POST(request: Request) {
       );
     }
 
-    const { address, cursor } = result.data;
+    const { address, pageKey } = result.data;
 
-    const nfts = await getNftsForUser({ address, cursor });
+    const nfts = await getNftsForUser({ address, pageKey });
     const tokenIds = nfts.ownedNfts.map((nft) => nft.tokenId);
 
     if (tokenIds.length === 0) {

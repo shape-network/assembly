@@ -11,7 +11,6 @@ import { z } from 'zod';
 
 const schema = z.object({
   address: z.string().refine(isAddress, { message: 'Invalid address' }),
-  pageKey: z.string().optional(),
 });
 
 export async function POST(request: Request) {
@@ -22,11 +21,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
   }
 
-  const { address, pageKey } = result.data;
+  const { address } = result.data;
 
   const nfts = await alchemy.nft.getNftsForOwner(address, {
     contractAddresses: [assemblyItems[config.chainId]],
-    pageKey,
   });
 
   const items: (OwnedItem | null)[] = await Promise.all(
@@ -110,7 +108,6 @@ export async function POST(request: Request) {
 
   const response = {
     items: items.filter(isNotNullish),
-    nextPageKey: nfts.pageKey,
   };
 
   return NextResponse.json(superjson.stringify(response));
