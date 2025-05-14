@@ -164,7 +164,7 @@ export const HomeContent = () => {
                 <div className="flex items-baseline justify-between gap-2">
                   <TabsList>
                     <TabsTrigger value="items-to-craft">Items to craft</TabsTrigger>
-                    <TabsTrigger value="owned-otoms">Owned Items</TabsTrigger>
+                    {address && <TabsTrigger value="owned-otoms">Owned Items</TabsTrigger>}
                   </TabsList>
 
                   <InlineLink
