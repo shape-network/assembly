@@ -259,6 +259,8 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({
     representativeItem.giving_atoms.reduce((acc, atom) => acc + atom.mass, 0) +
     representativeItem.receiving_atoms.reduce((acc, atom) => acc + atom.mass, 0);
 
+  const isMolecule = !isOtomAtom(representativeItem);
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -272,7 +274,7 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({
             areAllItemsUsed
               ? 'bg-primary text-primary-foreground'
               : isRequiredInBlueprint
-                ? 'border-primary/50 text-primary border-dashed'
+                ? 'border-primary text-primary border-dashed'
                 : 'border-border text-muted-foreground font-normal',
             areAllItemsUsed && 'cursor-not-allowed'
           )}
@@ -285,11 +287,23 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({
               </span>
             )}
           </CardContent>
+
+          {isMolecule && (
+            <span
+              className={cn(
+                'absolute top-0 left-1 text-xs',
+                isRequiredInBlueprint ? 'text-primary font-semibold' : 'text-muted-foreground'
+              )}
+            >
+              M
+            </span>
+          )}
         </Card>
       </TooltipTrigger>
 
       <TooltipContent className="max-w-[300px]">
         <p className="text-base font-semibold">{representativeItem.name}</p>
+        <p className="mb-1">{isMolecule ? 'Molecule (M)' : 'Otom'}</p>
         <p>Hardness: {representativeItem.hardness.toFixed(3)}</p>
         <p>Toughness: {representativeItem.toughness.toFixed(3)}</p>
         <p>Ductility: {representativeItem.ductility.toFixed(3)}</p>
@@ -476,15 +490,17 @@ const RequiredDropZone: FC<{
     enabled: component.componentType === 'otom',
   });
 
+  const isMolecule = molecule ? !isOtomAtom(molecule) : false;
+
   return (
     <Card
       ref={setNodeRef}
       className={cn(
-        'py-0 transition-colors select-none',
+        'relative py-0 transition-colors select-none',
         isDropped
           ? 'bg-primary text-primary-foreground font-semibold'
           : isOwned
-            ? 'border-primary/50 border-dashed font-semibold'
+            ? 'border-primary border-dashed font-semibold'
             : 'text-muted-foreground/50 border-border font-normal',
         isOver && canDrop && 'ring-primary ring-2 ring-offset-2',
         isOver && !canDrop && 'ring-destructive ring-2 ring-offset-2'
@@ -495,6 +511,17 @@ const RequiredDropZone: FC<{
           <ElementName otom={molecule} />
         ) : (
           component.name
+        )}
+
+        {isMolecule && (
+          <span
+            className={cn(
+              'absolute top-0 left-1 text-xs',
+              isOwned ? 'text-primary font-semibold' : 'text-muted-foreground'
+            )}
+          >
+            M
+          </span>
         )}
       </CardContent>
     </Card>
