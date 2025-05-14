@@ -555,41 +555,42 @@ const RequiredDropZone: FC<{
   };
 
   return (
-    <Card
-      ref={setNodeRef}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      className={cn(
-        'relative py-0 transition-[colors,transform] select-none',
-        isDropped
-          ? 'bg-primary text-primary-foreground font-semibold'
-          : isOwned
-            ? 'border-primary border-dashed font-semibold'
-            : 'text-muted-foreground/50 border-border font-normal',
-        isOver && canDrop && 'ring-primary ring-2 ring-offset-2',
-        isOver && !canDrop && 'ring-destructive ring-2 ring-offset-2',
-        isHoveredTarget && !isDropped && 'bg-primary/15'
-      )}
-    >
-      <CardContent className="grid size-15 place-items-center px-0">
-        {component.componentType === 'otom' && molecule ? (
-          <ElementName otom={molecule} />
-        ) : (
-          component.name
+    <div ref={setNodeRef}>
+      <Card
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        className={cn(
+          'relative py-0 transition-[colors,transform] select-none',
+          isDropped
+            ? 'bg-primary text-primary-foreground font-semibold'
+            : isOwned
+              ? 'border-primary border-dashed font-semibold'
+              : 'text-muted-foreground/50 border-border font-normal',
+          isOver && canDrop && 'ring-primary ring-2 ring-offset-2',
+          isOver && !canDrop && 'ring-destructive ring-2 ring-offset-2',
+          isHoveredTarget && !isDropped && 'bg-primary/15'
         )}
+      >
+        <CardContent className="grid size-15 place-items-center px-0">
+          {component.componentType === 'otom' && molecule ? (
+            <ElementName otom={molecule} />
+          ) : (
+            component.name
+          )}
 
-        {isMolecule && (
-          <span
-            className={cn(
-              'absolute top-0 left-1 text-xs',
-              isOwned ? 'text-primary font-semibold' : 'text-muted-foreground/50'
-            )}
-          >
-            M
-          </span>
-        )}
-      </CardContent>
-    </Card>
+          {isMolecule && (
+            <span
+              className={cn(
+                'absolute top-0 left-1 text-xs',
+                isOwned ? 'text-primary font-semibold' : 'text-muted-foreground/50'
+              )}
+            >
+              M
+            </span>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
@@ -610,34 +611,36 @@ const VariableDropZone: FC<{
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Card
-          ref={setNodeRef}
-          className={cn(
-            'relative py-0 transition-colors',
-            droppedItem
-              ? 'bg-primary border-primary font-semibold text-white'
-              : 'text-muted-foreground/40',
-            isOver && canDrop && 'ring-primary ring-2 ring-offset-2',
-            isOver && !canDrop && 'ring-destructive ring-2 ring-offset-2'
-          )}
-        >
-          <CardContent className="grid size-15 place-items-center px-0">
-            {droppedItem ? (
-              droppedItem.name
-            ) : (
-              <div className="relative size-9">
-                <Image
-                  src="/molicon.svg"
-                  alt="Molecule"
-                  fill
-                  className="object-contain"
-                  loading="lazy"
-                />
-              </div>
+        <div ref={setNodeRef}>
+          <Card
+            className={cn(
+              'relative py-0 transition-colors',
+              droppedItem
+                ? 'bg-primary border-primary font-semibold text-white'
+                : 'text-muted-foreground/40',
+              isOver && canDrop && 'ring-primary ring-2 ring-offset-2',
+              isOver && !canDrop && 'ring-destructive ring-2 ring-offset-2'
             )}
-          </CardContent>
-        </Card>
+          >
+            <CardContent className="grid size-15 place-items-center px-0">
+              {droppedItem ? (
+                droppedItem.name
+              ) : (
+                <div className="relative size-9">
+                  <Image
+                    src="/molicon.svg"
+                    alt="Molecule"
+                    fill
+                    className="object-contain"
+                    loading="lazy"
+                  />
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </TooltipTrigger>
+
       <TooltipContent>
         <div className="flex flex-col gap-1">
           {criteria.map((c) => (
