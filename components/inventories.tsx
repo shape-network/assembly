@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { isOtomAtom } from '@/lib/otoms';
 import { paths } from '@/lib/paths';
 import type { OtomItem } from '@/lib/types';
 import { useDeferredValue, useMemo, useState, type FC } from 'react';
@@ -25,29 +26,40 @@ export const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedReq
   const [searchTerm, setSearchTerm] = useState('');
   const deferredSearchTerm = useDeferredValue(searchTerm);
 
-  const groupedInventory = useMemo(() => {
-    if (!rawInventory) return [];
+  const inventory = useMemo(() => {
+    if (!rawInventory) return { molecules: [], otoms: [] };
 
     const filteredInventory = rawInventory.filter((item) =>
       item.name.toLowerCase().includes(deferredSearchTerm.toLowerCase())
     );
-    const groups = new Map<string, GroupedOtomItems>();
-    for (const item of filteredInventory) {
-      if (groups.has(item.tokenId)) {
-        const group = groups.get(item.tokenId);
-        if (group) {
-          group.count++;
-          group.allItems.push(item);
+
+    const molecules = filteredInventory.filter((item) => !isOtomAtom(item));
+    const atoms = filteredInventory.filter((item) => isOtomAtom(item));
+
+    const groupItems = (items: OtomItem[]): GroupedOtomItems[] => {
+      const groups = new Map<string, GroupedOtomItems>();
+      for (const item of items) {
+        if (groups.has(item.tokenId)) {
+          const group = groups.get(item.tokenId);
+          if (group) {
+            group.count++;
+            group.allItems.push(item);
+          }
+        } else {
+          groups.set(item.tokenId, {
+            representativeItem: item,
+            count: 1,
+            allItems: [item],
+          });
         }
-      } else {
-        groups.set(item.tokenId, {
-          representativeItem: item,
-          count: 1,
-          allItems: [item],
-        });
       }
-    }
-    return Array.from(groups.values());
+      return Array.from(groups.values());
+    };
+
+    const groupedMolecules = groupItems(molecules);
+    const groupedAtoms = groupItems(atoms);
+
+    return { molecules: groupedMolecules, otoms: groupedAtoms };
   }, [rawInventory, deferredSearchTerm]);
 
   if (isLoading) {
@@ -85,19 +97,41 @@ export const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedReq
           disabled={!rawInventory || rawInventory.length === 0}
         />
 
-        {groupedInventory.length > 0 ? (
-          <ul className="grid grid-cols-[repeat(auto-fill,minmax(64px,1fr))] items-start gap-2 rounded sm:flex sm:flex-wrap">
-            {groupedInventory.map((group) => (
-              <OtomItemCard
-                key={group.representativeItem.tokenId}
-                representativeItem={group.representativeItem}
-                count={group.count}
-                allItems={group.allItems}
-                usedTokenIds={usedRequiredItems}
-              />
-            ))}
-          </ul>
-        ) : (
+        {inventory.molecules.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <h3 className="text-muted-foreground text-sm">Molecules</h3>
+            <ul className="grid grid-cols-[repeat(auto-fill,minmax(64px,1fr))] items-start gap-2 rounded sm:flex sm:flex-wrap">
+              {inventory.molecules.map((group) => (
+                <OtomItemCard
+                  key={group.representativeItem.tokenId}
+                  representativeItem={group.representativeItem}
+                  count={group.count}
+                  allItems={group.allItems}
+                  usedTokenIds={usedRequiredItems}
+                />
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {inventory.otoms.length > 0 && (
+          <div className="mt-4 flex flex-col gap-2">
+            <h3 className="text-muted-foreground text-sm">Otoms</h3>
+            <ul className="grid grid-cols-[repeat(auto-fill,minmax(64px,1fr))] items-start gap-2 rounded sm:flex sm:flex-wrap">
+              {inventory.otoms.map((group) => (
+                <OtomItemCard
+                  key={group.representativeItem.tokenId}
+                  representativeItem={group.representativeItem}
+                  count={group.count}
+                  allItems={group.allItems}
+                  usedTokenIds={usedRequiredItems}
+                />
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {!inventory.molecules.length && !inventory.otoms.length && (
           <p className="text-muted-foreground py-4 text-sm">{`No otoms found matching "${deferredSearchTerm}".`}</p>
         )}
       </ScrollArea>
