@@ -26,6 +26,7 @@
     "jotai": "^2.12.4",
     "lucide-react": "^0.487.0",
     "next": "15.3.0",
+    "posthog-js": "^1.242.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-intersection-observer": "^9.16.0",
