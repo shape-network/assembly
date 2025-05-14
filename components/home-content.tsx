@@ -197,7 +197,7 @@ export const HomeContent = () => {
                   <h2 className="text-primary font-bold tracking-wide uppercase">Owned otoms</h2>
                   <InlineLink
                     href={paths.otom}
-                    className="text-muted-foreground/50 text-sm no-underline hover:underline"
+                    className="text-muted-foreground/50 hidden text-sm no-underline hover:underline sm:inline-flex"
                   >
                     Mine more otoms <ExternalLinkIcon className="size-4" />
                   </InlineLink>
