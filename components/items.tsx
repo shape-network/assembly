@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useWriteAssemblyCoreContractCraftItem } from '@/generated';
 import { assemblyCore } from '@/lib/addresses';
+import { hoveredOtomIdAtom } from '@/lib/atoms';
 import { config } from '@/lib/config';
 import { isOtomAtom } from '@/lib/otoms';
 import { checkCriteria, formatPropertyName } from '@/lib/property-utils';
@@ -19,10 +20,48 @@ import { cn, isNotNullish } from '@/lib/utils';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { LightningBoltIcon, QuestionMarkCircledIcon } from '@radix-ui/react-icons';
+import { useAtom } from 'jotai';
 import Image from 'next/image';
 import { FC, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useWaitForTransactionReceipt } from 'wagmi';
+
+export const ItemsToCraft: FC<{
+  droppedItemsState: Record<string, Record<number, OtomItem | null>>;
+  onDrop: (itemId: string, index: number, item: OtomItem | null) => void;
+  droppedOnRequiredSlots: Set<string>;
+  onClearRequired: (itemId: string) => void;
+  onCraftSuccess: (itemId: string) => void;
+}> = ({ droppedItemsState, onDrop, droppedOnRequiredSlots, onClearRequired, onCraftSuccess }) => {
+  const { data, isLoading, isError } = useGetCraftableItems();
+
+  if (isLoading) {
+    return <ItemsToCraftSkeleton />;
+  }
+
+  if (!data || isError) {
+    return <p>Error loading items to craft.</p>;
+  }
+
+  return (
+    <HorizontallScrollWrapper>
+      {data.map((item) => {
+        const droppedItemsForThisCard = droppedItemsState[String(item.id)] || {};
+        return (
+          <ItemToCraftCard
+            key={item.id}
+            item={item}
+            droppedVariableItems={droppedItemsForThisCard}
+            onDropVariable={onDrop}
+            droppedOnRequiredSlots={droppedOnRequiredSlots}
+            onClearRequired={onClearRequired}
+            onCraftSuccess={onCraftSuccess}
+          />
+        );
+      })}
+    </HorizontallScrollWrapper>
+  );
+};
 
 type ItemToCraftCardProps = {
   item: Item;
@@ -33,7 +72,7 @@ type ItemToCraftCardProps = {
   onCraftSuccess: (itemId: string) => void;
 };
 
-export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
+const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
   item,
   droppedVariableItems,
   onDropVariable,
@@ -199,10 +238,6 @@ export const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
                         index={i}
                         criteria={vb.criteria}
                         droppedItem={droppedItem}
-                        onDrop={(_itemId, index, theDroppedItem) =>
-                          onDropVariable(String(item.id), index, theDroppedItem)
-                        }
-                        itemName={item.name}
                       />
                     );
                   })}
@@ -232,6 +267,7 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({
   usedTokenIds,
 }) => {
   const { data: craftableItems } = useGetCraftableItems();
+  const [hoveredTokenId, setHoveredTokenId] = useAtom(hoveredOtomIdAtom);
 
   const draggableItem = allItems.find((item) => !usedTokenIds.has(item.tokenId));
   const areAllItemsUsed = allItems.every((item) => usedTokenIds.has(item.tokenId));
@@ -255,9 +291,21 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({
     )
   );
 
+  const handleMouseEnter = () => {
+    if (isRequiredInBlueprint && !areAllItemsUsed) {
+      setHoveredTokenId(representativeItem.tokenId);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setHoveredTokenId(null);
+  };
+
   const mass =
     representativeItem.giving_atoms.reduce((acc, atom) => acc + atom.mass, 0) +
     representativeItem.receiving_atoms.reduce((acc, atom) => acc + atom.mass, 0);
+
+  const isMolecule = !isOtomAtom(representativeItem);
 
   return (
     <Tooltip>
@@ -267,14 +315,17 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({
           style={style}
           {...listeners}
           {...attributes}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
           className={cn(
             'relative cursor-pointer touch-none py-0 font-semibold transition-colors',
             areAllItemsUsed
               ? 'bg-primary text-primary-foreground'
               : isRequiredInBlueprint
-                ? 'border-primary/50 text-primary border-dashed'
+                ? 'border-primary text-primary border-dashed'
                 : 'border-border text-muted-foreground font-normal',
-            areAllItemsUsed && 'cursor-not-allowed'
+            areAllItemsUsed && 'cursor-not-allowed',
+            hoveredTokenId === representativeItem.tokenId && !areAllItemsUsed && 'bg-primary/15'
           )}
         >
           <CardContent className="grid size-15 place-items-center px-0">
@@ -285,11 +336,23 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({
               </span>
             )}
           </CardContent>
+
+          {isMolecule && (
+            <span
+              className={cn(
+                'absolute top-0 left-1 text-xs',
+                isRequiredInBlueprint ? 'text-primary font-semibold' : 'text-muted-foreground'
+              )}
+            >
+              M
+            </span>
+          )}
         </Card>
       </TooltipTrigger>
 
       <TooltipContent className="max-w-[300px]">
         <p className="text-base font-semibold">{representativeItem.name}</p>
+        <p className="mb-1">{isMolecule ? 'Molecule (M)' : 'Otom'}</p>
         <p>Hardness: {representativeItem.hardness.toFixed(3)}</p>
         <p>Toughness: {representativeItem.toughness.toFixed(3)}</p>
         <p>Ductility: {representativeItem.ductility.toFixed(3)}</p>
@@ -466,6 +529,8 @@ const RequiredDropZone: FC<{
     id: id,
     data: { requiredTokenId: String(component.itemIdOrOtomTokenId), type: 'required' },
   });
+  const [hoveredTokenId, setHoveredTokenId] = useAtom(hoveredOtomIdAtom);
+  const isHoveredTarget = hoveredTokenId === String(component.itemIdOrOtomTokenId);
 
   const draggedElement = active?.data.current as OtomItem | null;
 
@@ -476,18 +541,33 @@ const RequiredDropZone: FC<{
     enabled: component.componentType === 'otom',
   });
 
+  const isMolecule = molecule ? !isOtomAtom(molecule) : false;
+
+  const handleMouseEnter = () => {
+    if (isOwned) {
+      setHoveredTokenId(String(component.itemIdOrOtomTokenId));
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setHoveredTokenId(null);
+  };
+
   return (
     <Card
       ref={setNodeRef}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       className={cn(
-        'py-0 transition-colors select-none',
+        'relative py-0 transition-[colors,transform] select-none',
         isDropped
           ? 'bg-primary text-primary-foreground font-semibold'
           : isOwned
-            ? 'border-primary/50 border-dashed font-semibold'
+            ? 'border-primary border-dashed font-semibold'
             : 'text-muted-foreground/50 border-border font-normal',
         isOver && canDrop && 'ring-primary ring-2 ring-offset-2',
-        isOver && !canDrop && 'ring-destructive ring-2 ring-offset-2'
+        isOver && !canDrop && 'ring-destructive ring-2 ring-offset-2',
+        isHoveredTarget && !isDropped && 'bg-primary/15'
       )}
     >
       <CardContent className="grid size-15 place-items-center px-0">
@@ -495,6 +575,17 @@ const RequiredDropZone: FC<{
           <ElementName otom={molecule} />
         ) : (
           component.name
+        )}
+
+        {isMolecule && (
+          <span
+            className={cn(
+              'absolute top-0 left-1 text-xs',
+              isOwned ? 'text-primary font-semibold' : 'text-muted-foreground'
+            )}
+          >
+            M
+          </span>
         )}
       </CardContent>
     </Card>
@@ -506,8 +597,6 @@ const VariableDropZone: FC<{
   index: number;
   criteria: BlueprintComponent['criteria'];
   droppedItem: OtomItem | null;
-  onDrop: (itemId: string, index: number, item: OtomItem | null) => void;
-  itemName: string;
 }> = ({ id, index, criteria, droppedItem }) => {
   const { isOver, setNodeRef, active } = useDroppable({
     id: id,
@@ -578,5 +667,27 @@ export const HorizontallScrollWrapper: FC<{ children: React.ReactNode }> = ({ ch
         <ul className="flex flex-nowrap gap-2 pb-4">{children}</ul>
       </div>
     </div>
+  );
+};
+
+export const InventorySkeleton: FC = () => {
+  return (
+    <div className="flex flex-wrap items-start gap-2">
+      {Array.from({ length: 25 }).map((_, index) => (
+        <Skeleton key={index} className="size-15" />
+      ))}
+    </div>
+  );
+};
+
+export const ItemsToCraftSkeleton: FC = () => {
+  return (
+    <HorizontallScrollWrapper>
+      {Array.from({ length: 4 }).map((_, index) => (
+        <li key={index} className="w-xs flex-shrink-0 sm:w-[300px]">
+          <Skeleton className="h-[578px] w-full" />
+        </li>
+      ))}
+    </HorizontallScrollWrapper>
   );
 };
