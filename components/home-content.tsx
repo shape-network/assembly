@@ -194,7 +194,9 @@ export const HomeContent = () => {
             {address ? (
               <div className="flex w-full flex-col gap-2">
                 <div className="flex items-baseline justify-between gap-2">
-                  <h2 className="text-primary font-bold tracking-wide uppercase">Owned otoms</h2>
+                  <h2 className="text-primary font-bold tracking-wide uppercase">
+                    Owned Otom Elements
+                  </h2>
                   <InlineLink
                     href={paths.otom}
                     className="text-muted-foreground/50 hidden text-sm no-underline hover:underline sm:inline-flex"
