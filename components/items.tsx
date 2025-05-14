@@ -582,7 +582,7 @@ const RequiredDropZone: FC<{
           <span
             className={cn(
               'absolute top-0 left-1 text-xs',
-              isOwned ? 'text-primary font-semibold' : 'text-muted-foreground'
+              isOwned ? 'text-primary font-semibold' : 'text-muted-foreground/50'
             )}
           >
             M
