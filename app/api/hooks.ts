@@ -3,28 +3,27 @@
 import { getMoleculesByIds } from '@/app/api/fetchers';
 import { paths } from '@/lib/paths';
 import { Item, Molecule, OtomItem, OwnedItem } from '@/lib/types';
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import superjson from 'superjson';
 import { useAccount } from 'wagmi';
 
 export function useGetOtomItemsForUser() {
   const { address } = useAccount();
 
-  return useQuery<OtomItem[]>({
+  return useInfiniteQuery<{ items: OtomItem[]; nextPageKey: string | undefined }>({
     queryKey: ['otom-items', address],
-    queryFn: async () => {
-      if (!address) return [];
-
+    queryFn: async ({ pageParam }) => {
       const response = await fetch(paths.api.ownedOtomItems, {
         method: 'POST',
-        body: JSON.stringify({ address }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address, pageKey: pageParam }),
       });
-
       const data = await response.json();
-      return data.elements || [];
+      return { items: data.elements, nextPageKey: data.nextPageKey };
     },
+    getNextPageParam: (lastPage) => lastPage.nextPageKey,
     enabled: !!address,
-    staleTime: 60 * 0.5 * 1000,
+    initialPageParam: undefined,
   });
 }
 

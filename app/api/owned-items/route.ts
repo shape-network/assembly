@@ -3,15 +3,15 @@ import { assemblyCore, assemblyItems } from '@/lib/addresses';
 import { alchemy, rpcClient } from '@/lib/clients';
 import { config } from '@/lib/config';
 import { ItemType, OwnedItem } from '@/lib/types';
+import { isNotNullish } from '@/lib/utils';
 import { NextResponse } from 'next/server';
 import superjson from 'superjson';
 import { isAddress } from 'viem';
 import { z } from 'zod';
 
 const schema = z.object({
-  address: z.string().refine(isAddress, {
-    message: 'Invalid address',
-  }),
+  address: z.string().refine(isAddress, { message: 'Invalid address' }),
+  pageKey: z.string().optional(),
 });
 
 export async function POST(request: Request) {
@@ -19,22 +19,22 @@ export async function POST(request: Request) {
   const result = schema.safeParse(body);
 
   if (!result.success) {
-    return NextResponse.json({ error: 'Invalid address' }, { status: 400 });
+    return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
   }
 
-  const { address } = result.data;
+  const { address, pageKey } = result.data;
 
   const nfts = await alchemy.nft.getNftsForOwner(address, {
     contractAddresses: [assemblyItems[config.chainId]],
+    pageKey,
   });
 
-  const rpc = rpcClient();
-
-  const items = await Promise.all(
+  const items: (OwnedItem | null)[] = await Promise.all(
     nfts.ownedNfts.map(async (nft) => {
       try {
         const nftTokenId = BigInt(nft.tokenId);
 
+        const rpc = rpcClient();
         const itemId = await rpc.readContract({
           abi: assemblyCoreContractAbi,
           address: assemblyCore[config.chainId],
@@ -108,8 +108,10 @@ export async function POST(request: Request) {
     })
   );
 
-  const filteredItems: OwnedItem[] = items.filter((item) => item !== null);
-  const serialized = superjson.stringify(filteredItems);
+  const response = {
+    items: items.filter(isNotNullish),
+    nextPageKey: nfts.pageKey,
+  };
 
-  return NextResponse.json(serialized);
+  return NextResponse.json(superjson.stringify(response));
 }
