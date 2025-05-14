@@ -102,7 +102,7 @@ export const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedReq
 
       <ScrollArea className="relative h-full max-h-[50vh] flex-col sm:max-h-[36vh]">
         <p className="text-muted-foreground mb-4 text-sm italic">
-          Drag elements into the desired slot to craft an item.
+          Drag components into the desired slot to craft an item.
         </p>
 
         <Input
