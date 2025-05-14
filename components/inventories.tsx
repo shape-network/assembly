@@ -13,7 +13,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { isOtomAtom } from '@/lib/otoms';
 import { paths } from '@/lib/paths';
 import type { OtomItem } from '@/lib/types';
-import { useDeferredValue, useMemo, useState, type FC } from 'react';
+import { useDeferredValue, useEffect, useMemo, useState, type FC } from 'react';
+import { useInView } from 'react-intersection-observer';
 
 type GroupedOtomItems = {
   representativeItem: OtomItem;
@@ -22,29 +23,37 @@ type GroupedOtomItems = {
 };
 
 export const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedRequiredItems }) => {
-  const { data: rawInventory, isLoading, isError } = useGetOtomItemsForUser();
   const [searchTerm, setSearchTerm] = useState('');
   const deferredSearchTerm = useDeferredValue(searchTerm);
 
-  const inventory = useMemo(() => {
-    if (!rawInventory) return { molecules: [], otoms: [] };
+  const [moleculesRef, moleculesInView] = useInView();
+  const [otomsRef, otomsInView] = useInView();
 
-    const filteredInventory = rawInventory.filter((item) =>
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
+    useGetOtomItemsForUser();
+
+  useEffect(() => {
+    if ((moleculesInView || otomsInView) && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [moleculesInView, otomsInView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const inventory = useMemo(() => {
+    const allItems = data?.pages.flatMap((page) => page.items) || [];
+    const filteredItems = allItems.filter((item) =>
       item.name.toLowerCase().includes(deferredSearchTerm.toLowerCase())
     );
 
-    const molecules = filteredInventory.filter((item) => !isOtomAtom(item));
-    const atoms = filteredInventory.filter((item) => isOtomAtom(item));
+    const molecules = filteredItems.filter((item) => !isOtomAtom(item));
+    const otoms = filteredItems.filter((item) => isOtomAtom(item));
 
     const groupItems = (items: OtomItem[]): GroupedOtomItems[] => {
       const groups = new Map<string, GroupedOtomItems>();
       for (const item of items) {
         if (groups.has(item.tokenId)) {
-          const group = groups.get(item.tokenId);
-          if (group) {
-            group.count++;
-            group.allItems.push(item);
-          }
+          const group = groups.get(item.tokenId)!;
+          group.count++;
+          group.allItems.push(item);
         } else {
           groups.set(item.tokenId, {
             representativeItem: item,
@@ -53,14 +62,16 @@ export const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedReq
           });
         }
       }
-      return Array.from(groups.values());
+      return Array.from(groups.values()).sort((a, b) =>
+        a.representativeItem.name.localeCompare(b.representativeItem.name)
+      );
     };
 
-    const groupedMolecules = groupItems(molecules);
-    const groupedAtoms = groupItems(atoms);
-
-    return { molecules: groupedMolecules, otoms: groupedAtoms };
-  }, [rawInventory, deferredSearchTerm]);
+    return {
+      molecules: groupItems(molecules),
+      otoms: groupItems(otoms),
+    };
+  }, [data?.pages, deferredSearchTerm]);
 
   if (isLoading) {
     return <InventorySkeleton />;
@@ -70,9 +81,12 @@ export const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedReq
     return <p>Error loading inventory.</p>;
   }
 
+  const isInventoryEmpty =
+    !inventory || (inventory.otoms.length === 0 && inventory.molecules.length === 0);
+
   return (
     <div className="flex flex-col gap-4">
-      {(!rawInventory || rawInventory.length === 0) && (
+      {!deferredSearchTerm && isInventoryEmpty && (
         <div className="grid place-items-center gap-4 py-12">
           <p>No otoms found in your wallet.</p>
           <Button asChild>
@@ -94,7 +108,7 @@ export const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedReq
           className="mb-4 max-w-xs"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          disabled={!rawInventory || rawInventory.length === 0}
+          disabled={isInventoryEmpty}
         />
 
         {inventory.molecules.length > 0 && (
@@ -111,6 +125,7 @@ export const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedReq
                 />
               ))}
             </ul>
+            <div ref={moleculesRef}>{isFetchingNextPage && 'Loading more...'}</div>
           </div>
         )}
 
@@ -128,10 +143,11 @@ export const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedReq
                 />
               ))}
             </ul>
+            <div ref={otomsRef}>{isFetchingNextPage && 'Loading more...'}</div>
           </div>
         )}
 
-        {!inventory.molecules.length && !inventory.otoms.length && (
+        {deferredSearchTerm && isInventoryEmpty && (
           <p className="text-muted-foreground py-4 text-sm">{`No otoms found matching "${deferredSearchTerm}".`}</p>
         )}
       </ScrollArea>

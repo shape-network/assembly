@@ -80,7 +80,8 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
   onClearRequired,
   onCraftSuccess,
 }) => {
-  const { data: inventory } = useGetOtomItemsForUser();
+  const { data } = useGetOtomItemsForUser();
+  const inventory = data?.pages.flatMap((page) => page.items) || [];
 
   function isElementOwned(otomTokenId: bigint): boolean {
     if (!inventory) return false;
