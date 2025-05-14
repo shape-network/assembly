@@ -19,7 +19,7 @@ import { BlueprintComponent, Item, Molecule, OtomItem, OwnedItem, Trait } from '
 import { cn, isNotNullish } from '@/lib/utils';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
-import { LightningBoltIcon, QuestionMarkCircledIcon } from '@radix-ui/react-icons';
+import { QuestionMarkCircledIcon } from '@radix-ui/react-icons';
 import { useAtom } from 'jotai';
 import Image from 'next/image';
 import { FC, useEffect } from 'react';
@@ -621,7 +621,19 @@ const VariableDropZone: FC<{
           )}
         >
           <CardContent className="grid size-15 place-items-center px-0">
-            {droppedItem ? droppedItem.name : <LightningBoltIcon className="size-4" />}
+            {droppedItem ? (
+              droppedItem.name
+            ) : (
+              <div className="relative size-9">
+                <Image
+                  src="/molicon.svg"
+                  alt="Molecule"
+                  fill
+                  className="object-contain"
+                  loading="lazy"
+                />
+              </div>
+            )}
           </CardContent>
         </Card>
       </TooltipTrigger>
