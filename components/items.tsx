@@ -342,9 +342,9 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({ representativeItem, count,
         >
           <CardContent className="grid aspect-square w-full place-items-center px-0 sm:size-15">
             <ElementName otom={representativeItem} />
-            {count > 1 && (
+            {availableCount > 1 && (
               <span className="text-muted-foreground bg-background absolute -top-2 -right-2 grid h-5 min-w-[20px] place-items-center rounded-full px-0.5 text-[10px] font-bold">
-                x{count}
+                x{availableCount}
               </span>
             )}
           </CardContent>
