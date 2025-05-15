@@ -23,7 +23,7 @@ type GroupedOtomItems = {
   allItems: OtomItem[];
 };
 
-export const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedRequiredItems }) => {
+export const OtomsInventory: FC<{ usedCounts: Map<string, number> }> = ({ usedCounts }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const deferredSearchTerm = useDeferredValue(searchTerm);
 
@@ -126,8 +126,7 @@ export const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedReq
                   key={group.representativeItem.tokenId}
                   representativeItem={group.representativeItem}
                   count={group.count}
-                  allItems={group.allItems}
-                  usedTokenIds={usedRequiredItems}
+                  usedCounts={usedCounts}
                 />
               ))}
             </ul>
@@ -146,8 +145,7 @@ export const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedReq
                   key={group.representativeItem.tokenId}
                   representativeItem={group.representativeItem}
                   count={group.count}
-                  allItems={group.allItems}
-                  usedTokenIds={usedRequiredItems}
+                  usedCounts={usedCounts}
                 />
               ))}
             </ul>

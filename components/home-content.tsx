@@ -11,7 +11,7 @@ import type { OtomItem } from '@/lib/types';
 import { DndContext, DragOverlay, type DragEndEvent, type DragStartEvent } from '@dnd-kit/core';
 import { ExternalLinkIcon } from '@radix-ui/react-icons';
 import Link from 'next/link';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useAccount } from 'wagmi';
 
 export const HomeContent = () => {
@@ -20,7 +20,6 @@ export const HomeContent = () => {
     Record<string, Record<number, OtomItem | null>>
   >({});
   const [droppedOnRequiredSlots, setDroppedOnRequiredSlots] = useState<Set<string>>(new Set());
-  const [usedRequiredItems, setUsedRequiredItems] = useState<Set<string>>(new Set());
   const [requiredSlotToOtomMap, setRequiredSlotToOtomMap] = useState<Record<string, string>>({});
   const [activeItem, setActiveItem] = useState<OtomItem | null>(null);
 
@@ -51,9 +50,7 @@ export const HomeContent = () => {
       setDroppedOnRequiredSlots(
         (prevSet) => new Set([...prevSet].filter((id) => !slotsToClear.has(id)))
       );
-      setUsedRequiredItems(
-        (prevSet) => new Set([...prevSet].filter((id) => !otomsToUnuse.has(id)))
-      );
+
       return mapUpdates;
     });
   }
@@ -82,7 +79,6 @@ export const HomeContent = () => {
         if (dropZoneData?.type === 'required') {
           if (droppedItemData?.tokenId === dropZoneData?.requiredTokenId) {
             setDroppedOnRequiredSlots((prev) => new Set(prev).add(dropZoneId));
-            setUsedRequiredItems((prev) => new Set(prev).add(draggedItemId));
             setRequiredSlotToOtomMap((prev) => ({ ...prev, [dropZoneId]: draggedItemId }));
           }
         } else if (dropZoneData?.type === 'variable') {
@@ -115,11 +111,6 @@ export const HomeContent = () => {
             newSet.delete(finalSlotIdToClear);
             return newSet;
           });
-          setUsedRequiredItems((prev) => {
-            const newSet = new Set(prev);
-            newSet.delete(String(active.id));
-            return newSet;
-          });
           setRequiredSlotToOtomMap((prev) => {
             const newMap = { ...prev };
             delete newMap[finalSlotIdToClear];
@@ -138,6 +129,25 @@ export const HomeContent = () => {
       setActiveItem(droppedItemData);
     }
   }, []);
+
+  const usedCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+
+    for (const slotId in requiredSlotToOtomMap) {
+      const tokenId = requiredSlotToOtomMap[slotId];
+      counts.set(tokenId, (counts.get(tokenId) || 0) + 1);
+    }
+
+    for (const itemId in droppedItemsState) {
+      for (const index in droppedItemsState[itemId]) {
+        const item = droppedItemsState[itemId][index];
+        if (item) {
+          counts.set(item.tokenId, (counts.get(item.tokenId) || 0) + 1);
+        }
+      }
+    }
+    return counts;
+  }, [requiredSlotToOtomMap, droppedItemsState]);
 
   return (
     <div className="mx-auto grid min-h-screen max-w-7xl grid-rows-[auto_1fr] gap-4 sm:p-5">
@@ -211,7 +221,7 @@ export const HomeContent = () => {
                   </InlineLink>
                 </div>
 
-                <OtomsInventory usedRequiredItems={usedRequiredItems} />
+                <OtomsInventory usedCounts={usedCounts} />
 
                 <div className="mt-24 flex flex-wrap gap-2">
                   <InlineLink className="self-start" href={paths.repo}>

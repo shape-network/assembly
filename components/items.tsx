@@ -273,25 +273,20 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
 type OtomItemCardProps = {
   representativeItem: OtomItem;
   count: number;
-  allItems: OtomItem[];
-  usedTokenIds: Set<string>;
+  usedCounts: Map<string, number>;
 };
 
-export const OtomItemCard: FC<OtomItemCardProps> = ({
-  representativeItem,
-  count,
-  allItems,
-  usedTokenIds,
-}) => {
+export const OtomItemCard: FC<OtomItemCardProps> = ({ representativeItem, count, usedCounts }) => {
   const { data: craftableItems } = useGetCraftableItems();
   const [hoveredTokenId, setHoveredTokenId] = useAtom(hoveredOtomIdAtom);
 
-  const draggableItem = allItems.find((item) => !usedTokenIds.has(item.tokenId));
-  const areAllItemsUsed = allItems.every((item) => usedTokenIds.has(item.tokenId));
+  const usedCount = usedCounts.get(representativeItem.tokenId) || 0;
+  const availableCount = count - usedCount;
+  const areAllItemsUsed = availableCount <= 0;
 
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-    id: draggableItem ? draggableItem.tokenId : representativeItem.tokenId,
-    data: draggableItem || representativeItem,
+    id: representativeItem.tokenId,
+    data: representativeItem,
     disabled: areAllItemsUsed,
   });
 
@@ -347,9 +342,9 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({
         >
           <CardContent className="grid aspect-square w-full place-items-center px-0 sm:size-15">
             <ElementName otom={representativeItem} />
-            {count > 1 && (
+            {availableCount > 1 && (
               <span className="text-muted-foreground bg-background absolute -top-2 -right-2 grid h-5 min-w-[20px] place-items-center rounded-full px-0.5 text-[10px] font-bold">
-                x{count}
+                x{availableCount}
               </span>
             )}
           </CardContent>
@@ -701,7 +696,7 @@ const VariableDropZone: FC<{
                       : String(c.minValue)}{' '}
                     -{' '}
                     {typeof c.maxValue === 'number' && c.maxValue > 1000000000 ? (
-                      <p className="text-sm">∞</p>
+                      <span className="text-sm">∞</span>
                     ) : typeof c.maxValue === 'number' && c.maxValue > 10000 ? (
                       `${c.maxValue.toExponential(2)}`
                     ) : (
