@@ -644,7 +644,7 @@ const VariableDropZone: FC<{
               'relative py-0 transition-colors',
               droppedItem
                 ? 'bg-primary border-primary font-semibold text-white'
-                : 'text-muted-foreground/40',
+                : 'border-primary text-primary border-dashed',
               isOver && canDrop && 'ring-primary ring-2 ring-offset-2',
               isOver && !canDrop && 'ring-destructive ring-2 ring-offset-2'
             )}
