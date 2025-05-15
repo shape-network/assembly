@@ -772,6 +772,6 @@ function getPickaxeMiningPower(tier: number): string {
     case 5:
       return '30';
     default:
-      return '10';
+      return '6';
   }
 }
