@@ -14,11 +14,10 @@ async function getCraftItems(): Promise<Item[]> {
     abi: assemblyTrackingContractAbi,
     address: assemblyTracking[config.chainId],
     functionName: 'getAllItemsPaginated',
-    args: [BigInt(0), BigInt(100)], // TODO: add proper pagination
+    args: [BigInt(0), BigInt(50)], // TODO: add proper pagination
   });
 
-  // FIXME: TESTNET ONLY, REMOVE FOR MAINNET
-  const filteredResults = results.filter((r) => r.id === BigInt(2) || r.id === BigInt(3));
+  const filteredResults = results.filter((r) => r.id === BigInt(2));
 
   const items = await Promise.all(
     filteredResults.map(async (r) => ({
