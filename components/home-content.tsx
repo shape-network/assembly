@@ -212,6 +212,16 @@ export const HomeContent = () => {
                 </div>
 
                 <OtomsInventory usedRequiredItems={usedRequiredItems} />
+
+                <div className="mt-24 flex flex-wrap gap-2">
+                  <InlineLink className="self-start" href={paths.repo}>
+                    Contribute
+                  </InlineLink>
+                  <span>・</span>
+                  <InlineLink className="self-start" href={paths.docs}>
+                    Documentation
+                  </InlineLink>
+                </div>
               </div>
             ) : (
               <div className="flex w-full flex-col items-start gap-8">
@@ -229,9 +239,15 @@ export const HomeContent = () => {
                     This project is completely open, anyone can contribute to improve the code or
                     submit their own item for people to craft.
                   </p>
-                  <InlineLink className="self-start" href={paths.repo}>
-                    View source code
-                  </InlineLink>
+                  <div className="flex flex-wrap gap-2">
+                    <InlineLink className="self-start" href={paths.repo}>
+                      Source code
+                    </InlineLink>
+                    <span>・</span>
+                    <InlineLink className="self-start" href={paths.docs}>
+                      Documentation
+                    </InlineLink>
+                  </div>
                 </div>
 
                 <div className="flex w-full flex-col items-center gap-2">
