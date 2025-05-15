@@ -273,25 +273,20 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
 type OtomItemCardProps = {
   representativeItem: OtomItem;
   count: number;
-  allItems: OtomItem[];
-  usedTokenIds: Set<string>;
+  usedCounts: Map<string, number>;
 };
 
-export const OtomItemCard: FC<OtomItemCardProps> = ({
-  representativeItem,
-  count,
-  allItems,
-  usedTokenIds,
-}) => {
+export const OtomItemCard: FC<OtomItemCardProps> = ({ representativeItem, count, usedCounts }) => {
   const { data: craftableItems } = useGetCraftableItems();
   const [hoveredTokenId, setHoveredTokenId] = useAtom(hoveredOtomIdAtom);
 
-  const draggableItem = allItems.find((item) => !usedTokenIds.has(item.tokenId));
-  const areAllItemsUsed = allItems.every((item) => usedTokenIds.has(item.tokenId));
+  const usedCount = usedCounts.get(representativeItem.tokenId) || 0;
+  const availableCount = count - usedCount;
+  const areAllItemsUsed = availableCount <= 0;
 
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-    id: draggableItem ? draggableItem.tokenId : representativeItem.tokenId,
-    data: draggableItem || representativeItem,
+    id: representativeItem.tokenId,
+    data: representativeItem,
     disabled: areAllItemsUsed,
   });
 
@@ -701,7 +696,7 @@ const VariableDropZone: FC<{
                       : String(c.minValue)}{' '}
                     -{' '}
                     {typeof c.maxValue === 'number' && c.maxValue > 1000000000 ? (
-                      <p className="text-sm">∞</p>
+                      <span className="text-sm">∞</span>
                     ) : typeof c.maxValue === 'number' && c.maxValue > 10000 ? (
                       `${c.maxValue.toExponential(2)}`
                     ) : (
