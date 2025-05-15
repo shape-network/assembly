@@ -167,7 +167,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
             {item.id === BigInt(2) ? (
               <ItemTraits
                 traits={[
-                  { name: 'Tiers', value: '5' },
+                  { name: 'Tier', value: '1 - 5' },
                   { name: 'Mining Power', value: '6 - 30' },
                   { name: 'Usages', value: '6 - 9' },
                 ]}
