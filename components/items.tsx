@@ -24,7 +24,7 @@ import { useAtom } from 'jotai';
 import Image from 'next/image';
 import { FC, useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { useWaitForTransactionReceipt } from 'wagmi';
+import { useAccount, useSwitchChain, useWaitForTransactionReceipt } from 'wagmi';
 
 export const ItemsToCraft: FC<{
   droppedItemsState: Record<string, Record<number, OtomItem | null>>;
@@ -401,12 +401,32 @@ const CraftItemButton: FC<{
 }> = ({ item, className, droppedVariableItems, onCraftSuccess, isCraftable }) => {
   const { data: hash, writeContractAsync } = useWriteAssemblyCoreContractCraftItem();
   const { refetch: refetchOtomItems } = useGetOtomItemsForUser();
+  const { chain: currentWalletChain } = useAccount();
+  const { switchChainAsync } = useSwitchChain();
 
   const [craftingStatus, setCraftingStatus] = useState<'idle' | 'pending' | 'success' | 'error'>(
     'idle'
   );
 
   async function handleCraftItem() {
+    if (!switchChainAsync) {
+      toast.error(
+        'Could not automatically switch to Shape network. Please ensure your wallet network is set to Shape.'
+      );
+      return;
+    }
+
+    if (currentWalletChain?.id !== config.chainId) {
+      try {
+        await switchChainAsync({ chainId: config.chainId });
+      } catch (error) {
+        toast.dismiss();
+        toast.error('Failed to switch to Shape network. Please switch manually.');
+        console.error('Failed to switch network:', error);
+        return;
+      }
+    }
+
     setCraftingStatus('pending');
     const variableOtomTokenIds = item.blueprint
       .filter((bp) => bp.componentType === 'variable_otom')
