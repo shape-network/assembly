@@ -19,7 +19,7 @@ export function useGetOtomItemsForUser() {
         body: JSON.stringify({ address, pageKey: pageParam }),
       });
       const data = await response.json();
-      return { items: data.elements ?? [], nextPageKey: data.nextPageKey };
+      return { items: data.elements ?? [], nextPageKey: data.cursor };
     },
     getNextPageParam: (lastPage) => lastPage.nextPageKey,
     enabled: !!address,
