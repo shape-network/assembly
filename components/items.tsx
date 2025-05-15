@@ -164,7 +164,17 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
 
             <CardDescription className="text-center italic">{item.description}</CardDescription>
 
-            <ItemTraits traits={item.initialTraits} />
+            {item.id === BigInt(2) ? (
+              <ItemTraits
+                traits={[
+                  { name: 'Tier', value: '1 - 5' },
+                  { name: 'Mining Power', value: '6 - 30' },
+                  { name: 'Usages', value: '6 - 9' },
+                ]}
+              />
+            ) : (
+              <ItemTraits traits={item.initialTraits} />
+            )}
           </div>
 
           <div className="flex flex-col gap-6">
@@ -644,7 +654,7 @@ const VariableDropZone: FC<{
               'relative py-0 transition-colors',
               droppedItem
                 ? 'bg-primary border-primary font-semibold text-white'
-                : 'text-muted-foreground/40',
+                : 'border-primary text-primary border-dashed',
               isOver && canDrop && 'ring-primary ring-2 ring-offset-2',
               isOver && !canDrop && 'ring-destructive ring-2 ring-offset-2'
             )}
@@ -673,7 +683,7 @@ const VariableDropZone: FC<{
           {criteria.map((c) => (
             <span key={c.propertyType}>
               <p className="font-semibold">{formatPropertyName(c.propertyType)}</p>
-              <p className="">
+              <p className="flex gap-1">
                 {c.checkBoolValue ? (
                   `Required: ${c.boolValue}`
                 ) : c.checkStringValue ? (
@@ -685,9 +695,13 @@ const VariableDropZone: FC<{
                       ? `${c.minValue.toExponential(2)}`
                       : String(c.minValue)}{' '}
                     -{' '}
-                    {typeof c.maxValue === 'number' && c.maxValue > 10000
-                      ? `${c.maxValue.toExponential(2)}`
-                      : String(c.maxValue)}
+                    {typeof c.maxValue === 'number' && c.maxValue > 1000000000 ? (
+                      <p className="text-sm">∞</p>
+                    ) : typeof c.maxValue === 'number' && c.maxValue > 10000 ? (
+                      `${c.maxValue.toExponential(2)}`
+                    ) : (
+                      String(c.maxValue)
+                    )}
                   </>
                 )}
               </p>
