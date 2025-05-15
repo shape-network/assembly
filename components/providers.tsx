@@ -7,6 +7,7 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import posthog from 'posthog-js';
 import { PostHogProvider, usePostHog } from 'posthog-js/react';
 import { ReactNode, Suspense, useEffect } from 'react';
+import { shape } from 'viem/chains';
 import { WagmiProvider } from 'wagmi';
 
 const queryClient = new QueryClient();
@@ -16,7 +17,7 @@ export const Providers = ({ children }: { children: ReactNode }) => {
     <AnalyticsProvider>
       <WagmiProvider config={wagmiConfig}>
         <QueryClientProvider client={queryClient}>
-          <RainbowKitProvider>{children}</RainbowKitProvider>
+          <RainbowKitProvider initialChain={shape}>{children}</RainbowKitProvider>
         </QueryClientProvider>
       </WagmiProvider>
     </AnalyticsProvider>
