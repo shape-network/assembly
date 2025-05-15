@@ -528,13 +528,23 @@ export const OwnedItemCard: FC<{ item: OwnedItem }> = ({ item }) => {
         </div>
 
         <CardContent className="flex flex-col gap-6">
-          <ItemTraits
-            traits={[
-              ...traits,
-              { name: 'Remaining Usages', value: item.usagesRemaining ?? '?' },
-              item.tier ? { name: 'Tier', value: item.tier } : null,
-            ].filter(isNotNullish)}
-          />
+          {isPickaxe ? (
+            <ItemTraits
+              traits={[
+                item.tier ? { name: 'Tier', value: item.tier } : null,
+                { name: 'Mining Power', value: getPickaxeMiningPower(item.tier ?? 1) },
+                { name: 'Remaining Usages', value: item.usagesRemaining ?? '?' },
+              ].filter(isNotNullish)}
+            />
+          ) : (
+            <ItemTraits
+              traits={[
+                item.tier ? { name: 'Tier', value: item.tier } : null,
+                ...traits,
+                { name: 'Remaining Usages', value: item.usagesRemaining ?? '?' },
+              ].filter(isNotNullish)}
+            />
+          )}
         </CardContent>
       </Card>
     </li>
@@ -748,3 +758,20 @@ export const ItemsToCraftSkeleton: FC = () => {
     </HorizontallScrollWrapper>
   );
 };
+
+function getPickaxeMiningPower(tier: number): string {
+  switch (tier) {
+    case 1:
+      return '6';
+    case 2:
+      return '12';
+    case 3:
+      return '18';
+    case 4:
+      return '24';
+    case 5:
+      return '30';
+    default:
+      return '6';
+  }
+}
