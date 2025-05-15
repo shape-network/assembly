@@ -7,6 +7,7 @@ import {
 } from '@/app/api/hooks';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useWriteAssemblyCoreContractCraftItem } from '@/generated';
@@ -729,11 +730,11 @@ function getRequiredDropZoneId(itemId: bigint | string, index: number): string {
 
 export const HorizontallScrollWrapper: FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <div className="w-full">
+    <ScrollArea className="w-full" orientation="horizontal">
       <div className="overflow-x-auto">
         <ul className="flex flex-nowrap gap-2 pb-4">{children}</ul>
       </div>
-    </div>
+    </ScrollArea>
   );
 };
 
