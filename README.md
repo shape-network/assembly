@@ -55,4 +55,4 @@ Contributions are welcome! If you have any improvements or features to add, plea
 4. Push to the branch (`git push origin feature/your-feature-name`).
 5. Open a Pull Request.
 
-We appreciate your help in making this project better!
+We appreciate your contributions Shaper!
