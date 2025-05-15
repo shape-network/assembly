@@ -1,8 +1,6 @@
 import { config } from '@/lib/config';
 import { shape } from 'viem/chains';
 
-export const otomsBucket = config.chainId === shape.id ? 'prod-otoms' : 'dev-otoms';
-
 export const paths = {
   home: '/',
   repo: 'https://github.com/shape-network/assembly',
@@ -14,8 +12,8 @@ export const paths = {
     craftableItems: '/api/craftable-items',
     ownedItems: '/api/owned-items',
   },
-  images: (identifier: string) => ({
-    token: `https://${otomsBucket}.s3.us-east-1.amazonaws.com/otoms/${identifier}-token.png`,
-    chip: `https://${otomsBucket}.s3.us-east-1.amazonaws.com/otoms/${identifier}-chip.png`,
-  }),
+  assemblyItemImage: (itemId: bigint, tier: number) =>
+    config.chainId === shape.id
+      ? `https://prod-otoms.s3.us-east-1.amazonaws.com/assembly-items/item-${String(itemId)}-tier-${tier}.svg`
+      : `https://dev-otoms.s3.us-east-1.amazonaws.com/assembly-items/item-${String(itemId)}-tier-${tier}.svg`,
 } as const;
