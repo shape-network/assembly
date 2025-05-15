@@ -14,6 +14,7 @@ import { assemblyCore } from '@/lib/addresses';
 import { hoveredOtomIdAtom } from '@/lib/atoms';
 import { config } from '@/lib/config';
 import { isOtomAtom } from '@/lib/otoms';
+import { paths } from '@/lib/paths';
 import { checkCriteria, formatPropertyName } from '@/lib/property-utils';
 import { BlueprintComponent, Item, Molecule, OtomItem, OwnedItem, Trait } from '@/lib/types';
 import { cn, isNotNullish } from '@/lib/utils';
@@ -132,6 +133,8 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
     [onCraftSuccess]
   );
 
+  const isPickaxe = item.id === BigInt(2);
+
   return (
     <li className="grid w-[300px] shrink-0 grid-rows-[1fr_auto] gap-1">
       <Card className="relative w-full">
@@ -144,7 +147,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
         />
 
         <CardHeader className="relative">
-          <CardTitle>{item.name}</CardTitle>
+          <CardTitle>{isPickaxe ? 'PkAx' : item.name}</CardTitle>
         </CardHeader>
 
         <CardContent className="flex h-full flex-col justify-between gap-6">
@@ -152,10 +155,10 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
             <div className="relative h-40 w-full">
               {item.defaultImageUri ? (
                 <Image
-                  src={item.defaultImageUri}
+                  src={isPickaxe ? '/tiersgif.gif' : item.defaultImageUri}
                   alt={item.name}
                   fill
-                  className="object-contain py-2"
+                  className={cn('object-contain py-2', isPickaxe && 'scale-125 object-contain')}
                 />
               ) : (
                 <Skeleton className="h-40 w-full" />
@@ -164,7 +167,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
 
             <CardDescription className="text-center italic">{item.description}</CardDescription>
 
-            {item.id === BigInt(2) ? (
+            {isPickaxe ? (
               <ItemTraits
                 traits={[
                   { name: 'Tier', value: '1 - 5' },
@@ -507,17 +510,19 @@ const CraftItemButton: FC<{
 export const OwnedItemCard: FC<{ item: OwnedItem }> = ({ item }) => {
   const traits = item.initialTraits.filter((t) => t.name !== 'Usages Remaining');
 
+  const isPickaxe = item.id === BigInt(2);
+
   return (
     <li className="w-xs shrink-0 sm:w-[300px]">
       <Card className="h-full">
         <CardHeader>
-          <CardTitle>{item.name}</CardTitle>
+          <CardTitle>{isPickaxe ? 'PkAx' : item.name}</CardTitle>
         </CardHeader>
 
         <div className="relative h-40 w-full">
           {item.defaultImageUri ? (
             <Image
-              src={item.defaultImageUri}
+              src={paths.assemblyItemImage(item.id, item.tier ?? 1)}
               alt={item.name}
               fill
               className="object-contain py-2"
