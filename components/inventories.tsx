@@ -195,7 +195,7 @@ export const ItemsInventory: FC = () => {
   return (
     <HorizontallScrollWrapper>
       {data.map((item) => (
-        <OwnedItemCard key={item.id} item={item} />
+        <OwnedItemCard key={item.tokenId} item={item} />
       ))}
     </HorizontallScrollWrapper>
   );
