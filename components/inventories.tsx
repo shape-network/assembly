@@ -87,6 +87,9 @@ export const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedReq
   const isInventoryEmpty =
     !inventory || (inventory.otoms.length === 0 && inventory.molecules.length === 0);
 
+  const moleculesAmount = inventory.molecules.reduce((acc, group) => acc + group.count, 0);
+  const otomsAmount = inventory.otoms.reduce((acc, group) => acc + group.count, 0);
+
   return (
     <div className="flex flex-col gap-4">
       {!deferredSearchTerm && isInventoryEmpty && (
@@ -114,9 +117,9 @@ export const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedReq
           disabled={isInventoryEmpty}
         />
 
-        {inventory.molecules.length > 0 && (
+        {moleculesAmount > 0 && (
           <div className="flex flex-col gap-2">
-            <h3 className="text-muted-foreground text-sm">Molecules</h3>
+            <h3 className="text-muted-foreground text-sm">Molecules ({moleculesAmount})</h3>
             <ul className="grid grid-cols-[repeat(auto-fill,minmax(64px,1fr))] items-start gap-2 rounded sm:flex sm:flex-wrap">
               {inventory.molecules.map((group) => (
                 <OtomItemCard
@@ -134,9 +137,9 @@ export const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedReq
           </div>
         )}
 
-        {inventory.otoms.length > 0 && (
+        {otomsAmount > 0 && (
           <div className="mt-4 flex flex-col gap-2">
-            <h3 className="text-muted-foreground text-sm">Otoms</h3>
+            <h3 className="text-muted-foreground text-sm">Otoms ({otomsAmount})</h3>
             <ul className="grid grid-cols-[repeat(auto-fill,minmax(64px,1fr))] items-start gap-2 rounded sm:flex sm:flex-wrap">
               {inventory.otoms.map((group) => (
                 <OtomItemCard
