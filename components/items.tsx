@@ -164,7 +164,17 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
 
             <CardDescription className="text-center italic">{item.description}</CardDescription>
 
-            <ItemTraits traits={item.initialTraits} />
+            {item.id === BigInt(2) ? (
+              <ItemTraits
+                traits={[
+                  { name: 'Tiers', value: '5' },
+                  { name: 'Mining Power', value: '6 - 30' },
+                  { name: 'Usages', value: '6 - 9' },
+                ]}
+              />
+            ) : (
+              <ItemTraits traits={item.initialTraits} />
+            )}
           </div>
 
           <div className="flex flex-col gap-6">
