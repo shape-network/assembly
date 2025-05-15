@@ -673,7 +673,7 @@ const VariableDropZone: FC<{
           {criteria.map((c) => (
             <span key={c.propertyType}>
               <p className="font-semibold">{formatPropertyName(c.propertyType)}</p>
-              <p className="">
+              <p className="flex gap-1">
                 {c.checkBoolValue ? (
                   `Required: ${c.boolValue}`
                 ) : c.checkStringValue ? (
@@ -685,9 +685,13 @@ const VariableDropZone: FC<{
                       ? `${c.minValue.toExponential(2)}`
                       : String(c.minValue)}{' '}
                     -{' '}
-                    {typeof c.maxValue === 'number' && c.maxValue > 10000
-                      ? `${c.maxValue.toExponential(2)}`
-                      : String(c.maxValue)}
+                    {typeof c.maxValue === 'number' && c.maxValue > 1000000000 ? (
+                      <p className="text-sm">∞</p>
+                    ) : typeof c.maxValue === 'number' && c.maxValue > 10000 ? (
+                      `${c.maxValue.toExponential(2)}`
+                    ) : (
+                      String(c.maxValue)
+                    )}
                   </>
                 )}
               </p>
