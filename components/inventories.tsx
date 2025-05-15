@@ -128,7 +128,9 @@ export const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedReq
                 />
               ))}
             </ul>
-            <div ref={moleculesRef}>{isFetchingNextPage && 'Loading more...'}</div>
+            <div ref={moleculesRef} className="text-muted-foreground text-xs">
+              {isFetchingNextPage && 'Loading more...'}
+            </div>
           </div>
         )}
 
@@ -146,7 +148,9 @@ export const OtomsInventory: FC<{ usedRequiredItems: Set<string> }> = ({ usedReq
                 />
               ))}
             </ul>
-            <div ref={otomsRef}>{isFetchingNextPage && 'Loading more...'}</div>
+            <div ref={otomsRef} className="text-muted-foreground text-xs">
+              {isFetchingNextPage && 'Loading more...'}
+            </div>
           </div>
         )}
 
