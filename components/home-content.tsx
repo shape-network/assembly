@@ -2,7 +2,6 @@
 
 import { ItemsInventory, OtomsInventory } from '@/components/inventories';
 import { ItemsToCraft } from '@/components/items';
-import { Button } from '@/components/ui/button';
 import { InlineLink } from '@/components/ui/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { WalletConnect } from '@/components/wallet-connect';
@@ -162,11 +161,9 @@ export const HomeContent = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button asChild variant="link" className="hidden sm:flex">
-            <a href={paths.otom} target="_blank" rel="noopener noreferrer">
-              otom.xyz
-            </a>
-          </Button>
+          <InlineLink href={paths.otom} target="_blank" rel="noopener noreferrer" className="px-3">
+            otom.xyz
+          </InlineLink>
 
           <WalletConnect />
         </div>
