@@ -148,7 +148,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
         />
 
         <CardHeader className="relative">
-          <CardTitle>{isPickaxe ? 'PkAx' : item.name}</CardTitle>
+          <CardTitle>{item.name}</CardTitle>
         </CardHeader>
 
         <CardContent className="flex h-full flex-col justify-between gap-6">
@@ -156,10 +156,10 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
             <div className="relative h-40 w-full">
               {item.defaultImageUri ? (
                 <Image
-                  src={isPickaxe ? '/tiersgif.gif' : item.defaultImageUri}
+                  src={item.defaultImageUri}
                   alt={item.name}
                   fill
-                  className={cn('object-contain py-2', isPickaxe && 'scale-125 object-contain')}
+                  className="scale-125 object-contain"
                 />
               ) : (
                 <Skeleton className="h-40 w-full" />
@@ -512,7 +512,7 @@ export const OwnedItemCard: FC<{ item: OwnedItem }> = ({ item }) => {
     <li className="w-xs shrink-0 sm:w-[300px]">
       <Card className="h-full">
         <CardHeader>
-          <CardTitle>{isPickaxe ? 'PkAx' : item.name}</CardTitle>
+          <CardTitle>{item.name}</CardTitle>
         </CardHeader>
 
         <div className="relative h-40 w-full">
