@@ -96,6 +96,7 @@ export const HomeContent = () => {
         }
       } else {
         let slotIdToClear: string | null = null;
+
         for (const slotId in requiredSlotToOtomMap) {
           if (requiredSlotToOtomMap[slotId] === String(active.id)) {
             slotIdToClear = slotId;
