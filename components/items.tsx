@@ -16,7 +16,7 @@ import { hoveredOtomIdAtom } from '@/lib/atoms';
 import { config } from '@/lib/config';
 import { isOtomAtom } from '@/lib/otoms';
 import { paths } from '@/lib/paths';
-import { checkCriteria, formatPropertyName } from '@/lib/property-utils';
+import { checkCriteria, formatPropertyName, isExactMatchCriteria } from '@/lib/property-utils';
 import { BlueprintComponent, Item, Molecule, OtomItem, OwnedItem, Trait } from '@/lib/types';
 import { cn, isNotNullish } from '@/lib/utils';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
@@ -85,13 +85,39 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
   const { data } = useGetOtomItemsForUser();
   const inventory = data?.pages.flatMap((page) => page.items) || [];
 
-  function isElementOwned(otomTokenId: bigint): boolean {
-    if (!inventory) return false;
-    return inventory.some((i) => i.tokenId === otomTokenId.toString());
+  function isElementOwned(component: BlueprintComponent): boolean {
+    if (!inventory || inventory.length === 0) return false;
+
+    if (component.componentType !== 'variable_otom') {
+      return inventory.some((i) => i.tokenId === component.itemIdOrOtomTokenId.toString());
+    }
+
+    if (isExactMatchCriteria(component.criteria)) {
+      return inventory.some((item) => checkCriteria(item, component.criteria));
+    }
+
+    return false;
   }
 
-  const requiredBlueprints = item.blueprint.filter((i) => i.componentType !== 'variable_otom');
-  const variableBlueprints = item.blueprint.filter((i) => i.componentType === 'variable_otom');
+  // Filter blueprint into three categories:
+  // 1. Standard required components (type !== variable_otom)
+  // 2. Variable components with exact match criteria (treated as required)
+  // 3. Variable components with range criteria (true variables)
+  const standardRequiredBlueprints = item.blueprint.filter(
+    (i) => i.componentType !== 'variable_otom'
+  );
+
+  const variableExactMatchBlueprints = item.blueprint.filter(
+    (i) => i.componentType === 'variable_otom' && isExactMatchCriteria(i.criteria)
+  );
+
+  const variableRangeBlueprints = item.blueprint.filter(
+    (i) => i.componentType === 'variable_otom' && !isExactMatchCriteria(i.criteria)
+  );
+
+  // Combine standard required and variable exact match for UI
+  const requiredBlueprints = [...standardRequiredBlueprints, ...variableExactMatchBlueprints];
+  const variableBlueprints = variableRangeBlueprints;
 
   const hasDroppedRequired = requiredBlueprints.some((_, i) =>
     droppedOnRequiredSlots.has(getRequiredDropZoneId(item.id, i))
@@ -100,14 +126,22 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
 
   const isCraftable =
     requiredBlueprints.length > 0 &&
-    requiredBlueprints.every(({ componentType, itemIdOrOtomTokenId }, index) => {
+    requiredBlueprints.every(({ componentType, itemIdOrOtomTokenId, criteria }, index) => {
       const dropId = getRequiredDropZoneId(item.id, index);
       const isDropped = droppedOnRequiredSlots.has(dropId);
+
+      // Standard required component check
       if (componentType !== 'variable_otom') {
         const requiredTokenId = String(itemIdOrOtomTokenId);
         const hasRequiredComponent =
           inventory?.some((ownedItem) => ownedItem.tokenId === requiredTokenId) ?? false;
         return isDropped && hasRequiredComponent;
+      }
+      // Variable component with exact match criteria (treated as required)
+      else if (isExactMatchCriteria(criteria)) {
+        // We already know it's dropped if we're here (isDropped is true)
+        // The criteria check was already done during drop
+        return isDropped;
       } else {
         return false;
       }
@@ -199,7 +233,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
 
               <div className="flex flex-wrap gap-1">
                 {requiredBlueprints.map((component, i) => {
-                  const isOwned = isElementOwned(component.itemIdOrOtomTokenId);
+                  const isOwned = isElementOwned(component);
                   const dropId = getRequiredDropZoneId(item.id, i);
                   return (
                     <RequiredDropZone
@@ -296,12 +330,22 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({ representativeItem, count,
     opacity: isDragging ? 0.5 : 1,
   };
 
+  // Check if this item is required in any blueprint as a standard required component OR
+  // as a variable component with exact match criteria
   const isRequiredInBlueprint = craftableItems?.some((item) =>
-    item.blueprint.some(
-      (b) =>
-        b.componentType !== 'variable_otom' &&
-        b.itemIdOrOtomTokenId.toString() === representativeItem.tokenId
-    )
+    item.blueprint.some((b) => {
+      // Standard required component check
+      if (b.componentType !== 'variable_otom') {
+        return b.itemIdOrOtomTokenId.toString() === representativeItem.tokenId;
+      }
+
+      // Variable component with exact match criteria
+      if (isExactMatchCriteria(b.criteria)) {
+        return checkCriteria(representativeItem, b.criteria);
+      }
+
+      return false;
+    })
   );
 
   const handleMouseEnter = () => {
@@ -576,14 +620,29 @@ const RequiredDropZone: FC<{
 }> = ({ id, component, isOwned, isDropped }) => {
   const { isOver, setNodeRef, active } = useDroppable({
     id: id,
-    data: { requiredTokenId: String(component.itemIdOrOtomTokenId), type: 'required' },
+    data: {
+      requiredTokenId: String(component.itemIdOrOtomTokenId),
+      type: 'required',
+      component: component,
+    },
   });
   const [hoveredTokenId, setHoveredTokenId] = useAtom(hoveredOtomIdAtom);
   const isHoveredTarget = hoveredTokenId === String(component.itemIdOrOtomTokenId);
 
   const draggedElement = active?.data.current as OtomItem | null;
 
-  const canDrop = draggedElement?.tokenId === String(component.itemIdOrOtomTokenId);
+  const isVariableWithExactMatch =
+    component.componentType === 'variable_otom' && isExactMatchCriteria(component.criteria);
+
+  let canDrop = false;
+
+  if (draggedElement) {
+    if (isVariableWithExactMatch) {
+      canDrop = checkCriteria(draggedElement, component.criteria);
+    } else {
+      canDrop = draggedElement.tokenId === String(component.itemIdOrOtomTokenId);
+    }
+  }
 
   const { data: molecule } = useGetMoleculesFromOtomTokenId({
     otomTokenId: String(component.itemIdOrOtomTokenId),
