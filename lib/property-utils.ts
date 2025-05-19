@@ -195,3 +195,16 @@ export function checkCriteria(item: OtomItem, criteria: BlueprintComponent['crit
   // If the loop completes without returning false, all criteria passed
   return true;
 }
+
+export function isExactMatchCriteria(criteria: BlueprintComponent['criteria']): boolean {
+  if (!criteria || criteria.length === 0) return false;
+
+  // Check if any criteria is an exact match rather than a range check
+  return criteria.some((c) => {
+    if (c.checkStringValue || c.checkBoolValue || (!c.minValue && !c.maxValue)) {
+      return true;
+    }
+
+    return false;
+  });
+}
