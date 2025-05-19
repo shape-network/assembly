@@ -85,10 +85,8 @@ export const HomeContent = () => {
           let canDrop = false;
 
           if (isVariableWithExactMatch && dropZoneData.component) {
-            // For variable with exact match, use checkCriteria
             canDrop = checkCriteria(droppedItemData, dropZoneData.component.criteria);
           } else {
-            // For standard required component, check token ID
             canDrop = droppedItemData?.tokenId === dropZoneData?.requiredTokenId;
           }
 
