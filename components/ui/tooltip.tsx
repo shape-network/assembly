@@ -5,7 +5,7 @@ import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import * as React from 'react';
 
 function TooltipProvider({
-  delayDuration = 0,
+  delayDuration = 450,
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Provider>) {
   return (
