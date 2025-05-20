@@ -12,7 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useWriteAssemblyCoreContractCraftItem } from '@/generated';
 import { assemblyCore } from '@/lib/addresses';
-import { hoveredOtomIdAtom } from '@/lib/atoms';
+import { hoveredOtomItemAtom } from '@/lib/atoms';
 import { config } from '@/lib/config';
 import { isOtomAtom } from '@/lib/otoms';
 import { paths } from '@/lib/paths';
@@ -313,7 +313,7 @@ type OtomItemCardProps = {
 
 export const OtomItemCard: FC<OtomItemCardProps> = ({ representativeItem, count, usedCounts }) => {
   const { data: craftableItems } = useGetCraftableItems();
-  const [hoveredTokenId, setHoveredTokenId] = useAtom(hoveredOtomIdAtom);
+  const [hoveredState, setHoveredState] = useAtom(hoveredOtomItemAtom);
 
   const usedCount = usedCounts.get(representativeItem.tokenId) || 0;
   const availableCount = count - usedCount;
@@ -348,15 +348,23 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({ representativeItem, count,
     })
   );
 
-  const handleMouseEnter = () => {
-    if (isRequiredInBlueprint && !areAllItemsUsed) {
-      setHoveredTokenId(representativeItem.tokenId);
-    }
-  };
+  const shouldHighlightFromBlueprintHover =
+    !!hoveredState?.component &&
+    ((hoveredState.component.componentType !== 'variable_otom' &&
+      hoveredState.component.itemIdOrOtomTokenId.toString() === representativeItem.tokenId) ||
+      (hoveredState.component.componentType === 'variable_otom' &&
+        isExactMatchCriteria(hoveredState.component.criteria) &&
+        checkCriteria(representativeItem, hoveredState.component.criteria)));
 
-  const handleMouseLeave = () => {
-    setHoveredTokenId(null);
-  };
+  function handleMouseEnter() {
+    if (isRequiredInBlueprint && !areAllItemsUsed) {
+      setHoveredState({ item: representativeItem });
+    }
+  }
+
+  function handleMouseLeave() {
+    setHoveredState(null);
+  }
 
   const mass =
     representativeItem.giving_atoms.reduce((acc, atom) => acc + atom.mass, 0) +
@@ -382,7 +390,10 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({ representativeItem, count,
                 ? 'border-primary text-primary border-dashed'
                 : 'border-border text-muted-foreground font-normal',
             areAllItemsUsed && 'cursor-not-allowed',
-            hoveredTokenId === representativeItem.tokenId && !areAllItemsUsed && 'bg-primary/15'
+            (hoveredState?.item?.tokenId === representativeItem.tokenId ||
+              shouldHighlightFromBlueprintHover) &&
+              !areAllItemsUsed &&
+              'bg-primary/15'
           )}
         >
           <CardContent className="grid aspect-square w-full place-items-center px-0 sm:size-15">
@@ -626,8 +637,16 @@ const RequiredDropZone: FC<{
       component: component,
     },
   });
-  const [hoveredTokenId, setHoveredTokenId] = useAtom(hoveredOtomIdAtom);
-  const isHoveredTarget = hoveredTokenId === String(component.itemIdOrOtomTokenId);
+
+  const [hoveredState, setHoveredState] = useAtom(hoveredOtomItemAtom);
+
+  const isHoveredTarget =
+    (component.componentType !== 'variable_otom' &&
+      hoveredState?.item?.tokenId === String(component.itemIdOrOtomTokenId)) ||
+    (component.componentType === 'variable_otom' &&
+      isExactMatchCriteria(component.criteria) &&
+      hoveredState?.item &&
+      checkCriteria(hoveredState.item, component.criteria));
 
   const draggedElement = active?.data.current as OtomItem | null;
 
@@ -651,15 +670,15 @@ const RequiredDropZone: FC<{
 
   const isMolecule = molecule ? !isOtomAtom(molecule) : false;
 
-  const handleMouseEnter = () => {
+  function handleMouseEnter() {
     if (isOwned) {
-      setHoveredTokenId(String(component.itemIdOrOtomTokenId));
+      setHoveredState({ component, item: null });
     }
-  };
+  }
 
-  const handleMouseLeave = () => {
-    setHoveredTokenId(null);
-  };
+  function handleMouseLeave() {
+    setHoveredState(null);
+  }
 
   return (
     <div ref={setNodeRef}>

@@ -1,3 +1,7 @@
+import { BlueprintComponent, OtomItem } from '@/lib/types';
 import { atom } from 'jotai';
 
-export const hoveredOtomIdAtom = atom<string | null>(null);
+export const hoveredOtomItemAtom = atom<{
+  item?: OtomItem | null;
+  component?: BlueprintComponent;
+} | null>(null);
