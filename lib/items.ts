@@ -29,7 +29,7 @@ export async function getBlueprintForItem(
 ): Promise<BlueprintComponent> {
   let name: string = '?';
 
-  if (blueprint.componentType === 0 || blueprint.componentType === 1) {
+  if (blueprint.componentType === 0) {
     const tokenId = blueprint.itemIdOrOtomTokenId.toString();
     const otomResults = await getMoleculesByIds([tokenId]);
     if (otomResults.length > 0 && otomResults[0]?.molecule) {
@@ -37,16 +37,25 @@ export async function getBlueprintForItem(
     } else {
       console.warn(`No molecule data found for specific Otom tokenId: ${tokenId}`);
     }
-  } else if (blueprint.componentType === 2 || blueprint.componentType === 3) {
-    try {
-      const nft = await alchemy.nft.getNftMetadata(
-        assemblyItems[config.chainId],
-        blueprint.itemIdOrOtomTokenId.toString()
-      );
-      name = nft.name ?? '?';
-    } catch (error) {
-      console.warn(`Could not fetch metadata for item ID: ${blueprint.itemIdOrOtomTokenId}`, error);
-      name = `Item ID ${blueprint.itemIdOrOtomTokenId.toString().substring(0, 6)}...`;
+  } else {
+    if (!!blueprint.itemIdOrOtomTokenId) {
+      try {
+        const nft = await alchemy.nft.getNftMetadata(
+          assemblyItems[config.chainId],
+          blueprint.itemIdOrOtomTokenId.toString()
+        );
+        name = nft.name ?? '?';
+      } catch (error) {
+        console.warn(
+          `Could not fetch metadata for item ID: ${blueprint.itemIdOrOtomTokenId}`,
+          error
+        );
+        name = `Item ID ${blueprint.itemIdOrOtomTokenId.toString().substring(0, 6)}...`;
+      }
+    } else if (blueprint.criteria[0].checkStringValue && !!blueprint.criteria[0].stringValue) {
+      name = blueprint.criteria[0].stringValue;
+    } else {
+      name = '?';
     }
   }
 
