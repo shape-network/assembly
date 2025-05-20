@@ -6,7 +6,8 @@ import { InlineLink } from '@/components/ui/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { WalletConnect } from '@/components/wallet-connect';
 import { paths } from '@/lib/paths';
-import type { OtomItem } from '@/lib/types';
+import { checkCriteria, isExactMatchCriteria } from '@/lib/property-utils';
+import type { BlueprintComponent, OtomItem } from '@/lib/types';
 import { DndContext, DragOverlay, type DragEndEvent, type DragStartEvent } from '@dnd-kit/core';
 import { ExternalLinkIcon } from '@radix-ui/react-icons';
 import Link from 'next/link';
@@ -70,13 +71,26 @@ export const HomeContent = () => {
           type: string;
           requiredTokenId?: string;
           index?: number;
+          component?: BlueprintComponent;
         };
         const draggedItemId = String(active.id);
 
         if (!droppedItemData || !dropZoneData) return;
 
         if (dropZoneData?.type === 'required') {
-          if (droppedItemData?.tokenId === dropZoneData?.requiredTokenId) {
+          const isVariableWithExactMatch =
+            dropZoneData.component?.componentType === 'variable_otom' &&
+            isExactMatchCriteria(dropZoneData.component.criteria || []);
+
+          let canDrop = false;
+
+          if (isVariableWithExactMatch && dropZoneData.component) {
+            canDrop = checkCriteria(droppedItemData, dropZoneData.component.criteria);
+          } else {
+            canDrop = droppedItemData?.tokenId === dropZoneData?.requiredTokenId;
+          }
+
+          if (canDrop) {
             setDroppedOnRequiredSlots((prev) => new Set(prev).add(dropZoneId));
             setRequiredSlotToOtomMap((prev) => ({ ...prev, [dropZoneId]: draggedItemId }));
           }
