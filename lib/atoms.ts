@@ -1,3 +1,4 @@
+import { OtomItem } from '@/lib/types';
 import { atom } from 'jotai';
 
-export const hoveredOtomIdAtom = atom<string | null>(null);
+export const hoveredOtomItemAtom = atom<OtomItem | null>(null);

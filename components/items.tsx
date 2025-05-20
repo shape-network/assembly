@@ -12,7 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useWriteAssemblyCoreContractCraftItem } from '@/generated';
 import { assemblyCore } from '@/lib/addresses';
-import { hoveredOtomIdAtom } from '@/lib/atoms';
+import { hoveredOtomItemAtom } from '@/lib/atoms';
 import { config } from '@/lib/config';
 import { isOtomAtom } from '@/lib/otoms';
 import { paths } from '@/lib/paths';
@@ -313,7 +313,7 @@ type OtomItemCardProps = {
 
 export const OtomItemCard: FC<OtomItemCardProps> = ({ representativeItem, count, usedCounts }) => {
   const { data: craftableItems } = useGetCraftableItems();
-  const [hoveredTokenId, setHoveredTokenId] = useAtom(hoveredOtomIdAtom);
+  const [hoveredOtomItem, setHoveredOtomItem] = useAtom(hoveredOtomItemAtom);
 
   const usedCount = usedCounts.get(representativeItem.tokenId) || 0;
   const availableCount = count - usedCount;
@@ -350,12 +350,12 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({ representativeItem, count,
 
   const handleMouseEnter = () => {
     if (isRequiredInBlueprint && !areAllItemsUsed) {
-      setHoveredTokenId(representativeItem.tokenId);
+      setHoveredOtomItem(representativeItem);
     }
   };
 
   const handleMouseLeave = () => {
-    setHoveredTokenId(null);
+    setHoveredOtomItem(null);
   };
 
   const mass =
@@ -382,7 +382,9 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({ representativeItem, count,
                 ? 'border-primary text-primary border-dashed'
                 : 'border-border text-muted-foreground font-normal',
             areAllItemsUsed && 'cursor-not-allowed',
-            hoveredTokenId === representativeItem.tokenId && !areAllItemsUsed && 'bg-primary/15'
+            hoveredOtomItem?.tokenId === representativeItem.tokenId &&
+              !areAllItemsUsed &&
+              'bg-primary/15'
           )}
         >
           <CardContent className="grid aspect-square w-full place-items-center px-0 sm:size-15">
@@ -626,8 +628,16 @@ const RequiredDropZone: FC<{
       component: component,
     },
   });
-  const [hoveredTokenId, setHoveredTokenId] = useAtom(hoveredOtomIdAtom);
-  const isHoveredTarget = hoveredTokenId === String(component.itemIdOrOtomTokenId);
+
+  const [hoveredOtomItem, setHoveredOtomItem] = useAtom(hoveredOtomItemAtom);
+
+  const isHoveredTarget =
+    (component.componentType !== 'variable_otom' &&
+      hoveredOtomItem?.tokenId === String(component.itemIdOrOtomTokenId)) ||
+    (component.componentType === 'variable_otom' &&
+      isExactMatchCriteria(component.criteria) &&
+      hoveredOtomItem &&
+      checkCriteria(hoveredOtomItem, component.criteria));
 
   const draggedElement = active?.data.current as OtomItem | null;
 
@@ -651,21 +661,9 @@ const RequiredDropZone: FC<{
 
   const isMolecule = molecule ? !isOtomAtom(molecule) : false;
 
-  const handleMouseEnter = () => {
-    if (isOwned) {
-      setHoveredTokenId(String(component.itemIdOrOtomTokenId));
-    }
-  };
-
-  const handleMouseLeave = () => {
-    setHoveredTokenId(null);
-  };
-
   return (
     <div ref={setNodeRef}>
       <Card
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
         className={cn(
           'relative py-0 transition-[colors,transform] select-none',
           isDropped
