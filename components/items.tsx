@@ -493,7 +493,7 @@ const CraftItemButton: FC<{
 
     setCraftingStatus('pending');
     const variableOtomTokenIds = item.blueprint
-      .filter((bp) => bp.componentType === 'variable_otom')
+      .filter((bp) => bp.componentType === 'variable_otom' && !isExactMatchCriteria(bp.criteria))
       .map((_, index) => {
         const dropped = droppedVariableItems ? droppedVariableItems[index] : null;
         return dropped && dropped.tokenId ? BigInt(dropped.tokenId) : null;
