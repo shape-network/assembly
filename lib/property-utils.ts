@@ -138,9 +138,6 @@ export function checkCriteria(item: OtomItem, criteria: BlueprintComponent['crit
           (min !== undefined && itemValueBigInt < min) ||
           (max !== undefined && itemValueBigInt > max)
         ) {
-          console.log(
-            `Criteria fail (Number): ${String(mapping.path)} value ${itemValueBigInt} not in range [${min ?? '-inf'}, ${max ?? '+inf'}]`
-          );
           return false; // Range check fails
         }
       } catch (error) {
@@ -161,9 +158,6 @@ export function checkCriteria(item: OtomItem, criteria: BlueprintComponent['crit
       }
       // Only check the value if the criterion requires it
       if (c.checkBoolValue && itemValue !== c.boolValue) {
-        console.log(
-          `Criteria fail (Boolean): ${String(mapping.path)} value ${itemValue} !== required ${c.boolValue}`
-        );
         return false; // Boolean value mismatch fails
       }
     }
@@ -177,9 +171,6 @@ export function checkCriteria(item: OtomItem, criteria: BlueprintComponent['crit
       }
       // Only check the value if the criterion requires it
       if (c.checkStringValue && itemValue !== c.stringValue) {
-        console.log(
-          `Criteria fail (String): ${String(mapping.path)} value "${itemValue}" !== required "${c.stringValue}"`
-        );
         return false; // String value mismatch fails
       }
     }

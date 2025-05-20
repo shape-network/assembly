@@ -19,7 +19,7 @@ import { paths } from '@/lib/paths';
 import { checkCriteria, formatPropertyName, isExactMatchCriteria } from '@/lib/property-utils';
 import { BlueprintComponent, Item, Molecule, OtomItem, OwnedItem, Trait } from '@/lib/types';
 import { cn, isNotNullish } from '@/lib/utils';
-import { useDraggable, useDroppable } from '@dnd-kit/core';
+import { useDndContext, useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { QuestionMarkCircledIcon } from '@radix-ui/react-icons';
 import { useAtom } from 'jotai';
@@ -29,12 +29,9 @@ import { toast } from 'sonner';
 import { useAccount, useSwitchChain, useWaitForTransactionReceipt } from 'wagmi';
 
 export const ItemsToCraft: FC<{
-  droppedItemsState: Record<string, Record<number, OtomItem | null>>;
-  onDrop: (itemId: string, index: number, item: OtomItem | null) => void;
-  droppedOnRequiredSlots: Set<string>;
-  onClearRequired: (itemId: string) => void;
-  onCraftSuccess: (itemId: string) => void;
-}> = ({ droppedItemsState, onDrop, droppedOnRequiredSlots, onClearRequired, onCraftSuccess }) => {
+  droppedItemsState: DroppedItemsState;
+  onClearSlots: (itemId: string) => void;
+}> = ({ droppedItemsState, onClearSlots }) => {
   const { data, isLoading, isError } = useGetCraftableItems();
 
   if (isLoading) {
@@ -47,43 +44,64 @@ export const ItemsToCraft: FC<{
 
   return (
     <HorizontallScrollWrapper>
-      {data.map((item) => {
-        const droppedItemsForThisCard = droppedItemsState[String(item.id)] || {};
-        return (
-          <ItemToCraftCard
-            key={item.id}
-            item={item}
-            droppedVariableItems={droppedItemsForThisCard}
-            onDropVariable={onDrop}
-            droppedOnRequiredSlots={droppedOnRequiredSlots}
-            onClearRequired={onClearRequired}
-            onCraftSuccess={onCraftSuccess}
-          />
-        );
-      })}
+      {data.map((item) => (
+        <ItemToCraftCard
+          key={item.id}
+          item={item}
+          droppedItemsState={droppedItemsState}
+          onClearSlots={onClearSlots}
+        />
+      ))}
     </HorizontallScrollWrapper>
   );
 };
 
+export type DroppedItemsState = Record<string, Record<number, OtomItem | null>>;
+
 type ItemToCraftCardProps = {
   item: Item;
-  droppedVariableItems: Record<number, OtomItem | null>;
-  onDropVariable: (itemId: string, index: number, item: OtomItem | null) => void;
-  droppedOnRequiredSlots: Set<string>;
-  onClearRequired: (itemId: string) => void;
-  onCraftSuccess: (itemId: string) => void;
+  droppedItemsState: DroppedItemsState;
+  onClearSlots: (itemId: string) => void;
 };
 
-const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
-  item,
-  droppedVariableItems,
-  onDropVariable,
-  droppedOnRequiredSlots,
-  onClearRequired,
-  onCraftSuccess,
-}) => {
+const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, onClearSlots }) => {
   const { data } = useGetOtomItemsForUser();
   const inventory = data?.pages.flatMap((page) => page.items) || [];
+
+  const droppedItemsForThisCard = droppedItemsState[String(item.id)] || {};
+
+  const requiredIndices = item.blueprint
+    .map((bp, index) =>
+      bp.componentType !== 'variable_otom' || isExactMatchCriteria(bp.criteria) ? index : null
+    )
+    .filter(isNotNullish);
+
+  const wildcardIndices = item.blueprint
+    .map((bp, index) =>
+      bp.componentType === 'variable_otom' && !isExactMatchCriteria(bp.criteria) ? index : null
+    )
+    .filter(isNotNullish);
+
+  const isCraftable = item.blueprint.every((component, index) => {
+    const droppedItem = droppedItemsForThisCard[index];
+    if (!droppedItem) return false;
+
+    if (component.componentType === 'otom') {
+      const requiredTokenId = String(component.itemIdOrOtomTokenId);
+      const requiredAmount = Number(component.amount);
+      const ownedAmount = inventory.filter((i) => i.tokenId === requiredTokenId).length || 0;
+      return droppedItem.tokenId === requiredTokenId && ownedAmount >= requiredAmount;
+    } else if (component.componentType === 'variable_otom') {
+      return checkCriteria(droppedItem, component.criteria);
+    }
+    return false;
+  });
+
+  const handleClearAllClick = useCallback(() => {
+    onClearSlots(String(item.id));
+  }, [item.id, onClearSlots]);
+
+  const hasDroppedItems = Object.values(droppedItemsForThisCard).some((item) => item !== null);
 
   function isElementOwned(component: BlueprintComponent): boolean {
     if (!inventory || inventory.length === 0) return false;
@@ -99,86 +117,17 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
     return false;
   }
 
-  // Filter blueprint into three categories:
-  // 1. Standard required components (type !== variable_otom)
-  // 2. Variable components with exact match criteria (treated as required)
-  // 3. Variable components with range criteria (true variables)
-  const standardRequiredBlueprints = item.blueprint.filter(
-    (i) => i.componentType !== 'variable_otom'
-  );
-
-  const variableExactMatchBlueprints = item.blueprint.filter(
-    (i) => i.componentType === 'variable_otom' && isExactMatchCriteria(i.criteria)
-  );
-
-  const variableRangeBlueprints = item.blueprint.filter(
-    (i) => i.componentType === 'variable_otom' && !isExactMatchCriteria(i.criteria)
-  );
-
-  // Combine standard required and variable exact match for UI
-  const requiredBlueprints = [...standardRequiredBlueprints, ...variableExactMatchBlueprints];
-  const variableBlueprints = variableRangeBlueprints;
-
-  const hasDroppedRequired = requiredBlueprints.some((_, i) =>
-    droppedOnRequiredSlots.has(getRequiredDropZoneId(item.id, i))
-  );
-  const hasDroppedVariable = Object.values(droppedVariableItems).some((item) => item !== null);
-
-  const isCraftable =
-    requiredBlueprints.length > 0 &&
-    requiredBlueprints.every(({ componentType, itemIdOrOtomTokenId, criteria }, index) => {
-      const dropId = getRequiredDropZoneId(item.id, index);
-      const isDropped = droppedOnRequiredSlots.has(dropId);
-
-      // Standard required component check
-      if (componentType !== 'variable_otom') {
-        const requiredTokenId = String(itemIdOrOtomTokenId);
-        const hasRequiredComponent =
-          inventory?.some((ownedItem) => ownedItem.tokenId === requiredTokenId) ?? false;
-        return isDropped && hasRequiredComponent;
-      }
-      // Variable component with exact match criteria (treated as required)
-      else if (isExactMatchCriteria(criteria)) {
-        // We already know it's dropped if we're here (isDropped is true)
-        // The criteria check was already done during drop
-        return isDropped;
-      } else {
-        return false;
-      }
-    }) &&
-    variableBlueprints.length === Object.keys(droppedVariableItems).length &&
-    variableBlueprints.every((_, i) => droppedVariableItems[i] !== null);
-
-  function handleClearRequiredClick() {
-    onClearRequired(String(item.id));
-  }
-
-  function handleClearVariableClick() {
-    variableBlueprints.forEach((_, index) => {
-      onDropVariable(String(item.id), index, null);
-    });
-  }
-
-  const handleSuccess = useCallback(
-    (itemId: string) => {
-      onCraftSuccess(itemId);
-      handleClearRequiredClick();
-      handleClearVariableClick();
-    },
-    [onCraftSuccess]
-  );
-
   const isPickaxe = item.id === BigInt(2);
 
   return (
     <li className="grid w-[300px] shrink-0 grid-rows-[1fr_auto] gap-1">
       <Card className="relative w-full">
         <CraftItemButton
+          droppedItemsState={droppedItemsState}
           isCraftable={isCraftable}
           item={item}
           className="absolute top-2 right-2 z-10 h-8 px-3"
-          droppedVariableItems={droppedVariableItems}
-          onCraftSuccess={handleSuccess}
+          onCraftSuccess={handleClearAllClick}
         />
 
         <CardHeader className="relative">
@@ -219,12 +168,12 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-muted-foreground text-sm">Required components</p>
-                {hasDroppedRequired && (
+                {hasDroppedItems && (
                   <Button
                     variant="ghost"
                     size="sm"
                     className="text-muted-foreground h-5 cursor-pointer px-2 text-xs"
-                    onClick={handleClearRequiredClick}
+                    onClick={handleClearAllClick}
                   >
                     Clear
                   </Button>
@@ -232,23 +181,25 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
               </div>
 
               <div className="flex flex-wrap gap-1">
-                {requiredBlueprints.map((component, i) => {
-                  const isOwned = isElementOwned(component);
-                  const dropId = getRequiredDropZoneId(item.id, i);
+                {requiredIndices.map((blueprintIndex) => {
+                  const component = item.blueprint[blueprintIndex];
+                  const dropId = `required-${item.id}-${blueprintIndex}`;
+                  const isDropped = !!droppedItemsForThisCard[blueprintIndex];
                   return (
                     <RequiredDropZone
                       key={dropId}
                       id={dropId}
                       component={component}
-                      isOwned={isOwned}
-                      isDropped={droppedOnRequiredSlots.has(dropId)}
+                      isOwned={isElementOwned(component)}
+                      isDropped={isDropped}
+                      index={blueprintIndex}
                     />
                   );
                 })}
               </div>
             </div>
 
-            {variableBlueprints.length > 0 ? (
+            {wildcardIndices.length > 0 ? (
               <div className="flex flex-col gap-2">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1">
@@ -266,29 +217,18 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({
                       </TooltipContent>
                     </Tooltip>
                   </div>
-
-                  {hasDroppedVariable && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-muted-foreground h-5 cursor-pointer px-2 text-xs"
-                      onClick={handleClearVariableClick}
-                    >
-                      Clear
-                    </Button>
-                  )}
                 </div>
 
                 <div className="flex justify-start gap-1">
-                  {variableBlueprints.map((vb, i) => {
-                    const dropId = `variable-${item.id}-${i}`;
-                    const droppedItem = droppedVariableItems[i] || null;
+                  {wildcardIndices.map((blueprintIndex) => {
+                    const dropId = `variable-${item.id}-${blueprintIndex}`;
+                    const droppedItem = droppedItemsForThisCard[blueprintIndex] || null;
                     return (
-                      <VariableDropZone
+                      <WildcardDropZone
                         key={dropId}
                         id={dropId}
-                        index={i}
-                        criteria={vb.criteria}
+                        index={blueprintIndex}
+                        component={item.blueprint[blueprintIndex]}
                         droppedItem={droppedItem}
                       />
                     );
@@ -459,18 +399,23 @@ export const ElementName: FC<{ otom: OtomItem | Molecule; className?: string }> 
 const CraftItemButton: FC<{
   item: Item;
   className?: string;
-  droppedVariableItems?: Record<number, OtomItem | null>;
   onCraftSuccess?: (itemId: string) => void;
   isCraftable?: boolean;
-}> = ({ item, className, droppedVariableItems, onCraftSuccess, isCraftable }) => {
-  const { data: hash, writeContractAsync } = useWriteAssemblyCoreContractCraftItem();
-  const { refetch: refetchOtomItems } = useGetOtomItemsForUser();
-  const { chain: currentWalletChain } = useAccount();
-  const { switchChainAsync } = useSwitchChain();
-
+  droppedItemsState: DroppedItemsState;
+}> = ({ item, className, onCraftSuccess, isCraftable, droppedItemsState }) => {
   const [craftingStatus, setCraftingStatus] = useState<'idle' | 'pending' | 'success' | 'error'>(
     'idle'
   );
+
+  const { data: hash, writeContractAsync } = useWriteAssemblyCoreContractCraftItem();
+  const {
+    isLoading: isTxConfirming,
+    isError: isTxError,
+    isSuccess: isTxConfirmed,
+  } = useWaitForTransactionReceipt({ hash, query: { enabled: !!hash } });
+  const { refetch: refetchOtomItems } = useGetOtomItemsForUser();
+  const { chain: currentWalletChain } = useAccount();
+  const { switchChainAsync } = useSwitchChain();
 
   async function handleCraftItem() {
     if (!switchChainAsync) {
@@ -492,11 +437,14 @@ const CraftItemButton: FC<{
     }
 
     setCraftingStatus('pending');
+
     const variableOtomTokenIds = item.blueprint
-      .filter((bp) => bp.componentType === 'variable_otom')
-      .map((_, index) => {
-        const dropped = droppedVariableItems ? droppedVariableItems[index] : null;
-        return dropped && dropped.tokenId ? BigInt(dropped.tokenId) : null;
+      .map((bp, index) => {
+        if (bp.componentType === 'variable_otom') {
+          const dropped = droppedItemsState[String(item.id)]?.[index];
+          return dropped ? BigInt(dropped.tokenId) : null;
+        }
+        return null;
       })
       .filter(isNotNullish);
 
@@ -512,12 +460,6 @@ const CraftItemButton: FC<{
       console.error(error);
     }
   }
-
-  const {
-    isLoading: isTxConfirming,
-    isError: isTxError,
-    isSuccess: isTxConfirmed,
-  } = useWaitForTransactionReceipt({ hash, query: { enabled: !!hash } });
 
   useEffect(() => {
     if (hash && isTxConfirming && craftingStatus === 'pending') {
@@ -628,15 +570,25 @@ const RequiredDropZone: FC<{
   component: BlueprintComponent;
   isOwned: boolean;
   isDropped: boolean;
-}> = ({ id, component, isOwned, isDropped }) => {
-  const { isOver, setNodeRef, active } = useDroppable({
+  index: number;
+}> = ({ id, component, isOwned, isDropped, index }) => {
+  const { isOver, setNodeRef } = useDroppable({
     id: id,
     data: {
-      requiredTokenId: String(component.itemIdOrOtomTokenId),
       type: 'required',
+      index: index,
       component: component,
     },
   });
+
+  const { active } = useDndContext();
+  const draggedItem = active?.data.current as OtomItem | null;
+
+  const canDrop = draggedItem
+    ? component.componentType === 'otom'
+      ? draggedItem.tokenId === String(component.itemIdOrOtomTokenId)
+      : checkCriteria(draggedItem, component.criteria)
+    : false;
 
   const [hoveredState, setHoveredState] = useAtom(hoveredOtomItemAtom);
 
@@ -647,21 +599,6 @@ const RequiredDropZone: FC<{
       isExactMatchCriteria(component.criteria) &&
       hoveredState?.item &&
       checkCriteria(hoveredState.item, component.criteria));
-
-  const draggedElement = active?.data.current as OtomItem | null;
-
-  const isVariableWithExactMatch =
-    component.componentType === 'variable_otom' && isExactMatchCriteria(component.criteria);
-
-  let canDrop = false;
-
-  if (draggedElement) {
-    if (isVariableWithExactMatch) {
-      canDrop = checkCriteria(draggedElement, component.criteria);
-    } else {
-      canDrop = draggedElement.tokenId === String(component.itemIdOrOtomTokenId);
-    }
-  }
 
   const { data: molecule } = useGetMoleculesFromOtomTokenId({
     otomTokenId: String(component.itemIdOrOtomTokenId),
@@ -692,8 +629,8 @@ const RequiredDropZone: FC<{
             : isOwned
               ? 'border-primary border-dashed font-semibold'
               : 'text-muted-foreground/50 border-border font-normal',
-          isOver && canDrop && 'ring-primary ring-2 ring-offset-2',
-          isOver && !canDrop && 'ring-destructive ring-2 ring-offset-2',
+          !isDropped && isOver && canDrop && 'ring-primary ring-2 ring-offset-2',
+          !isDropped && isOver && !canDrop && 'ring-destructive ring-2 ring-offset-2',
           isHoveredTarget && !isDropped && 'bg-primary/15'
         )}
       >
@@ -720,19 +657,19 @@ const RequiredDropZone: FC<{
   );
 };
 
-const VariableDropZone: FC<{
+const WildcardDropZone: FC<{
   id: string;
   index: number;
-  criteria: BlueprintComponent['criteria'];
+  component: BlueprintComponent;
   droppedItem: OtomItem | null;
-}> = ({ id, index, criteria, droppedItem }) => {
+}> = ({ id, index, component, droppedItem }) => {
   const { isOver, setNodeRef, active } = useDroppable({
     id: id,
-    data: { index: index, type: 'variable' },
+    data: { index, type: 'variable', component },
   });
 
   const draggedItem = active?.data.current as OtomItem | undefined;
-  const canDrop = active ? checkCriteria(draggedItem!, criteria) : false;
+  const canDrop = active ? checkCriteria(draggedItem!, component.criteria) : false;
 
   return (
     <Tooltip>
@@ -769,7 +706,7 @@ const VariableDropZone: FC<{
 
       <TooltipContent>
         <div className="flex flex-col gap-1">
-          {criteria.map((c) => (
+          {component.criteria.map((c) => (
             <span key={c.propertyType}>
               <p className="font-semibold">{formatPropertyName(c.propertyType)}</p>
               <p className="flex gap-1">
@@ -801,10 +738,6 @@ const VariableDropZone: FC<{
     </Tooltip>
   );
 };
-
-function getRequiredDropZoneId(itemId: bigint | string, index: number): string {
-  return `required-${itemId}-${index}`;
-}
 
 export const HorizontallScrollWrapper: FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
