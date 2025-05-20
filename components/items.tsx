@@ -28,7 +28,7 @@ import { useAtom } from 'jotai';
 import Image from 'next/image';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { AbiEvent, decodeEventLog, toEventSelector } from 'viem';
+import { decodeEventLog, toEventSelector } from 'viem';
 import { useAccount, useSwitchChain, useWaitForTransactionReceipt } from 'wagmi';
 
 export const ItemsToCraft: FC<{
@@ -424,12 +424,9 @@ const CraftItemButton: FC<{
 
   const craftedItemTokenId = useMemo<string | undefined>(() => {
     if (txReceipt && txReceipt.logs && txReceipt.logs.length > 0) {
-      // FIXME: using event selector from abi is not working, using hardcoded selector for now
-      // const itemCraftedSelector = toEventSelector(
-      //   'event ItemCrafted(address indexed crafter, uint256 indexed itemId, uint256 amount, uint256 tokenId, tuple(uint8 componentType, uint256 itemIdOrOtomTokenId, uint256 amount, tuple(uint8 propertyType, uint256 minValue, uint256 maxValue, bool boolValue, bool checkBoolValue, string stringValue, bool checkStringValue, bytes32 bytes32Value, bool checkBytes32Value)[] criteria)[] actualComponents)'
-      // );
-      const itemCraftedSelector =
-        '0x058fb927aa87079f330120dd81c3bb27a3ea4f1becb48da8d8fac84b4799977b';
+      const itemCraftedSelector = toEventSelector(
+        'ItemCrafted(address,uint256,uint256,uint256,(uint8,uint256,uint256,(uint8,uint256,uint256,bool,bool,string,bool,bytes32,bool)[])[])'
+      );
 
       const craftLog = txReceipt.logs.find(
         (log) =>
