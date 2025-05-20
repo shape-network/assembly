@@ -54,9 +54,12 @@ export async function POST(request: Request) {
     const tierResult = tierResponse.status === 'success' ? tierResponse.result : null;
     const traitsResult = traitsResponse.status === 'success' ? traitsResponse.result : null;
 
-    if (itemResult === null) {
+    if (!itemResult) {
       console.error(`An error occurred while fetching item ${itemId}:`, itemResponse.error);
-      return null;
+      return NextResponse.json(
+        { error: `Item ${itemId} not found or could not be retrieved` },
+        { status: 404 }
+      );
     }
 
     const tier = Number(tierResult);
