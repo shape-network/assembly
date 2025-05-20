@@ -235,11 +235,11 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, on
                     const dropId = `variable-${item.id}-${blueprintIndex}`;
                     const droppedItem = droppedItemsForThisCard[blueprintIndex] || null;
                     return (
-                      <VariableDropZone
+                      <WildcardDropZone
                         key={dropId}
                         id={dropId}
                         index={blueprintIndex}
-                        criteria={item.blueprint[blueprintIndex].criteria}
+                        component={item.blueprint[blueprintIndex]}
                         droppedItem={droppedItem}
                       />
                     );
@@ -668,19 +668,19 @@ const RequiredDropZone: FC<{
   );
 };
 
-const VariableDropZone: FC<{
+const WildcardDropZone: FC<{
   id: string;
   index: number;
-  criteria: BlueprintComponent['criteria'];
+  component: BlueprintComponent;
   droppedItem: OtomItem | null;
-}> = ({ id, index, criteria, droppedItem }) => {
+}> = ({ id, index, component, droppedItem }) => {
   const { isOver, setNodeRef, active } = useDroppable({
     id: id,
-    data: { index: index, type: 'variable' },
+    data: { index, type: 'variable', component },
   });
 
   const draggedItem = active?.data.current as OtomItem | undefined;
-  const canDrop = active ? checkCriteria(draggedItem!, criteria) : false;
+  const canDrop = active ? checkCriteria(draggedItem!, component.criteria) : false;
 
   return (
     <Tooltip>
@@ -717,7 +717,7 @@ const VariableDropZone: FC<{
 
       <TooltipContent>
         <div className="flex flex-col gap-1">
-          {criteria.map((c) => (
+          {component.criteria.map((c) => (
             <span key={c.propertyType}>
               <p className="font-semibold">{formatPropertyName(c.propertyType)}</p>
               <p className="flex gap-1">
