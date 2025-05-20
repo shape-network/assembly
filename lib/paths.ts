@@ -11,6 +11,7 @@ export const paths = {
     ownedOtomItems: '/api/owned-otom-items',
     craftableItems: '/api/craftable-items',
     ownedItems: '/api/owned-items',
+    item: '/api/item',
   },
   assemblyItemImage: (itemId: bigint, tier: number) =>
     config.chainId === shape.id

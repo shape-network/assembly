@@ -77,3 +77,29 @@ export function useGetMoleculesFromOtomTokenId({
     refetchOnMount: false,
   });
 }
+
+export function useGetItem({
+  itemTokenId,
+  itemId,
+  enabled,
+}: {
+  itemTokenId: string;
+  itemId: string;
+  enabled: boolean;
+}) {
+  return useQuery<OwnedItem>({
+    queryKey: ['item', itemTokenId, itemId],
+    queryFn: async () => {
+      const response = await fetch(paths.api.item, {
+        method: 'POST',
+        body: JSON.stringify({ itemTokenId, itemId }),
+      });
+      const data = await response.text();
+      return superjson.parse<OwnedItem>(data);
+    },
+    enabled,
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+}

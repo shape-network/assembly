@@ -2,15 +2,17 @@
 
 import {
   useGetCraftableItems,
+  useGetItem,
   useGetMoleculesFromOtomTokenId,
   useGetOtomItemsForUser,
 } from '@/app/api/hooks';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { useWriteAssemblyCoreContractCraftItem } from '@/generated';
+import { assemblyCoreContractAbi, useWriteAssemblyCoreContractCraftItem } from '@/generated';
 import { assemblyCore } from '@/lib/addresses';
 import { hoveredOtomItemAtom } from '@/lib/atoms';
 import { config } from '@/lib/config';
@@ -18,14 +20,15 @@ import { isOtomAtom } from '@/lib/otoms';
 import { paths } from '@/lib/paths';
 import { checkCriteria, formatPropertyName, isExactMatchCriteria } from '@/lib/property-utils';
 import { BlueprintComponent, Item, Molecule, OtomItem, OwnedItem, Trait } from '@/lib/types';
-import { cn, isNotNullish } from '@/lib/utils';
+import { cn, isNotNullish, isSameAddress } from '@/lib/utils';
 import { useDndContext, useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { QuestionMarkCircledIcon } from '@radix-ui/react-icons';
 import { useAtom } from 'jotai';
 import Image from 'next/image';
-import { FC, useCallback, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
+import { decodeEventLog, toEventSelector } from 'viem';
 import { useAccount, useSwitchChain, useWaitForTransactionReceipt } from 'wagmi';
 
 export const ItemsToCraft: FC<{
@@ -406,16 +409,66 @@ const CraftItemButton: FC<{
   const [craftingStatus, setCraftingStatus] = useState<'idle' | 'pending' | 'success' | 'error'>(
     'idle'
   );
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
   const { data: hash, writeContractAsync } = useWriteAssemblyCoreContractCraftItem();
   const {
     isLoading: isTxConfirming,
     isError: isTxError,
     isSuccess: isTxConfirmed,
+    data: txReceipt,
   } = useWaitForTransactionReceipt({ hash, query: { enabled: !!hash } });
   const { refetch: refetchOtomItems } = useGetOtomItemsForUser();
   const { chain: currentWalletChain } = useAccount();
   const { switchChainAsync } = useSwitchChain();
+
+  const craftedItemTokenId = useMemo<string | undefined>(() => {
+    if (txReceipt && txReceipt.logs && txReceipt.logs.length > 0) {
+      const itemCraftedSelector = toEventSelector(
+        'ItemCrafted(address,uint256,uint256,uint256,(uint8,uint256,uint256,(uint8,uint256,uint256,bool,bool,string,bool,bytes32,bool)[])[])'
+      );
+
+      const craftLog = txReceipt.logs.find(
+        (log) =>
+          isSameAddress(log.address, assemblyCore[config.chainId]) &&
+          log.topics &&
+          log.topics[0] === itemCraftedSelector
+      );
+
+      if (craftLog) {
+        try {
+          const decodedLog = decodeEventLog({
+            abi: assemblyCoreContractAbi,
+            eventName: 'ItemCrafted',
+            data: craftLog.data,
+            topics: craftLog.topics,
+          });
+
+          if (decodedLog.args && 'tokenId' in decodedLog.args) {
+            console.log('decodedLog.args', decodedLog.args);
+            const tokenId = decodedLog.args.tokenId;
+            return typeof tokenId === 'bigint' ? tokenId.toString() : String(tokenId);
+          }
+
+          console.error(
+            'ItemCrafted event decoded, but tokenId not found in args:',
+            decodedLog.args
+          );
+          return undefined;
+        } catch (error) {
+          console.error('Failed to decode ItemCrafted event with full ABI:', error);
+        }
+      }
+      return undefined;
+    }
+    return undefined;
+  }, [txReceipt]);
+
+  const { data: craftedItem } = useGetItem({
+    itemTokenId: craftedItemTokenId ?? '',
+    itemId: String(item.id),
+    enabled: !!craftedItemTokenId && !!item.id,
+  });
 
   async function handleCraftItem() {
     if (!switchChainAsync) {
@@ -472,6 +525,7 @@ const CraftItemButton: FC<{
       setCraftingStatus('success');
       toast.success(`${item.name} crafted successfully!`);
       toast.dismiss('loading');
+      setShowSuccessDialog(true);
       refetchOtomItems();
       if (onCraftSuccess) {
         onCraftSuccess(String(item.id));
@@ -487,16 +541,72 @@ const CraftItemButton: FC<{
     }
   }, [isTxError, craftingStatus, item.name]);
 
+  const isPickaxe = item.id === BigInt(2);
+
   const disabled = !isCraftable || craftingStatus === 'pending' || isTxConfirming;
 
   return (
-    <Button
-      disabled={disabled}
-      onClick={handleCraftItem}
-      className={cn('disabled:opacity-15', className)}
-    >
-      {craftingStatus === 'pending' || isTxConfirming ? 'Crafting...' : 'Craft'}
-    </Button>
+    <>
+      <Button
+        disabled={disabled}
+        onClick={handleCraftItem}
+        className={cn('disabled:opacity-15', className)}
+      >
+        {craftingStatus === 'pending' || isTxConfirming ? 'Crafting...' : 'Craft'}
+      </Button>
+
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="text-center">Item Crafted Successfully!</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center gap-4 py-4">
+            <div className="relative h-60 w-full">
+              {craftedItem?.defaultImageUri ? (
+                <Image
+                  src={craftedItem.defaultImageUri}
+                  alt={craftedItem.name}
+                  fill
+                  className="object-contain"
+                />
+              ) : (
+                <Skeleton className="h-60 w-full" />
+              )}
+            </div>
+
+            <div className="flex w-full flex-col items-center gap-2">
+              <h3 className="text-xl font-bold">{craftedItem?.name ?? '-'}</h3>
+              <p className="text-muted-foreground text-center">{craftedItem?.description ?? '-'}</p>
+
+              {craftedItem && (
+                <div className="w-full">
+                  {isPickaxe ? (
+                    <ItemTraits
+                      traits={[
+                        craftedItem.tier ? { name: 'Tier', value: craftedItem.tier } : null,
+                        {
+                          name: 'Mining Power',
+                          value: getPickaxeMiningPower(craftedItem.tier ?? 1),
+                        },
+                        { name: 'Remaining Usages', value: craftedItem.usagesRemaining ?? '?' },
+                      ].filter(isNotNullish)}
+                    />
+                  ) : (
+                    <ItemTraits
+                      traits={[
+                        craftedItem.tier ? { name: 'Tier', value: craftedItem.tier } : null,
+                        ...craftedItem?.initialTraits,
+                        { name: 'Usages', value: craftedItem.usagesRemaining ?? '?' },
+                      ].filter(isNotNullish)}
+                    />
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 

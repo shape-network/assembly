@@ -42,3 +42,7 @@ export function universeSeedToHash(universeSeed: string): Hex {
 export function isNotNullish<T>(val: T | null | undefined): val is T {
   return val !== null && val !== undefined;
 }
+
+export function isSameAddress(a: string, b: string): boolean {
+  return a.toLowerCase() === b.toLowerCase();
+}
