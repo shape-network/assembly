@@ -313,7 +313,7 @@ type OtomItemCardProps = {
 
 export const OtomItemCard: FC<OtomItemCardProps> = ({ representativeItem, count, usedCounts }) => {
   const { data: craftableItems } = useGetCraftableItems();
-  const [hoveredOtomItem, setHoveredOtomItem] = useAtom(hoveredOtomItemAtom);
+  const [hoveredState, setHoveredState] = useAtom(hoveredOtomItemAtom);
 
   const usedCount = usedCounts.get(representativeItem.tokenId) || 0;
   const availableCount = count - usedCount;
@@ -348,15 +348,23 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({ representativeItem, count,
     })
   );
 
-  const handleMouseEnter = () => {
-    if (isRequiredInBlueprint && !areAllItemsUsed) {
-      setHoveredOtomItem(representativeItem);
-    }
-  };
+  const shouldHighlightFromBlueprintHover =
+    !!hoveredState?.component &&
+    ((hoveredState.component.componentType !== 'variable_otom' &&
+      hoveredState.component.itemIdOrOtomTokenId.toString() === representativeItem.tokenId) ||
+      (hoveredState.component.componentType === 'variable_otom' &&
+        isExactMatchCriteria(hoveredState.component.criteria) &&
+        checkCriteria(representativeItem, hoveredState.component.criteria)));
 
-  const handleMouseLeave = () => {
-    setHoveredOtomItem(null);
-  };
+  function handleMouseEnter() {
+    if (isRequiredInBlueprint && !areAllItemsUsed) {
+      setHoveredState({ item: representativeItem });
+    }
+  }
+
+  function handleMouseLeave() {
+    setHoveredState(null);
+  }
 
   const mass =
     representativeItem.giving_atoms.reduce((acc, atom) => acc + atom.mass, 0) +
@@ -382,7 +390,8 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({ representativeItem, count,
                 ? 'border-primary text-primary border-dashed'
                 : 'border-border text-muted-foreground font-normal',
             areAllItemsUsed && 'cursor-not-allowed',
-            hoveredOtomItem?.tokenId === representativeItem.tokenId &&
+            (hoveredState?.item?.tokenId === representativeItem.tokenId ||
+              shouldHighlightFromBlueprintHover) &&
               !areAllItemsUsed &&
               'bg-primary/15'
           )}
@@ -629,15 +638,15 @@ const RequiredDropZone: FC<{
     },
   });
 
-  const [hoveredOtomItem, setHoveredOtomItem] = useAtom(hoveredOtomItemAtom);
+  const [hoveredState, setHoveredState] = useAtom(hoveredOtomItemAtom);
 
   const isHoveredTarget =
     (component.componentType !== 'variable_otom' &&
-      hoveredOtomItem?.tokenId === String(component.itemIdOrOtomTokenId)) ||
+      hoveredState?.item?.tokenId === String(component.itemIdOrOtomTokenId)) ||
     (component.componentType === 'variable_otom' &&
       isExactMatchCriteria(component.criteria) &&
-      hoveredOtomItem &&
-      checkCriteria(hoveredOtomItem, component.criteria));
+      hoveredState?.item &&
+      checkCriteria(hoveredState.item, component.criteria));
 
   const draggedElement = active?.data.current as OtomItem | null;
 
@@ -661,9 +670,21 @@ const RequiredDropZone: FC<{
 
   const isMolecule = molecule ? !isOtomAtom(molecule) : false;
 
+  function handleMouseEnter() {
+    if (isOwned) {
+      setHoveredState({ component, item: null });
+    }
+  }
+
+  function handleMouseLeave() {
+    setHoveredState(null);
+  }
+
   return (
     <div ref={setNodeRef}>
       <Card
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         className={cn(
           'relative py-0 transition-[colors,transform] select-none',
           isDropped
