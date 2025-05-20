@@ -217,17 +217,6 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, on
                       </TooltipContent>
                     </Tooltip>
                   </div>
-
-                  {hasDroppedItems && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-muted-foreground h-5 cursor-pointer px-2 text-xs"
-                      onClick={handleClearAllClick}
-                    >
-                      Clear
-                    </Button>
-                  )}
                 </div>
 
                 <div className="flex justify-start gap-1">
