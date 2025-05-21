@@ -117,12 +117,12 @@ export const HomeContent = () => {
                     {address && <TabsTrigger value="owned-otoms">Owned Items</TabsTrigger>}
                   </TabsList>
 
-                  {/* <InlineLink
-                    href={paths.repo}
+                  <InlineLink
+                    href={paths.create}
                     className="text-muted-foreground/50 hidden text-sm no-underline hover:underline sm:inline-flex"
                   >
                     Propose your own <ExternalLinkIcon className="size-4" />
-                  </InlineLink> */}
+                  </InlineLink>
                 </div>
 
                 <TabsContent value="items-to-craft">
