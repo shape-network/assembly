@@ -1,0 +1,13 @@
+{
+    "extends": "../../tsconfig.base.json",
+    "compilerOptions": {
+        "forceConsistentCasingInFileNames": true,
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+        "outDir": "dist",
+        "resolveJsonModule": true
+    },
+    "include": ["./scripts", "./test", "./typechain-types"],
+    "files": ["./hardhat.config.ts"]
+}
