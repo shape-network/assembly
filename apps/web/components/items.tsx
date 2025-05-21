@@ -564,7 +564,7 @@ const CraftItemButton: FC<{
             <div className="relative h-60 w-full">
               {craftedItem?.defaultImageUri ? (
                 <Image
-                  src={craftedItem.defaultImageUri}
+                  src={paths.assemblyItemImage(craftedItem.id, craftedItem.tier ?? 1)}
                   alt={craftedItem.name}
                   fill
                   className="object-contain"
