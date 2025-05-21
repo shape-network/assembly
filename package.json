@@ -1,6 +1,7 @@
 {
   "name": "assembly-monorepo",
   "private": true,
+  "author": "williamhzo",
   "packageManager": "yarn@1.22.22",
   "workspaces": [
     "apps/*",
@@ -9,7 +10,13 @@
   "scripts": {
     "build": "turbo build",
     "dev": "turbo run dev --parallel",
-    "lint": "turbo run lint"
+    "lint": "turbo run lint",
+    "compile": "turbo run compile",
+    "test": "turbo run test",
+    "deploy": "turbo run deploy",
+    "contracts:compile": "turbo run compile --filter=contracts",
+    "contracts:test": "turbo run test --filter=contracts",
+    "contracts:deploy": "turbo run deploy --filter=contracts"
   },
   "devDependencies": {
     "turbo": "latest"

@@ -3,7 +3,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**"]
+      "outputs": [".next/**", "!.next/cache/**", "artifacts/**", "cache/**", "typechain-types/**"]
     },
     "check-types": {
       "dependsOn": ["^check-types"]
@@ -11,6 +11,17 @@
     "dev": {
       "persistent": true,
       "cache": false
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "compile": {
+      "outputs": ["artifacts/**", "cache/**", "typechain-types/**"]
+    },
+    "deploy": {
+      "dependsOn": ["build", "test"],
+      "outputs": []
     }
   }
 }
