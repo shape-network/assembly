@@ -3,6 +3,7 @@ import { shape } from 'viem/chains';
 
 export const paths = {
   home: '/',
+  create: '/create',
   repo: 'https://github.com/shape-network/assembly',
   shape: 'https://shape.network',
   otom: 'https://otom.xyz',
