@@ -162,6 +162,7 @@ contract OtomItemsTracking is Initializable, Ownable2StepUpgradeable, IOtomItems
                 uint256 amount = values[i];
 
                 if (from == address(0)) {
+                    // Mint case - tokens are created
                     // Increase supply count for the item
                     nonFungibleItemSupply[itemId] += amount;
 
@@ -173,7 +174,11 @@ contract OtomItemsTracking is Initializable, Ownable2StepUpgradeable, IOtomItems
 
                     // Add the token ID to the owner's token ID array
                     nonFungibleItemOwnerTokenIds[itemId][to].push(tokenId);
-                } else {
+                    nonFungibleItemOwnerTokenIdIndex[tokenId] =
+                        nonFungibleItemOwnerTokenIds[itemId][to].length -
+                        1;
+                } else if (to == address(0)) {
+                    // Burn case - tokens are destroyed
                     // Decrease supply count for the item
                     nonFungibleItemSupply[itemId] -= amount;
 
@@ -183,6 +188,11 @@ contract OtomItemsTracking is Initializable, Ownable2StepUpgradeable, IOtomItems
                     nonFungibleItemTokenIds[itemId][tokenIdAllIndex] = nonFungibleItemTokenIds[
                         itemId
                     ][lastIndexAllTokenIds];
+                    // Update index for the swapped token
+                    if (tokenIdAllIndex != lastIndexAllTokenIds) {
+                        uint256 swappedTokenId = nonFungibleItemTokenIds[itemId][tokenIdAllIndex];
+                        nonFungibleItemTokenIdIndex[swappedTokenId] = tokenIdAllIndex;
+                    }
                     nonFungibleItemTokenIds[itemId].pop();
                     delete nonFungibleItemTokenIdIndex[tokenId];
 
@@ -193,8 +203,39 @@ contract OtomItemsTracking is Initializable, Ownable2StepUpgradeable, IOtomItems
                     nonFungibleItemOwnerTokenIds[itemId][from][
                         tokenIdOwnerIndex
                     ] = nonFungibleItemOwnerTokenIds[itemId][from][lastIndexOwnerTokenIds];
+                    // Update index for the swapped token
+                    if (tokenIdOwnerIndex != lastIndexOwnerTokenIds) {
+                        uint256 swappedTokenId = nonFungibleItemOwnerTokenIds[itemId][from][
+                            tokenIdOwnerIndex
+                        ];
+                        nonFungibleItemOwnerTokenIdIndex[swappedTokenId] = tokenIdOwnerIndex;
+                    }
                     nonFungibleItemOwnerTokenIds[itemId][from].pop();
                     delete nonFungibleItemOwnerTokenIdIndex[tokenId];
+                } else {
+                    // Transfer case - tokens are moved between accounts
+
+                    // Remove the token ID from the previous owner's token ID array
+                    uint256 tokenIdOwnerIndex = nonFungibleItemOwnerTokenIdIndex[tokenId];
+                    uint256 lastIndexOwnerTokenIds = nonFungibleItemOwnerTokenIds[itemId][from]
+                        .length - 1;
+                    nonFungibleItemOwnerTokenIds[itemId][from][
+                        tokenIdOwnerIndex
+                    ] = nonFungibleItemOwnerTokenIds[itemId][from][lastIndexOwnerTokenIds];
+                    // Update index for the swapped token
+                    if (tokenIdOwnerIndex != lastIndexOwnerTokenIds) {
+                        uint256 swappedTokenId = nonFungibleItemOwnerTokenIds[itemId][from][
+                            tokenIdOwnerIndex
+                        ];
+                        nonFungibleItemOwnerTokenIdIndex[swappedTokenId] = tokenIdOwnerIndex;
+                    }
+                    nonFungibleItemOwnerTokenIds[itemId][from].pop();
+
+                    // Add the token ID to the new owner's token ID array
+                    nonFungibleItemOwnerTokenIds[itemId][to].push(tokenId);
+                    nonFungibleItemOwnerTokenIdIndex[tokenId] =
+                        nonFungibleItemOwnerTokenIds[itemId][to].length -
+                        1;
                 }
             }
         }
@@ -241,5 +282,220 @@ contract OtomItemsTracking is Initializable, Ownable2StepUpgradeable, IOtomItems
         }
 
         return result;
+    }
+
+    /**
+     * @dev Updates the ownership tracking for a single non-fungible token
+     * @notice Used to fix ownership tracking after contract upgrade
+     * @param _tokenId The token ID to update
+     * @param _currentOwner The current owner of the token (should match actual ownership on OtomItems)
+     */
+    function _updateNonFungibleTokenOwnership(uint256 _tokenId, address _currentOwner) internal {
+        if (core.isFungibleTokenId(_tokenId)) revert InvalidItem();
+
+        uint256 itemId = core.getItemIdForToken(_tokenId);
+        address oldOwner = nonFungibleTokenOwner[_tokenId];
+
+        // Verify the new owner has the token
+        uint256 balance = otomItems.balanceOf(_currentOwner, _tokenId);
+        if (balance == 0) revert InvalidInput();
+
+        // Check if the token is already in the owner's token list
+        bool tokenInOwnerList = false;
+        uint256 ownerTokenCount = nonFungibleItemOwnerTokenIds[itemId][_currentOwner].length;
+        for (uint256 i = 0; i < ownerTokenCount; i++) {
+            if (nonFungibleItemOwnerTokenIds[itemId][_currentOwner][i] == _tokenId) {
+                tokenInOwnerList = true;
+                break;
+            }
+        }
+
+        // If the token is not in the current owner's list, add it
+        if (!tokenInOwnerList) {
+            // First remove from any old owner's list if needed
+            if (oldOwner != address(0) && oldOwner != _currentOwner) {
+                // Try to find and remove the token from the old owner's list
+                uint256 oldOwnerTokenCount = nonFungibleItemOwnerTokenIds[itemId][oldOwner].length;
+                for (uint256 i = 0; i < oldOwnerTokenCount; i++) {
+                    if (nonFungibleItemOwnerTokenIds[itemId][oldOwner][i] == _tokenId) {
+                        // Found the token, remove it by swapping with the last element
+                        uint256 lastIndex = oldOwnerTokenCount - 1;
+                        if (i != lastIndex) {
+                            uint256 lastTokenId = nonFungibleItemOwnerTokenIds[itemId][oldOwner][
+                                lastIndex
+                            ];
+                            nonFungibleItemOwnerTokenIds[itemId][oldOwner][i] = lastTokenId;
+                            nonFungibleItemOwnerTokenIdIndex[lastTokenId] = i;
+                        }
+                        nonFungibleItemOwnerTokenIds[itemId][oldOwner].pop();
+                        delete nonFungibleItemOwnerTokenIdIndex[_tokenId];
+                        break;
+                    }
+                }
+            }
+
+            // Add to current owner's list
+            nonFungibleItemOwnerTokenIds[itemId][_currentOwner].push(_tokenId);
+            nonFungibleItemOwnerTokenIdIndex[_tokenId] =
+                nonFungibleItemOwnerTokenIds[itemId][_currentOwner].length -
+                1;
+        }
+
+        // Only update the owner mapping if it's different
+        if (oldOwner != _currentOwner) {
+            nonFungibleTokenOwner[_tokenId] = _currentOwner;
+        }
+    }
+
+    /**
+     * @dev Fix a token's presence in the global token ID list for an item
+     * @param _tokenId The token ID to fix
+     */
+    function _fixTokenInGlobalList(uint256 _tokenId) internal {
+        if (core.isFungibleTokenId(_tokenId)) revert InvalidItem();
+
+        uint256 itemId = core.getItemIdForToken(_tokenId);
+
+        // Check if token is already in the global list
+        bool tokenInGlobalList = false;
+        uint256 globalCount = nonFungibleItemTokenIds[itemId].length;
+
+        for (uint256 i = 0; i < globalCount; i++) {
+            if (nonFungibleItemTokenIds[itemId][i] == _tokenId) {
+                tokenInGlobalList = true;
+                break;
+            }
+        }
+
+        // If not in global list, add it
+        if (!tokenInGlobalList) {
+            nonFungibleItemTokenIds[itemId].push(_tokenId);
+            nonFungibleItemTokenIdIndex[_tokenId] = nonFungibleItemTokenIds[itemId].length - 1;
+
+            // Update supply if needed
+            nonFungibleItemSupply[itemId] += 1;
+        }
+    }
+
+    /**
+     * @dev Full reconciliation of a token's tracking data
+     * @param _tokenId The token ID to reconcile
+     * @param _currentOwner The actual owner of the token
+     */
+    function reconcileToken(uint256 _tokenId, address _currentOwner) external onlyOwner {
+        _updateNonFungibleTokenOwnership(_tokenId, _currentOwner);
+        _fixTokenInGlobalList(_tokenId);
+    }
+
+    /**
+     * @dev Gets all addresses that own tokens from a specific item
+     * @param _itemId The item ID to get owners for
+     * @return Array of owner addresses
+     */
+    function _getItemOwners(uint256 _itemId) internal view returns (address[] memory) {
+        if (_itemId >= core.nextItemId()) revert InvalidItem();
+        if (core.getItemByItemId(_itemId).itemType != ItemType.NON_FUNGIBLE) revert InvalidItem();
+
+        uint256[] storage allTokenIds = nonFungibleItemTokenIds[_itemId];
+        uint256 tokenCount = allTokenIds.length;
+
+        // First pass: count unique owners
+        address[] memory tempOwners = new address[](tokenCount);
+        uint256 ownerCount = 0;
+
+        for (uint256 i = 0; i < tokenCount; i++) {
+            uint256 tokenId = allTokenIds[i];
+            address owner = nonFungibleTokenOwner[tokenId];
+
+            if (owner != address(0)) {
+                bool isNew = true;
+                for (uint256 j = 0; j < ownerCount; j++) {
+                    if (tempOwners[j] == owner) {
+                        isNew = false;
+                        break;
+                    }
+                }
+
+                if (isNew) {
+                    tempOwners[ownerCount] = owner;
+                    ownerCount++;
+                }
+            }
+        }
+
+        // Second pass: create properly sized array
+        address[] memory owners = new address[](ownerCount);
+        for (uint256 i = 0; i < ownerCount; i++) {
+            owners[i] = tempOwners[i];
+        }
+
+        return owners;
+    }
+
+    /**
+     * @dev Mass reconciliation function to fix multiple tokens at once
+     * @param _tokenIds Array of token IDs to reconcile
+     * @param _currentOwners Array of current owners corresponding to each token
+     */
+    function batchReconcileTokens(
+        uint256[] calldata _tokenIds,
+        address[] calldata _currentOwners
+    ) external onlyOwner {
+        if (_tokenIds.length != _currentOwners.length) revert InvalidInput();
+
+        for (uint256 i = 0; i < _tokenIds.length; i++) {
+            _updateNonFungibleTokenOwnership(_tokenIds[i], _currentOwners[i]);
+            _fixTokenInGlobalList(_tokenIds[i]);
+        }
+    }
+
+    /**
+     * @dev Directly update global token list for an item
+     * @param _itemId The item ID to update
+     * @param _tokenIds Array of token IDs for this item
+     */
+    function updateGlobalTokenList(
+        uint256 _itemId,
+        uint256[] calldata _tokenIds
+    ) external onlyOwner {
+        // Clear existing global token list
+        delete nonFungibleItemTokenIds[_itemId];
+
+        // Rebuild the global token list
+        for (uint256 i = 0; i < _tokenIds.length; i++) {
+            nonFungibleItemTokenIds[_itemId].push(_tokenIds[i]);
+            nonFungibleItemTokenIdIndex[_tokenIds[i]] = i;
+        }
+
+        // Update the supply count
+        nonFungibleItemSupply[_itemId] = _tokenIds.length;
+    }
+
+    /**
+     * @dev Update owner token lists for an item
+     * @param _itemId The item ID to update
+     * @param _owners Array of owner addresses
+     * @param _ownerTokenIds Array of arrays containing token IDs owned by each owner
+     */
+    function updateOwnerTokenLists(
+        uint256 _itemId,
+        address[] calldata _owners,
+        uint256[][] calldata _ownerTokenIds
+    ) external onlyOwner {
+        if (_owners.length != _ownerTokenIds.length) revert InvalidInput();
+
+        for (uint256 i = 0; i < _owners.length; i++) {
+            address owner = _owners[i];
+            uint256[] calldata tokenIds = _ownerTokenIds[i];
+
+            // Clear existing data for this owner
+            delete nonFungibleItemOwnerTokenIds[_itemId][owner];
+
+            // Rebuild owner token list
+            for (uint256 j = 0; j < tokenIds.length; j++) {
+                nonFungibleItemOwnerTokenIds[_itemId][owner].push(tokenIds[j]);
+                nonFungibleItemOwnerTokenIdIndex[tokenIds[j]] = j;
+            }
+        }
     }
 }

@@ -13,6 +13,7 @@ interface IOtomItemsTracking {
 
     error InvalidItem();
     error NotOtomItems();
+    error InvalidInput();
 
     function getNonFungibleTokenOwner(uint256 _tokenId) external view returns (address);
 

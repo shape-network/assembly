@@ -248,4 +248,11 @@ interface IOtomItemsCore {
     function nonFungibleTokenToActualBlueprint(
         uint256 _tokenId
     ) external view returns (ActualBlueprintComponent[] memory);
+
+    function itemMintCount(uint256 _itemId) external view returns (uint256);
+
+    function getNonFungibleTokenId(
+        uint256 _itemId,
+        uint256 _mintIndex
+    ) external view returns (uint256);
 }
