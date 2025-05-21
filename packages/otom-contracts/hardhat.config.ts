@@ -79,7 +79,6 @@ const config: HardhatUserConfig = {
         currency: "USD",
         coinmarketcap: process.env.COINMARKETCAP_API_KEY,
     },
-    // @ts-expect-error tsconfig.json is not loaded in this context
     contractSizer: {
         alphaSort: true,
         disambiguatePaths: false,
