@@ -5,6 +5,7 @@ import "@openzeppelin/hardhat-upgrades";
 import "dotenv/config";
 import "hardhat-contract-sizer";
 import "hardhat-watcher";
+// @ts-expect-error tsconfig.json is not loaded in this context
 import { HardhatUserConfig } from "hardhat/config";
 
 const accounts = {
@@ -78,7 +79,7 @@ const config: HardhatUserConfig = {
         currency: "USD",
         coinmarketcap: process.env.COINMARKETCAP_API_KEY,
     },
-    // @ts-ignore
+    // @ts-expect-error tsconfig.json is not loaded in this context
     contractSizer: {
         alphaSort: true,
         disambiguatePaths: false,
