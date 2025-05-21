@@ -1,7 +1,6 @@
 {
   "name": "assembly-monorepo",
   "private": true,
-  "author": "williamhzo",
   "packageManager": "yarn@1.22.22",
   "workspaces": [
     "apps/*",
