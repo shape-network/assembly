@@ -72,7 +72,7 @@ type FormDetails = {
   description: string;
   imageUri: string;
   costInEth: string;
-  feeRecipient: Address | '';
+  feeRecipient: Address;
 };
 
 export type FungibleItemFormData = FormDetails & {

@@ -27,7 +27,7 @@ import { useAtom } from 'jotai';
 import { XIcon } from 'lucide-react';
 import { useQueryState } from 'nuqs';
 import { FC, useState } from 'react';
-import { parseEther } from 'viem';
+import { parseEther, zeroAddress } from 'viem';
 import { shapeSepolia } from 'viem/chains';
 import { z } from 'zod';
 
@@ -36,7 +36,7 @@ const defaultFungibleItemData: FungibleItemFormData = {
   description: '',
   imageUri: '',
   costInEth: '0',
-  feeRecipient: '',
+  feeRecipient: zeroAddress,
   blueprintComponents: [],
   traits: [],
 };
@@ -73,6 +73,14 @@ export const ItemCreationForm: FC = () => {
 
   const validateFungibleItemDetails = () => {
     try {
+      if (parseFloat(formData.costInEth) > 0 && formData.feeRecipient === zeroAddress) {
+        setErrors((prev) => ({
+          ...prev,
+          feeRecipient: ['Fee recipient is required when cost is greater than 0'],
+        }));
+        return false;
+      }
+
       itemDetailsSchema.parse({
         name: formData.name,
         description: formData.description,
@@ -254,7 +262,7 @@ export const ItemCreationForm: FC = () => {
           blueprintComponents,
           contractTraits,
           formData.costInEth ? parseEther(formData.costInEth) : 0n,
-          formData.feeRecipient,
+          formData.feeRecipient ?? zeroAddress,
         ],
       });
 
