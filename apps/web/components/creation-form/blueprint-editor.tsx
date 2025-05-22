@@ -440,27 +440,23 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
                       }
                     />
                   </div>
-                  <div className="col-span-2 flex flex-col items-start gap-2">
-                    <Label htmlFor={`component-id-${index}`}>
-                      {component.componentType === 'otom' ||
-                      component.componentType === 'variable_otom'
-                        ? 'Otom Token ID'
-                        : 'Item ID'}
-                    </Label>
-                    <Input
-                      id={`component-id-${index}`}
-                      placeholder={
-                        component.componentType === 'variable_otom'
-                          ? 'Leave empty for variable otom'
-                          : 'Enter ID'
-                      }
-                      value={component.itemIdOrOtomTokenId}
-                      onChange={(e) =>
-                        handleComponentChange(index, 'itemIdOrOtomTokenId', e.target.value)
-                      }
-                      disabled={component.componentType === 'variable_otom'}
-                    />
-                  </div>
+
+                  {/* Only show token ID field when not variable_otom */}
+                  {component.componentType !== 'variable_otom' && (
+                    <div className="col-span-2 flex flex-col gap-2">
+                      <Label htmlFor={`component-id-${index}`}>
+                        {component.componentType === 'otom' ? 'Otom Token ID' : 'Item ID'}
+                      </Label>
+                      <Input
+                        id={`component-id-${index}`}
+                        placeholder="Enter ID"
+                        value={component.itemIdOrOtomTokenId}
+                        onChange={(e) =>
+                          handleComponentChange(index, 'itemIdOrOtomTokenId', e.target.value)
+                        }
+                      />
+                    </div>
+                  )}
 
                   {/* Only show criteria for variable_otom components */}
                   {shouldShowCriteria(component.componentType) &&
@@ -502,25 +498,21 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
                 onChange={(e) => handleNewComponentChange('amount', parseInt(e.target.value))}
               />
             </div>
-            <div className="col-span-2 flex flex-col gap-2">
-              <Label htmlFor="new-component-id">
-                {newComponent.componentType === 'otom' ||
-                newComponent.componentType === 'variable_otom'
-                  ? 'Otom Token ID'
-                  : 'Item ID'}
-              </Label>
-              <Input
-                id="new-component-id"
-                placeholder={
-                  newComponent.componentType === 'variable_otom'
-                    ? 'Leave empty for variable otom'
-                    : 'Enter ID'
-                }
-                value={newComponent.itemIdOrOtomTokenId}
-                onChange={(e) => handleNewComponentChange('itemIdOrOtomTokenId', e.target.value)}
-                disabled={newComponent.componentType === 'variable_otom'}
-              />
-            </div>
+
+            {/* Only show token ID field when not variable_otom */}
+            {newComponent.componentType !== 'variable_otom' && (
+              <div className="col-span-2 flex flex-col gap-2">
+                <Label htmlFor="new-component-id">
+                  {newComponent.componentType === 'otom' ? 'Otom Token ID' : 'Item ID'}
+                </Label>
+                <Input
+                  id="new-component-id"
+                  placeholder="Enter ID"
+                  value={newComponent.itemIdOrOtomTokenId}
+                  onChange={(e) => handleNewComponentChange('itemIdOrOtomTokenId', e.target.value)}
+                />
+              </div>
+            )}
 
             {showCriteriaEditor && renderCriteriaEditor(newComponent.criteria, null)}
           </div>
