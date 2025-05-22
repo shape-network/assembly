@@ -9,25 +9,9 @@ import { ComponentType, Criteria } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { FC } from 'react';
+import { parseEther } from 'viem';
 
 export type FormItemType = 'fungible' | 'non-fungible';
-
-export type BlueprintComponentInput = {
-  componentType: ComponentType;
-  itemIdOrOtomTokenId: string;
-  amount: number;
-  criteria: Criteria[];
-};
-
-export type FungibleItemFormData = {
-  name: string;
-  description: string;
-  imageUri: string;
-  costInWei: string;
-  feeRecipient: string;
-  blueprintComponents: BlueprintComponentInput[];
-  traits: ItemTrait[];
-};
 
 type ItemTypeSelectorProps = {
   selectedType: FormItemType | null;
@@ -77,6 +61,23 @@ export const ItemTypeSelector: FC<ItemTypeSelectorProps> = ({ selectedType, onSe
   );
 };
 
+export type BlueprintComponentInput = {
+  componentType: ComponentType;
+  itemIdOrOtomTokenId: string;
+  amount: number;
+  criteria: Criteria[];
+};
+
+export type FungibleItemFormData = {
+  name: string;
+  description: string;
+  imageUri: string;
+  costInWei: string;
+  feeRecipient: string;
+  blueprintComponents: BlueprintComponentInput[];
+  traits: ItemTrait[];
+};
+
 type FungibleItemDetailsFormProps = {
   formData: {
     name: string;
@@ -92,10 +93,11 @@ export const FungibleItemDetailsForm: FC<FungibleItemDetailsFormProps> = ({
   formData,
   onChange,
 }) => {
+  console.log('formData.costInWei', formData.costInWei);
+
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-medium">Fungible Item Details</h3>
-      <p className="text-muted-foreground">Provide basic information about your fungible item</p>
 
       <div className="grid gap-4 py-4">
         <div className="grid gap-2">
