@@ -3,12 +3,16 @@
 import { BlueprintEditor } from '@/components/blueprint-editor';
 import { ItemTrait, TraitsEditor } from '@/components/traits-editor';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { itemCreationBannerDismissedAtom } from '@/lib/atoms';
+import { paths } from '@/lib/paths';
 import { ComponentType, Criteria, ItemType, Trait } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { ArrowRight, Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
+import { useAtom } from 'jotai';
+import { ArrowRight, ChevronLeft, ChevronRight, XIcon } from 'lucide-react';
 import { useQueryState } from 'nuqs';
 import { FC } from 'react';
 
@@ -149,28 +153,77 @@ export const ItemCreationForm: FC = () => {
     }
   }
 
+  const [bannerDismissed, setBannerDismissed] = useAtom(itemCreationBannerDismissedAtom);
+
   return (
-    <Card className="mx-auto w-full max-w-2xl">
-      <CardHeader>
-        <CardTitle>Create New Item</CardTitle>
-        <CardDescription>Create a new item to be used in the Assembly system</CardDescription>
-      </CardHeader>
+    <div className="relative mt-64 flex flex-col gap-4">
+      <div className="fixed inset-x-0 top-0 z-10 flex flex-col items-center justify-between gap-16 p-4">
+        <div className="mx-auto w-full max-w-md">
+          <StepIndicator currentStep={step} totalSteps={4} />
+        </div>
 
-      <CardContent>
-        <StepIndicator currentStep={step} totalSteps={4} />
+        {step === 1 && (
+          <div className="mx-auto flex w-full max-w-xl flex-col items-center gap-2">
+            <h1 className="text-2xl font-medium">New Assembly Item</h1>
+            <h2 className="text-muted-foreground text-center text-pretty">
+              Create an item to be used in the Assembly system and more
+            </h2>
+          </div>
+        )}
+      </div>
 
-        {renderCurrentStep()}
+      <Card className="mx-auto w-3xl">
+        <CardContent>
+          {renderCurrentStep()}
 
-        <NavigationButtons
-          currentStep={step}
-          totalSteps={4}
-          onPrevious={handlePrevStep}
-          onNext={handleNextStep}
-          onSubmit={handleSubmit}
-          isNextDisabled={!isCurrentStepValid()}
-        />
-      </CardContent>
-    </Card>
+          <NavigationButtons
+            currentStep={step}
+            totalSteps={4}
+            onPrevious={handlePrevStep}
+            onNext={handleNextStep}
+            onSubmit={handleSubmit}
+            isNextDisabled={!isCurrentStepValid()}
+          />
+        </CardContent>
+      </Card>
+
+      {step === 1 && (
+        <div className="absolute -bottom-20 max-w-3xl rounded bg-white px-4 py-2">
+          <div className="flex items-start gap-2">
+            <ExclamationTriangleIcon className="mt-0.5 size-4 shrink-0" />
+            <p className="text-sm italic">
+              Item creation is only available on Shape Sepolia Testnet for now, we will roll it out
+              to Shape Mainnet very soon. Stay tuned!
+            </p>
+          </div>
+        </div>
+      )}
+
+      {!bannerDismissed && (
+        <div className="pointer-events-none fixed inset-x-0 bottom-0 transition-transform hover:scale-[101%] sm:flex sm:justify-center sm:px-6 sm:pb-5 lg:px-8">
+          <div className="pointer-events-auto flex items-center justify-between gap-x-6 rounded-4xl bg-gray-900 px-6 py-2.5 sm:py-3 sm:pr-3.5 sm:pl-4">
+            <a
+              className="text-sm text-white"
+              href={paths.docs.itemCreation}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Builder, looking for a more flexible and detailed guide to create an item? Check out
+              the <strong className="font-bold">Assembly Item Creation Guide</strong>{' '}
+            </a>
+
+            <button
+              type="button"
+              className="pointer-cursor -m-1.5 flex-none p-1.5"
+              onClick={() => setBannerDismissed(true)}
+            >
+              <span className="sr-only">Dismiss</span>
+              <XIcon className="size-5 text-white" />
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
@@ -261,7 +314,6 @@ const ItemTypeSelector: FC<ItemTypeSelectorProps> = ({ selectedType, onSelect })
   );
 };
 
-// Step 2: Item Details Form
 type FungibleItemDetailsFormProps = {
   formData: {
     name: string;
@@ -335,7 +387,6 @@ const FungibleItemDetailsForm: FC<FungibleItemDetailsFormProps> = ({ formData, o
   );
 };
 
-// Step 3: Blueprint Components Editor
 type BlueprintComponentsEditorProps = {
   components: BlueprintComponentInput[];
   onChange: (components: BlueprintComponentInput[]) => void;
@@ -355,7 +406,6 @@ const BlueprintComponentsEditor: FC<BlueprintComponentsEditorProps> = ({
   );
 };
 
-// Step 4: Item Traits Editor
 type ItemTraitsEditorProps = {
   traits: ItemTrait[];
   onChange: (traits: ItemTrait[]) => void;
@@ -380,30 +430,26 @@ type StepIndicatorProps = {
 
 const StepIndicator: FC<StepIndicatorProps> = ({ currentStep, totalSteps }) => {
   return (
-    <div className="mb-8 flex justify-between">
+    <div className="flex justify-between">
       {Array.from({ length: totalSteps }).map((_, index) => {
         const step = index + 1;
         return (
           <div key={step} className="flex flex-col items-center">
             <div
               className={cn(
-                'flex h-10 w-10 items-center justify-center rounded-full border',
-                currentStep === step
-                  ? 'bg-primary text-primary-foreground border-primary'
-                  : currentStep > step
-                    ? 'bg-primary/20 text-primary border-primary/20'
-                    : 'bg-muted text-muted-foreground border-input'
+                'flex',
+                currentStep >= step ? 'text-primary' : 'text-muted-foreground/50'
               )}
             >
-              {currentStep > step ? <Check className="h-5 w-5" /> : step}
+              {step}
             </div>
             <span
               className={cn(
                 'mt-2 text-xs',
-                currentStep === step ? 'text-primary font-medium' : 'text-muted-foreground'
+                currentStep >= step ? 'text-primary font-semibold' : 'text-muted-foreground/50'
               )}
             >
-              {step === 1 ? 'Type' : step === 2 ? 'Details' : step === 3 ? 'Blueprint' : 'Traits'}
+              {getStepLabel(step)}
             </span>
           </div>
         );
@@ -411,6 +457,21 @@ const StepIndicator: FC<StepIndicatorProps> = ({ currentStep, totalSteps }) => {
     </div>
   );
 };
+
+function getStepLabel(step: number) {
+  switch (step) {
+    case 1:
+      return 'Type';
+    case 2:
+      return 'Details';
+    case 3:
+      return 'Blueprint';
+    case 4:
+      return 'Traits';
+    default:
+      return 'n/a';
+  }
+}
 
 // Navigation Component
 type NavigationButtonsProps = {
@@ -431,7 +492,7 @@ const NavigationButtons: FC<NavigationButtonsProps> = ({
   isNextDisabled,
 }) => {
   return (
-    <div className="mt-8 flex justify-between">
+    <div className="mt-4 flex justify-between">
       {currentStep > 1 ? (
         <Button variant="outline" onClick={onPrevious}>
           <ChevronLeft className="mr-2 h-4 w-4" />

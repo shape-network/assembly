@@ -7,7 +7,11 @@ export const paths = {
   repo: 'https://github.com/shape-network/assembly',
   shape: 'https://shape.network',
   otom: 'https://otom.xyz',
-  docs: 'https://docs.shape.network/building-on-shape/onchain-compatible/assembly',
+  docs: {
+    assembly: 'https://docs.shape.network/building-on-shape/onchain-compatible/assembly',
+    itemCreation:
+      'https://docs.shape.network/building-on-shape/onchain-compatible/assembly#step-by-step-guides-for-creating-different-items-for-assembly',
+  },
   api: {
     ownedOtomItems: '/api/owned-otom-items',
     craftableItems: '/api/craftable-items',
