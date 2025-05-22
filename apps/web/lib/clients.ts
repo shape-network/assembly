@@ -9,8 +9,8 @@ export const alchemy = new Alchemy({
   network: config.chainId === shape.id ? Network.SHAPE_MAINNET : Network.SHAPE_SEPOLIA,
 });
 
-export function rpcClient() {
-  const chainId = config.chainId;
+export function rpcClient(_chainId?: number) {
+  const chainId = _chainId ?? config.chainId;
   const chain = chainId === shape.id ? shape : shapeSepolia;
   const rootUrl = chainId === shape.id ? 'shape-mainnet' : 'shape-sepolia';
 
