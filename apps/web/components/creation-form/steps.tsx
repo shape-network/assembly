@@ -72,7 +72,7 @@ export type FungibleItemFormData = {
   name: string;
   description: string;
   imageUri: string;
-  costInWei: string;
+  costInEth: string;
   feeRecipient: string;
   blueprintComponents: BlueprintComponentInput[];
   traits: ItemTrait[];
@@ -83,7 +83,7 @@ type FungibleItemDetailsFormProps = {
     name: string;
     description: string;
     imageUri: string;
-    costInWei: string;
+    costInEth: string;
     feeRecipient: string;
   };
   onChange: (field: keyof FungibleItemFormData, value: string) => void;
@@ -93,8 +93,6 @@ export const FungibleItemDetailsForm: FC<FungibleItemDetailsFormProps> = ({
   formData,
   onChange,
 }) => {
-  console.log('formData.costInWei', formData.costInWei);
-
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-medium">Fungible Item Details</h3>
@@ -131,13 +129,14 @@ export const FungibleItemDetailsForm: FC<FungibleItemDetailsFormProps> = ({
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="costInWei">Cost (in Wei)</Label>
+          <Label htmlFor="costInEth">Cost (in ETH)</Label>
           <Input
-            id="costInWei"
+            id="costInEth"
             type="number"
+            step="0.0001"
             placeholder="0"
-            value={formData.costInWei}
-            onChange={(e) => onChange('costInWei', e.target.value)}
+            value={formData.costInEth}
+            onChange={(e) => onChange('costInEth', e.target.value)}
           />
         </div>
 
