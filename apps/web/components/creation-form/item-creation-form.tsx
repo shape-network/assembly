@@ -21,7 +21,7 @@ import { useAtom } from 'jotai';
 import { XIcon } from 'lucide-react';
 import { useQueryState } from 'nuqs';
 import { FC, useState } from 'react';
-import { Address, parseEther, zeroAddress } from 'viem';
+import { Address, parseEther } from 'viem';
 
 type FungibleItemFormDataToSubmit = {
   itemType: ItemType;
@@ -43,7 +43,7 @@ const defaultFungibleItemData: FungibleItemFormData = {
   description: '',
   imageUri: '',
   costInEth: '0',
-  feeRecipient: zeroAddress,
+  feeRecipient: '',
   blueprintComponents: [],
   traits: [],
 };

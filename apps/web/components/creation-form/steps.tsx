@@ -9,7 +9,6 @@ import { ComponentType, Criteria } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { FC } from 'react';
-import { parseEther } from 'viem';
 
 export type FormItemType = 'fungible' | 'non-fungible';
 
