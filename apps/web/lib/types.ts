@@ -14,6 +14,16 @@ export type Criteria = {
   checkStringValue?: boolean;
 };
 
+type RawCriteria = {
+  propertyType: number;
+  minValue?: bigint;
+  maxValue?: bigint;
+  boolValue?: boolean;
+  checkBoolValue?: boolean;
+  stringValue?: string;
+  checkStringValue?: boolean;
+};
+
 export type BlueprintComponent = {
   itemIdOrOtomTokenId: bigint;
   amount: number;
@@ -26,7 +36,7 @@ export type RawBlueprintComponent = {
   componentType: number;
   itemIdOrOtomTokenId: bigint;
   amount: bigint;
-  criteria: readonly Criteria[];
+  criteria: readonly RawCriteria[];
 };
 
 /** 0: FUNGIBLE, 1: NON_FUNGIBLE */
