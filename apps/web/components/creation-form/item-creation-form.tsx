@@ -18,31 +18,18 @@ import {
 } from '@/components/creation-form/steps';
 import { ItemTrait } from '@/components/creation-form/traits-editor';
 import { Card, CardContent } from '@/components/ui/card';
+import { useWriteAssemblyCoreContractCreateFungibleItem } from '@/generated';
+import { assemblyCore } from '@/lib/addresses';
 import { itemCreationBannerDismissedAtom } from '@/lib/atoms';
 import { paths } from '@/lib/paths';
-import { ComponentType, ItemType, Trait } from '@/lib/types';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { useAtom } from 'jotai';
 import { XIcon } from 'lucide-react';
 import { useQueryState } from 'nuqs';
 import { FC, useState } from 'react';
-import { Address, parseEther } from 'viem';
+import { parseEther } from 'viem';
+import { shapeSepolia } from 'viem/chains';
 import { z } from 'zod';
-
-type FungibleItemFormDataToSubmit = {
-  itemType: ItemType;
-  name: string;
-  description: string;
-  imageUri: string;
-  costInWei: bigint;
-  feeRecipient: Address;
-  blueprintComponents: {
-    componentType: ComponentType;
-    itemIdOrOtomTokenId: bigint;
-    amount: number;
-  }[];
-  traits: Trait[];
-};
 
 const defaultFungibleItemData: FungibleItemFormData = {
   name: '',
@@ -67,6 +54,8 @@ export const ItemCreationForm: FC = () => {
   const [type, setType] = useState<FormItemType | ''>('');
   const [formData, setFormData] = useState<FungibleItemFormData>(defaultFungibleItemData);
   const [errors, setErrors] = useState<Record<string, string[]>>({});
+
+  const { writeContract, isPending } = useWriteAssemblyCoreContractCreateFungibleItem();
 
   // Validate specific parts of the form using Zod
   const validateItemType = () => {
@@ -201,37 +190,78 @@ export const ItemCreationForm: FC = () => {
   }
 
   function handleSubmit() {
-    // Convert form data to contract-compatible format
-    const contractItemType = type ? formItemTypeToItemType(type) : 0;
+    if (!writeContract) {
+      console.error('Write function not available');
+      return;
+    }
 
-    // Convert string IDs to bigint for contract call
-    const blueprintComponents = formData.blueprintComponents.map((component) => ({
-      ...component,
-      itemIdOrOtomTokenId: component.itemIdOrOtomTokenId
-        ? BigInt(component.itemIdOrOtomTokenId)
-        : BigInt(0),
-    }));
+    try {
+      const blueprintComponents = formData.blueprintComponents.map((component) => {
+        const componentTypeMap: Record<string, number> = {
+          otom: 0,
+          variable_otom: 1,
+          fungible_item: 2,
+          non_fungible_item: 3,
+        };
 
-    // Convert form traits to contract Trait format
-    const traits: Trait[] = formData.traits.map((trait) => ({
-      name: trait.typeName,
-      value: trait.traitType === 'NUMBER' ? Number(trait.valueNumber) : trait.valueString,
-    }));
+        const formattedCriteria = (component.criteria || []).map((criterion) => {
+          return {
+            propertyType: criterion.propertyType || 0,
+            minValue: BigInt(criterion.minValue || 0),
+            maxValue: BigInt(criterion.maxValue || 0xffffffff),
+            boolValue: !!criterion.boolValue,
+            checkBoolValue: !!criterion.checkBoolValue,
+            stringValue: criterion.stringValue || '',
+            checkStringValue: !!criterion.checkStringValue,
+            bytes32Value:
+              '0x0000000000000000000000000000000000000000000000000000000000000000' as `0x${string}`,
+            checkBytes32Value: false,
+          };
+        });
 
-    const formDataToSubmit: FungibleItemFormDataToSubmit = {
-      itemType: contractItemType,
-      name: formData.name,
-      description: formData.description,
-      imageUri: formData.imageUri,
-      costInWei: formData.costInEth ? parseEther(formData.costInEth) : 0n,
-      feeRecipient: formData.feeRecipient as Address,
-      blueprintComponents,
-      traits,
-    };
+        // Get component type as a number
+        let componentTypeNumber = 0;
+        if (typeof component.componentType === 'string') {
+          componentTypeNumber = componentTypeMap[component.componentType] || 0;
+        } else {
+          componentTypeNumber = component.componentType;
+        }
 
-    console.log('Form submitted', formDataToSubmit);
+        return {
+          componentType: componentTypeNumber,
+          itemIdOrOtomTokenId: component.itemIdOrOtomTokenId
+            ? BigInt(component.itemIdOrOtomTokenId)
+            : BigInt(0),
+          amount: BigInt(component.amount),
+          criteria: formattedCriteria,
+        };
+      });
 
-    // TODO: Implement contract interaction for createFungibleItem
+      // Convert form traits to contract Trait format
+      const contractTraits = formData.traits.map((trait) => ({
+        typeName: trait.typeName,
+        valueString: trait.traitType === 'STRING' ? trait.valueString : '',
+        valueNumber: trait.traitType === 'NUMBER' ? BigInt(trait.valueNumber) : 0n,
+        traitType: trait.traitType === 'NUMBER' ? 0 : 1,
+      }));
+
+      writeContract({
+        address: assemblyCore[shapeSepolia.id],
+        args: [
+          formData.name,
+          formData.description,
+          formData.imageUri,
+          blueprintComponents,
+          contractTraits,
+          formData.costInEth ? parseEther(formData.costInEth) : 0n,
+          formData.feeRecipient,
+        ],
+      });
+
+      console.log('Transaction submitted for item creation');
+    } catch (error) {
+      console.error('Error submitting form:', error);
+    }
   }
 
   function renderCurrentStep() {
@@ -323,7 +353,7 @@ export const ItemCreationForm: FC = () => {
                 onPrevious={handlePrevStep}
                 onNext={handleNextStep}
                 onSubmit={handleSubmit}
-                isNextDisabled={!isCurrentStepValid()}
+                isNextDisabled={!isCurrentStepValid() || isPending}
               />
             </CardContent>
           </Card>
@@ -393,7 +423,3 @@ export const ItemCreationForm: FC = () => {
     </div>
   );
 };
-
-function formItemTypeToItemType(type: FormItemType): ItemType {
-  return type === 'fungible' ? 0 : 1;
-}
