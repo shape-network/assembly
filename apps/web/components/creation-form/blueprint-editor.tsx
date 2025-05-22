@@ -165,7 +165,7 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
         <CardContent className="p-4">
           <h4 className="mb-3 text-sm font-medium">Add New Component</h4>
           <div className="grid grid-cols-2 gap-4">
-            <div>
+            <div className="flex flex-col gap-2">
               <Label htmlFor="new-component-type">Component Type</Label>
               <select
                 id="new-component-type"
@@ -181,7 +181,7 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
                 <option value="non_fungible_item">Non-Fungible Item</option>
               </select>
             </div>
-            <div>
+            <div className="flex flex-col gap-2">
               <Label htmlFor="new-component-amount">Amount</Label>
               <Input
                 id="new-component-amount"
@@ -191,7 +191,7 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
                 onChange={(e) => handleNewComponentChange('amount', parseInt(e.target.value))}
               />
             </div>
-            <div className="col-span-2">
+            <div className="col-span-2 flex flex-col gap-2">
               <Label htmlFor="new-component-id">
                 {newComponent.componentType === 'otom' ||
                 newComponent.componentType === 'variable_otom'
