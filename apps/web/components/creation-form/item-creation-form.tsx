@@ -15,19 +15,34 @@ import { ItemTrait } from '@/components/creation-form/traits-editor';
 import { Card, CardContent } from '@/components/ui/card';
 import { itemCreationBannerDismissedAtom } from '@/lib/atoms';
 import { paths } from '@/lib/paths';
-import { ItemType, Trait } from '@/lib/types';
+import { ComponentType, ItemType, Trait } from '@/lib/types';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { useAtom } from 'jotai';
 import { XIcon } from 'lucide-react';
 import { useQueryState } from 'nuqs';
 import { FC, useState } from 'react';
-import { zeroAddress } from 'viem';
+import { Address, parseEther, zeroAddress } from 'viem';
+
+type FungibleItemFormDataToSubmit = {
+  itemType: ItemType;
+  name: string;
+  description: string;
+  imageUri: string;
+  costInWei: bigint;
+  feeRecipient: Address;
+  blueprintComponents: {
+    componentType: ComponentType;
+    itemIdOrOtomTokenId: bigint;
+    amount: number;
+  }[];
+  traits: Trait[];
+};
 
 const defaultFungibleItemData: FungibleItemFormData = {
   name: '',
   description: '',
   imageUri: '',
-  costInWei: '0',
+  costInEth: '0',
   feeRecipient: zeroAddress,
   blueprintComponents: [],
   traits: [],
@@ -118,16 +133,18 @@ export const ItemCreationForm: FC = () => {
       value: trait.traitType === 'NUMBER' ? Number(trait.valueNumber) : trait.valueString,
     }));
 
-    console.log('Form submitted', {
+    const formDataToSubmit: FungibleItemFormDataToSubmit = {
       itemType: contractItemType,
       name: formData.name,
       description: formData.description,
       imageUri: formData.imageUri,
-      costInWei: formData.costInWei ? BigInt(formData.costInWei) : BigInt(0),
-      feeRecipient: formData.feeRecipient,
+      costInWei: formData.costInEth ? parseEther(formData.costInEth) : 0n,
+      feeRecipient: formData.feeRecipient as Address,
       blueprintComponents,
       traits,
-    });
+    };
+
+    console.log('Form submitted', formDataToSubmit);
 
     // TODO: Implement contract interaction for createFungibleItem
   }
