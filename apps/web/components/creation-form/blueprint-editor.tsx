@@ -99,7 +99,7 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
                 </Button>
                 <CardContent className="p-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <div>
+                    <div className="flex flex-col items-start gap-2">
                       <Label htmlFor={`component-type-${index}`}>Component Type</Label>
                       <select
                         id={`component-type-${index}`}
@@ -119,7 +119,7 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
                         <option value="non_fungible_item">Non-Fungible Item</option>
                       </select>
                     </div>
-                    <div>
+                    <div className="flex flex-col items-start gap-2">
                       <Label htmlFor={`component-amount-${index}`}>Amount</Label>
                       <Input
                         id={`component-amount-${index}`}
@@ -131,7 +131,7 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
                         }
                       />
                     </div>
-                    <div className="col-span-2">
+                    <div className="col-span-2 flex flex-col items-start gap-2">
                       <Label htmlFor={`component-id-${index}`}>
                         {component.componentType === 'otom' ||
                         component.componentType === 'variable_otom'
@@ -152,7 +152,7 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
                         disabled={component.componentType === 'variable_otom'}
                       />
                     </div>
-                    {/* Criteria will be implemented in a future version */}
+                    {/* TODO: Criteria will be implemented in a future version */}
                   </div>
                 </CardContent>
               </Card>
