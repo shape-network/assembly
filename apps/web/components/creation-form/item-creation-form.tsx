@@ -1,9 +1,14 @@
 'use client';
 
 import {
+  FormItemType,
+  blueprintComponentsSchema,
+  fungibleItemDetailsSchema,
+  itemTypeSchema,
+} from '@/components/creation-form/schema';
+import {
   BlueprintComponentInput,
   BlueprintComponentsEditor,
-  FormItemType,
   FungibleItemDetailsForm,
   FungibleItemFormData,
   ItemTraitsEditor,
@@ -22,6 +27,7 @@ import { XIcon } from 'lucide-react';
 import { useQueryState } from 'nuqs';
 import { FC, useState } from 'react';
 import { Address, parseEther } from 'viem';
+import { z } from 'zod';
 
 type FungibleItemFormDataToSubmit = {
   itemType: ItemType;
@@ -60,6 +66,69 @@ export const ItemCreationForm: FC = () => {
 
   const [type, setType] = useState<FormItemType | ''>('');
   const [formData, setFormData] = useState<FungibleItemFormData>(defaultFungibleItemData);
+  const [errors, setErrors] = useState<Record<string, string[]>>({});
+
+  // Validate specific parts of the form using Zod
+  const validateItemType = () => {
+    try {
+      itemTypeSchema.parse(type);
+      setErrors((prev) => ({ ...prev, type: [] }));
+      return true;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        setErrors((prev) => ({ ...prev, type: error.errors.map((e) => e.message) }));
+      }
+      return false;
+    }
+  };
+
+  const validateFungibleItemDetails = () => {
+    try {
+      fungibleItemDetailsSchema.parse({
+        name: formData.name,
+        description: formData.description,
+        imageUri: formData.imageUri,
+        costInEth: formData.costInEth,
+        feeRecipient: formData.feeRecipient,
+      });
+      setErrors((prev) => ({
+        ...prev,
+        name: [],
+        description: [],
+        imageUri: [],
+        costInEth: [],
+        feeRecipient: [],
+      }));
+      return true;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const newErrors: Record<string, string[]> = {};
+        error.errors.forEach((err) => {
+          const field = err.path[0] as string;
+          newErrors[field] = newErrors[field] || [];
+          newErrors[field].push(err.message);
+        });
+        setErrors((prev) => ({ ...prev, ...newErrors }));
+      }
+      return false;
+    }
+  };
+
+  const validateBlueprintComponents = () => {
+    try {
+      blueprintComponentsSchema.parse(formData.blueprintComponents);
+      setErrors((prev) => ({ ...prev, blueprintComponents: [] }));
+      return true;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        setErrors((prev) => ({
+          ...prev,
+          blueprintComponents: error.errors.map((e) => e.message),
+        }));
+      }
+      return false;
+    }
+  };
 
   function handleSelectItemType(selectedType: FormItemType) {
     setType(selectedType);
@@ -99,7 +168,23 @@ export const ItemCreationForm: FC = () => {
   }
 
   function handleNextStep() {
-    if (step < 4) {
+    let isValid = false;
+
+    switch (step) {
+      case 1:
+        isValid = validateItemType();
+        break;
+      case 2:
+        isValid = validateFungibleItemDetails();
+        break;
+      case 3:
+        isValid = validateBlueprintComponents();
+        break;
+      default:
+        isValid = true;
+    }
+
+    if (isValid && step < 4) {
       setStep(step + 1);
     }
   }
@@ -152,7 +237,18 @@ export const ItemCreationForm: FC = () => {
   function renderCurrentStep() {
     switch (step) {
       case 1:
-        return <ItemTypeSelector selectedType={type || null} onSelect={handleSelectItemType} />;
+        return (
+          <div>
+            <ItemTypeSelector selectedType={type || null} onSelect={handleSelectItemType} />
+            {errors.type && errors.type.length > 0 && (
+              <div className="mt-2 text-sm text-red-500">
+                {errors.type.map((error, index) => (
+                  <p key={index}>{error}</p>
+                ))}
+              </div>
+            )}
+          </div>
+        );
       case 2:
         if (type === 'fungible') {
           return (
@@ -162,6 +258,20 @@ export const ItemCreationForm: FC = () => {
                   formData={formData}
                   onChange={handleFungibleItemInputChange}
                 />
+                {Object.entries(errors)
+                  .filter(([key]) =>
+                    ['name', 'description', 'imageUri', 'costInEth', 'feeRecipient'].includes(key)
+                  )
+                  .map(
+                    ([key, errors]) =>
+                      errors.length > 0 && (
+                        <div key={key} className="mt-2 text-sm text-red-500">
+                          {errors.map((error, index) => (
+                            <p key={index}>{error}</p>
+                          ))}
+                        </div>
+                      )
+                  )}
                 <NavigationButtons
                   currentStep={step}
                   totalSteps={4}
@@ -184,6 +294,13 @@ export const ItemCreationForm: FC = () => {
                 components={formData.blueprintComponents}
                 onChange={handleBlueprintComponentsChange}
               />
+              {errors.blueprintComponents && errors.blueprintComponents.length > 0 && (
+                <div className="mt-2 text-sm text-red-500">
+                  {errors.blueprintComponents.map((error, index) => (
+                    <p key={index}>{error}</p>
+                  ))}
+                </div>
+              )}
               <NavigationButtons
                 currentStep={step}
                 totalSteps={4}
