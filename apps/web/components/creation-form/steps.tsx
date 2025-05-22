@@ -195,7 +195,7 @@ type StepIndicatorProps = {
 
 export const StepIndicator: FC<StepIndicatorProps> = ({ currentStep, totalSteps }) => {
   return (
-    <div className="flex justify-between">
+    <div className="bg-background flex justify-between rounded-full px-8 py-2">
       {Array.from({ length: totalSteps }).map((_, index) => {
         const step = index + 1;
         return (
