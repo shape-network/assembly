@@ -1,4 +1,4 @@
-import { ItemCreationForm } from '@/components/item-creation-form';
+import { ItemCreationForm } from '@/components/creation-form/item-creation-form';
 
 export default function Create() {
   return (
