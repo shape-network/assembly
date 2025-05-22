@@ -3,7 +3,7 @@
 import {
   FormItemType,
   blueprintComponentsSchema,
-  fungibleItemDetailsSchema,
+  itemDetailsSchema,
   itemTypeSchema,
 } from '@/components/creation-form/schema';
 import {
@@ -84,7 +84,7 @@ export const ItemCreationForm: FC = () => {
 
   const validateFungibleItemDetails = () => {
     try {
-      fungibleItemDetailsSchema.parse({
+      itemDetailsSchema.parse({
         name: formData.name,
         description: formData.description,
         imageUri: formData.imageUri,
