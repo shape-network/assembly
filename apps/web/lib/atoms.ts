@@ -5,3 +5,5 @@ export const hoveredOtomItemAtom = atom<{
   item?: OtomItem | null;
   component?: BlueprintComponent;
 } | null>(null);
+
+export const itemCreationBannerDismissedAtom = atom(false);

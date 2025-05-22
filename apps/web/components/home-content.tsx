@@ -159,7 +159,7 @@ export const HomeContent = () => {
                     Contribute
                   </InlineLink>
                   <span>・</span>
-                  <InlineLink className="self-start" href={paths.docs}>
+                  <InlineLink className="self-start" href={paths.docs.assembly}>
                     Documentation
                   </InlineLink>
                 </div>
@@ -185,7 +185,7 @@ export const HomeContent = () => {
                       Source code
                     </InlineLink>
                     <span>・</span>
-                    <InlineLink className="self-start" href={paths.docs}>
+                    <InlineLink className="self-start" href={paths.docs.assembly}>
                       Documentation
                     </InlineLink>
                   </div>
