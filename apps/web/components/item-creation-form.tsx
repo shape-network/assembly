@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ComponentType, Criteria, ItemType, Trait } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { ArrowRight, Check, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useQueryState } from 'nuqs';
@@ -22,8 +23,10 @@ export const ItemCreationForm: FC = () => {
   });
 
   const [type, setType] = useQueryState('type', {
-    defaultValue: '',
-    parse: (value) => value,
+    defaultValue: '' as FormItemType,
+    parse: (value) => {
+      return value === 'fungible' || value === 'non-fungible' ? (value as FormItemType) : '';
+    },
     serialize: (value) => value,
   });
 
@@ -39,46 +42,45 @@ export const ItemCreationForm: FC = () => {
     serialize: (value) => JSON.stringify(value),
   });
 
-  // Handle type selection - update both type in URL and form data
-  const handleSelectItemType = (selectedType: ItemType) => {
+  function handleSelectItemType(selectedType: FormItemType) {
     setType(selectedType);
     setStep(2);
-  };
+  }
 
-  const handleFungibleItemInputChange = (field: keyof FungibleItemFormData, value: string) => {
+  function handleFungibleItemInputChange(field: keyof FungibleItemFormData, value: string) {
     setFormData({
       ...formData,
       [field]: value,
     });
-  };
+  }
 
-  const handleBlueprintComponentsChange = (components: BlueprintComponentInput[]) => {
+  function handleBlueprintComponentsChange(components: BlueprintComponentInput[]) {
     setFormData({
       ...formData,
       blueprintComponents: components,
     });
-  };
+  }
 
-  const handleTraitsChange = (traits: ItemTrait[]) => {
+  function handleTraitsChange(traits: ItemTrait[]) {
     setFormData({
       ...formData,
       traits,
     });
-  };
+  }
 
-  const handlePrevStep = () => {
+  function handlePrevStep() {
     if (step > 1) {
       setStep(step - 1);
     }
-  };
+  }
 
-  const handleNextStep = () => {
+  function handleNextStep() {
     if (step < 4) {
       setStep(step + 1);
     }
-  };
+  }
 
-  const isCurrentStepValid = () => {
+  function isCurrentStepValid() {
     if (step === 1) return !!type;
     if (step === 2 && type === 'fungible') {
       return !!formData.name && !!formData.description && !!formData.imageUri;
@@ -87,17 +89,44 @@ export const ItemCreationForm: FC = () => {
       return formData.blueprintComponents.length > 0;
     }
     return true;
-  };
+  }
 
-  const handleSubmit = () => {
-    console.log('Form submitted', { type, formData });
+  function handleSubmit() {
+    // Convert form data to contract-compatible format
+    const contractItemType = type ? formItemTypeToItemType(type) : 0;
+
+    // Convert string IDs to bigint for contract call
+    const blueprintComponents = formData.blueprintComponents.map((component) => ({
+      ...component,
+      itemIdOrOtomTokenId: component.itemIdOrOtomTokenId
+        ? BigInt(component.itemIdOrOtomTokenId)
+        : BigInt(0),
+    }));
+
+    // Convert form traits to contract Trait format
+    const traits: Trait[] = formData.traits.map((trait) => ({
+      name: trait.typeName,
+      value: trait.traitType === 'NUMBER' ? Number(trait.valueNumber) : trait.valueString,
+    }));
+
+    console.log('Form submitted', {
+      itemType: contractItemType,
+      name: formData.name,
+      description: formData.description,
+      imageUri: formData.imageUri,
+      costInWei: formData.costInWei ? BigInt(formData.costInWei) : BigInt(0),
+      feeRecipient: formData.feeRecipient,
+      blueprintComponents,
+      traits,
+    });
+
     // TODO: Implement contract interaction for createFungibleItem
-  };
+  }
 
-  const renderCurrentStep = () => {
+  function renderCurrentStep() {
     switch (step) {
       case 1:
-        return <ItemTypeSelector selectedType={type as ItemType} onSelect={handleSelectItemType} />;
+        return <ItemTypeSelector selectedType={type || null} onSelect={handleSelectItemType} />;
       case 2:
         if (type === 'fungible') {
           return (
@@ -118,7 +147,7 @@ export const ItemCreationForm: FC = () => {
       default:
         return null;
     }
-  };
+  }
 
   return (
     <Card className="mx-auto w-full max-w-2xl">
@@ -145,21 +174,17 @@ export const ItemCreationForm: FC = () => {
   );
 };
 
-type ItemType = 'fungible' | 'non-fungible';
+type FormItemType = 'fungible' | 'non-fungible';
+
+function formItemTypeToItemType(type: FormItemType): ItemType {
+  return type === 'fungible' ? 0 : 1;
+}
 
 type BlueprintComponentInput = {
-  componentType: 'otom' | 'variable_otom' | 'fungible_item' | 'non_fungible_item';
+  componentType: ComponentType;
   itemIdOrOtomTokenId: string;
   amount: number;
-  criteria: {
-    propertyType: number;
-    minValue?: number;
-    maxValue?: number;
-    boolValue?: boolean;
-    checkBoolValue?: boolean;
-    stringValue?: string;
-    checkStringValue?: boolean;
-  }[];
+  criteria: Criteria[];
 };
 
 type FungibleItemFormData = {
@@ -172,7 +197,6 @@ type FungibleItemFormData = {
   traits: ItemTrait[];
 };
 
-// Default values
 const defaultFungibleItemData: FungibleItemFormData = {
   name: '',
   description: '',
@@ -183,10 +207,9 @@ const defaultFungibleItemData: FungibleItemFormData = {
   traits: [],
 };
 
-// Step 1: Item Type Selection
 type ItemTypeSelectorProps = {
-  selectedType: ItemType | null;
-  onSelect: (type: ItemType) => void;
+  selectedType: FormItemType | null;
+  onSelect: (type: FormItemType) => void;
 };
 
 const ItemTypeSelector: FC<ItemTypeSelectorProps> = ({ selectedType, onSelect }) => {
