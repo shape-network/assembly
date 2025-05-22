@@ -727,6 +727,8 @@ const RequiredDropZone: FC<{
     setHoveredState(null);
   }
 
+  console.log('component', component);
+
   return (
     <div ref={setNodeRef}>
       <Card
@@ -751,7 +753,7 @@ const RequiredDropZone: FC<{
             component.name
           )}
 
-          {isMolecule && (
+          {(isMolecule || component.name === 'Ju₃') && (
             <span
               className={cn(
                 'absolute top-0 left-1 text-xs',
