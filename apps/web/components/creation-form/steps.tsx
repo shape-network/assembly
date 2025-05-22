@@ -1,4 +1,5 @@
 import { BlueprintEditor } from '@/components/creation-form/blueprint-editor';
+import { FormItemType } from '@/components/creation-form/schema';
 import { ItemTrait, TraitsEditor } from '@/components/creation-form/traits-editor';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,8 +10,6 @@ import { ComponentType, Criteria } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { FC } from 'react';
-
-export type FormItemType = 'fungible' | 'non-fungible';
 
 type ItemTypeSelectorProps = {
   selectedType: FormItemType | null;

@@ -90,7 +90,7 @@ export const TraitsEditor: FC<TraitsEditorProps> = ({ traits, onChange }) => {
                 </Button>
                 <CardContent className="p-4">
                   <div className="grid gap-4">
-                    <div>
+                    <div className="flex flex-col gap-2">
                       <Label htmlFor={`trait-name-${index}`}>Trait Name</Label>
                       <Input
                         id={`trait-name-${index}`}
@@ -99,7 +99,7 @@ export const TraitsEditor: FC<TraitsEditorProps> = ({ traits, onChange }) => {
                       />
                     </div>
 
-                    <div>
+                    <div className="flex flex-col gap-2">
                       <Label className="mb-2 block">Trait Type</Label>
                       <RadioGroup
                         value={trait.traitType}
@@ -120,7 +120,7 @@ export const TraitsEditor: FC<TraitsEditorProps> = ({ traits, onChange }) => {
                     </div>
 
                     {trait.traitType === 'STRING' ? (
-                      <div>
+                      <div className="flex flex-col gap-2">
                         <Label htmlFor={`trait-value-string-${index}`}>String Value</Label>
                         <Input
                           id={`trait-value-string-${index}`}
@@ -129,7 +129,7 @@ export const TraitsEditor: FC<TraitsEditorProps> = ({ traits, onChange }) => {
                         />
                       </div>
                     ) : (
-                      <div>
+                      <div className="flex flex-col gap-2">
                         <Label htmlFor={`trait-value-number-${index}`}>Number Value</Label>
                         <Input
                           id={`trait-value-number-${index}`}
@@ -151,7 +151,7 @@ export const TraitsEditor: FC<TraitsEditorProps> = ({ traits, onChange }) => {
         <CardContent className="p-4">
           <h4 className="mb-3 text-sm font-medium">Add New Trait</h4>
           <div className="grid gap-4">
-            <div>
+            <div className="flex flex-col gap-2">
               <Label htmlFor="new-trait-name">Trait Name</Label>
               <Input
                 id="new-trait-name"
@@ -161,7 +161,7 @@ export const TraitsEditor: FC<TraitsEditorProps> = ({ traits, onChange }) => {
               />
             </div>
 
-            <div>
+            <div className="flex flex-col gap-2">
               <Label className="mb-2 block">Trait Type</Label>
               <RadioGroup
                 value={newTrait.traitType}
@@ -182,7 +182,7 @@ export const TraitsEditor: FC<TraitsEditorProps> = ({ traits, onChange }) => {
             </div>
 
             {newTrait.traitType === 'STRING' ? (
-              <div>
+              <div className="flex flex-col gap-2">
                 <Label htmlFor="new-trait-value-string">String Value</Label>
                 <Input
                   id="new-trait-value-string"
@@ -192,7 +192,7 @@ export const TraitsEditor: FC<TraitsEditorProps> = ({ traits, onChange }) => {
                 />
               </div>
             ) : (
-              <div>
+              <div className="flex flex-col gap-2">
                 <Label htmlFor="new-trait-value-number">Number Value</Label>
                 <Input
                   id="new-trait-value-number"
