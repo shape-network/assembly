@@ -14,7 +14,7 @@ import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { useAtom } from 'jotai';
 import { ArrowRight, ChevronLeft, ChevronRight, XIcon } from 'lucide-react';
 import { useQueryState } from 'nuqs';
-import { FC } from 'react';
+import { FC, useState } from 'react';
 
 export const ItemCreationForm: FC = () => {
   const [step, setStep] = useQueryState('step', {
@@ -26,25 +26,8 @@ export const ItemCreationForm: FC = () => {
     serialize: (value) => value.toString(),
   });
 
-  const [type, setType] = useQueryState('type', {
-    defaultValue: '' as FormItemType,
-    parse: (value) => {
-      return value === 'fungible' || value === 'non-fungible' ? (value as FormItemType) : '';
-    },
-    serialize: (value) => value,
-  });
-
-  const [formData, setFormData] = useQueryState('formData', {
-    defaultValue: defaultFungibleItemData,
-    parse: (value) => {
-      try {
-        return JSON.parse(value) as FungibleItemFormData;
-      } catch {
-        return defaultFungibleItemData;
-      }
-    },
-    serialize: (value) => JSON.stringify(value),
-  });
+  const [type, setType] = useState<FormItemType | ''>('');
+  const [formData, setFormData] = useState<FungibleItemFormData>(defaultFungibleItemData);
 
   function handleSelectItemType(selectedType: FormItemType) {
     setType(selectedType);
