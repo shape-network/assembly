@@ -10,6 +10,7 @@ import { ComponentType, Criteria } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { FC } from 'react';
+import { Address } from 'viem';
 
 type ItemTypeSelectorProps = {
   selectedType: FormItemType | null;
@@ -66,24 +67,21 @@ export type BlueprintComponentInput = {
   criteria: Criteria[];
 };
 
-export type FungibleItemFormData = {
+type FormDetails = {
   name: string;
   description: string;
   imageUri: string;
   costInEth: string;
-  feeRecipient: string;
+  feeRecipient: Address | '';
+};
+
+export type FungibleItemFormData = FormDetails & {
   blueprintComponents: BlueprintComponentInput[];
   traits: ItemTrait[];
 };
 
 type FungibleItemDetailsFormProps = {
-  formData: {
-    name: string;
-    description: string;
-    imageUri: string;
-    costInEth: string;
-    feeRecipient: string;
-  };
+  formData: FormDetails;
   onChange: (field: keyof FungibleItemFormData, value: string) => void;
 };
 
@@ -139,7 +137,7 @@ export const FungibleItemDetailsForm: FC<FungibleItemDetailsFormProps> = ({
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="feeRecipient">Fee Recipient (address)</Label>
+          <Label htmlFor="feeRecipient">Fee Recipient Address (leave blank if no cost)</Label>
           <Input
             id="feeRecipient"
             placeholder="0x0000000000000000000000000000000000000000"
