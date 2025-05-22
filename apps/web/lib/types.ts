@@ -4,35 +4,29 @@ import { Address, Hex } from 'viem';
 
 export type ComponentType = 'otom' | 'variable_otom' | 'fungible_item' | 'non_fungible_item';
 
+export type Criteria = {
+  propertyType: number;
+  minValue?: number;
+  maxValue?: number;
+  boolValue?: boolean;
+  checkBoolValue?: boolean;
+  stringValue?: string;
+  checkStringValue?: boolean;
+};
+
 export type BlueprintComponent = {
   itemIdOrOtomTokenId: bigint;
   amount: number;
   componentType: ComponentType;
   name: string;
-  criteria: {
-    propertyType: number;
-    minValue?: number;
-    maxValue?: number;
-    boolValue?: boolean;
-    checkBoolValue?: boolean;
-    stringValue?: string;
-    checkStringValue?: boolean;
-  }[];
+  criteria: Criteria[];
 };
 
 export type RawBlueprintComponent = {
   componentType: number;
   itemIdOrOtomTokenId: bigint;
   amount: bigint;
-  criteria: readonly {
-    propertyType: number;
-    minValue: bigint;
-    maxValue: bigint;
-    boolValue: boolean;
-    checkBoolValue: boolean;
-    stringValue: string;
-    checkStringValue: boolean;
-  }[];
+  criteria: readonly Criteria[];
 };
 
 /** 0: FUNGIBLE, 1: NON_FUNGIBLE */
