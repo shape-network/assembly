@@ -5,10 +5,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { PROPERTY_TYPE_MAP, formatPropertyName } from '@/lib/property-utils';
 import { ComponentType, Criteria } from '@/lib/types';
-import { PlusCircle, X } from 'lucide-react';
+import { PlusCircle, TrashIcon } from 'lucide-react';
 import { FC, useState } from 'react';
 
 type PropertyCriterion = Criteria;
@@ -129,6 +128,8 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
     }
   };
 
+  const showCriteriaEditor = shouldShowCriteria(newComponent.componentType);
+
   const handleRemoveCriterion = (componentIndex: number, criterionIndex: number) => {
     const newComponents = [...components];
     newComponents[componentIndex].criteria.splice(criterionIndex, 1);
@@ -192,7 +193,7 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
   };
 
   const renderCriteriaEditor = (criteria: PropertyCriterion[], componentIndex: number | null) => (
-    <div className="mt-4 space-y-3">
+    <div className="bg-background mt-4 space-y-3 rounded-md p-3">
       <h5 className="text-sm font-medium">Property Criteria</h5>
 
       {criteria.length === 0 ? (
@@ -204,7 +205,7 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
             const propertyName = formatPropertyName(criterion.propertyType);
 
             return (
-              <Card key={idx} className="p-3">
+              <Card key={idx} className="bg-primary/5 p-3">
                 <div className="grid gap-2">
                   <div className="flex items-center justify-between">
                     <span className="text-sm">{propertyName}</span>
@@ -215,14 +216,14 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
                         className="h-6 w-6"
                         onClick={() => handleRemoveCriterion(componentIndex, idx)}
                       >
-                        <X className="h-3 w-3" />
+                        <TrashIcon className="h-3 w-3" />
                       </Button>
                     )}
                   </div>
 
                   {propertyInfo?.type === 'number' && (
                     <div className="grid grid-cols-2 gap-2">
-                      <div>
+                      <div className="flex flex-col gap-2">
                         <Label className="text-xs">Min Value</Label>
                         <Input
                           type="number"
@@ -240,7 +241,7 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
                           className="h-7"
                         />
                       </div>
-                      <div>
+                      <div className="flex flex-col gap-2">
                         <Label className="text-xs">Max Value</Label>
                         <Input
                           type="number"
@@ -279,7 +280,7 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
                   )}
 
                   {propertyInfo?.type === 'string' && (
-                    <div>
+                    <div className="flex flex-col gap-2">
                       <Label className="text-xs">String Value</Label>
                       <Input
                         value={criterion.stringValue || ''}
@@ -304,13 +305,13 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
         </div>
       )}
 
-      <div className="rounded-md border p-3">
+      <div className="bg-muted/50 rounded-md border p-3">
         <h6 className="mb-2 text-xs font-medium">Add Criterion</h6>
         <div className="grid gap-2">
-          <div>
+          <div className="flex flex-col gap-2">
             <Label className="text-xs">Property Type</Label>
             <select
-              className="border-input bg-card h-7 w-full rounded-md border px-3 py-1 text-xs"
+              className="border-input bg-background h-7 w-full rounded-md border px-3 py-1 text-xs"
               value={newCriterion.propertyType}
               onChange={(e) => handleNewCriterionChange('propertyType', parseInt(e.target.value))}
             >
@@ -324,7 +325,7 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
 
           {PROPERTY_TYPE_MAP[newCriterion.propertyType]?.type === 'number' && (
             <div className="grid grid-cols-2 gap-2">
-              <div>
+              <div className="flex flex-col gap-2">
                 <Label className="text-xs">Min Value</Label>
                 <Input
                   type="number"
@@ -335,7 +336,7 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
                   className="h-7"
                 />
               </div>
-              <div>
+              <div className="flex flex-col gap-2">
                 <Label className="text-xs">Max Value</Label>
                 <Input
                   type="number"
@@ -363,7 +364,7 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
           )}
 
           {PROPERTY_TYPE_MAP[newCriterion.propertyType]?.type === 'string' && (
-            <div>
+            <div className="flex flex-col gap-2">
               <Label className="text-xs">String Value</Label>
               <Input
                 value={newCriterion.stringValue || ''}
@@ -389,95 +390,93 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
 
   return (
     <div className="space-y-4">
-      <ScrollArea className="h-72 pr-4">
-        {components.length === 0 ? (
-          <div className="flex h-24 items-center justify-center rounded-md border border-dashed">
-            <p className="text-muted-foreground">No components added yet</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {components.map((component, index) => (
-              <Card key={index} className="relative">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute top-2 right-2"
-                  onClick={() => handleRemoveComponent(index)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-                <CardContent className="p-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="flex flex-col items-start gap-2">
-                      <Label htmlFor={`component-type-${index}`}>Component Type</Label>
-                      <select
-                        id={`component-type-${index}`}
-                        className="border-input bg-card h-9 w-full rounded-md border px-3 py-1"
-                        value={component.componentType}
-                        onChange={(e) =>
-                          handleComponentChange(
-                            index,
-                            'componentType',
-                            e.target.value as ComponentType
-                          )
-                        }
-                      >
-                        <option value="otom">Otom</option>
-                        <option value="variable_otom">Variable Otom</option>
-                        <option value="fungible_item">Fungible Item</option>
-                        <option value="non_fungible_item">Non-Fungible Item</option>
-                      </select>
-                    </div>
-                    <div className="flex flex-col items-start gap-2">
-                      <Label htmlFor={`component-amount-${index}`}>Amount</Label>
-                      <Input
-                        id={`component-amount-${index}`}
-                        type="number"
-                        min="1"
-                        value={component.amount}
-                        onChange={(e) =>
-                          handleComponentChange(index, 'amount', parseInt(e.target.value))
-                        }
-                      />
-                    </div>
-                    <div className="col-span-2 flex flex-col items-start gap-2">
-                      <Label htmlFor={`component-id-${index}`}>
-                        {component.componentType === 'otom' ||
-                        component.componentType === 'variable_otom'
-                          ? 'Otom Token ID'
-                          : 'Item ID'}
-                      </Label>
-                      <Input
-                        id={`component-id-${index}`}
-                        placeholder={
-                          component.componentType === 'variable_otom'
-                            ? 'Leave empty for variable otom'
-                            : 'Enter ID'
-                        }
-                        value={component.itemIdOrOtomTokenId}
-                        onChange={(e) =>
-                          handleComponentChange(index, 'itemIdOrOtomTokenId', e.target.value)
-                        }
-                        disabled={component.componentType === 'variable_otom'}
-                      />
-                    </div>
-
-                    {/* Only show criteria for non-otom components */}
-                    {shouldShowCriteria(component.componentType) &&
-                      renderCriteriaEditor(component.criteria, index)}
+      {components.length === 0 ? (
+        <div className="flex h-24 items-center justify-center rounded-md border border-dashed">
+          <p className="text-muted-foreground">No components added yet</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {components.map((component, index) => (
+            <Card key={index} className="bg-primary/10 relative">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-2 right-2"
+                onClick={() => handleRemoveComponent(index)}
+              >
+                <TrashIcon className="h-4 w-4" />
+              </Button>
+              <CardContent className="p-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col items-start gap-2">
+                    <Label htmlFor={`component-type-${index}`}>Component Type</Label>
+                    <select
+                      id={`component-type-${index}`}
+                      className="border-input bg-background h-9 w-full rounded-md border px-3 py-1"
+                      value={component.componentType}
+                      onChange={(e) =>
+                        handleComponentChange(
+                          index,
+                          'componentType',
+                          e.target.value as ComponentType
+                        )
+                      }
+                    >
+                      <option value="otom">Otom</option>
+                      <option value="variable_otom">Variable Otom</option>
+                      <option value="fungible_item">Fungible Item</option>
+                      <option value="non_fungible_item">Non-Fungible Item</option>
+                    </select>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </ScrollArea>
+                  <div className="flex flex-col items-start gap-2">
+                    <Label htmlFor={`component-amount-${index}`}>Amount</Label>
+                    <Input
+                      id={`component-amount-${index}`}
+                      type="number"
+                      min="1"
+                      value={component.amount}
+                      onChange={(e) =>
+                        handleComponentChange(index, 'amount', parseInt(e.target.value))
+                      }
+                    />
+                  </div>
+                  <div className="col-span-2 flex flex-col items-start gap-2">
+                    <Label htmlFor={`component-id-${index}`}>
+                      {component.componentType === 'otom' ||
+                      component.componentType === 'variable_otom'
+                        ? 'Otom Token ID'
+                        : 'Item ID'}
+                    </Label>
+                    <Input
+                      id={`component-id-${index}`}
+                      placeholder={
+                        component.componentType === 'variable_otom'
+                          ? 'Leave empty for variable otom'
+                          : 'Enter ID'
+                      }
+                      value={component.itemIdOrOtomTokenId}
+                      onChange={(e) =>
+                        handleComponentChange(index, 'itemIdOrOtomTokenId', e.target.value)
+                      }
+                      disabled={component.componentType === 'variable_otom'}
+                    />
+                  </div>
+
+                  {/* Only show criteria for variable_otom components */}
+                  {shouldShowCriteria(component.componentType) &&
+                    renderCriteriaEditor(component.criteria, index)}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       <Card>
         <CardContent className="p-4">
           <h4 className="mb-3 text-sm font-medium">Add New Component</h4>
           <div className="grid grid-cols-2 gap-4">
-            <div>
+            <div className="flex flex-col gap-2">
               <Label htmlFor="new-component-type">Component Type</Label>
               <select
                 id="new-component-type"
@@ -493,7 +492,7 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
                 <option value="non_fungible_item">Non-Fungible Item</option>
               </select>
             </div>
-            <div>
+            <div className="flex flex-col gap-2">
               <Label htmlFor="new-component-amount">Amount</Label>
               <Input
                 id="new-component-amount"
@@ -503,7 +502,7 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
                 onChange={(e) => handleNewComponentChange('amount', parseInt(e.target.value))}
               />
             </div>
-            <div className="col-span-2">
+            <div className="col-span-2 flex flex-col gap-2">
               <Label htmlFor="new-component-id">
                 {newComponent.componentType === 'otom' ||
                 newComponent.componentType === 'variable_otom'
@@ -523,9 +522,7 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
               />
             </div>
 
-            {/* Only show criteria for non-otom components */}
-            {shouldShowCriteria(newComponent.componentType) &&
-              renderCriteriaEditor(newComponent.criteria, null)}
+            {showCriteriaEditor && renderCriteriaEditor(newComponent.criteria, null)}
           </div>
           <Button
             className="mt-4 w-full"
