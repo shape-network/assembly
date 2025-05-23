@@ -155,7 +155,7 @@ interface IOtomItemsCore {
     error InvalidTier(uint256 tier);
     error MutatorBlockedTransfer();
     error MissingItemId();
-    error MissmatchItemType();
+    error MismatchItemType();
     error CraftBlocked();
     error ItemAlreadyFrozen();
     error InvalidTraitType();
