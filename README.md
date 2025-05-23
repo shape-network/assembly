@@ -19,7 +19,7 @@ cd <repository-name>
 
 ### Environment Variables
 
-This project requires certain environment variables to be set. Create a `.env` file in the root of the project and add the necessary variables.
+This project requires certain environment variables to be set. Create a `.env` file in the root of apps/web project and add the necessary variables.
 
 For example:
 
@@ -27,6 +27,8 @@ For example:
 NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=
 NEXT_PUBLIC_ALCHEMY_KEY=
 NEXT_PUBLIC_CHAIN_ID=
+NEXT_PUBLIC_POSTHOG_KEY=
+NEXT_PUBLIC_POSTHOG_HOST=
 ```
 
 You will need to set `NEXT_PUBLIC_CHAIN_ID` to either Shape Mainnet (`360`) or Shape Sepolia Testnet (`11011`).
@@ -43,6 +45,12 @@ Then, run the development server:
 
 ```bash
 yarn dev
+```
+
+Want to run only web project locally connected to sepolia or mainnet contracts? You can run:
+
+```bash
+yarn run dev --filter=web
 ```
 
 ## Contributing
