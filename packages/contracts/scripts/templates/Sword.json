@@ -1,32 +1,26 @@
 {
   "name": "Jusonic Sword",
-  "description": "A non-fungible sword made of Ju3 and U77",
-  "imageUri": "https://oldschool.runescape.wiki/images/Wilderness_sword_1_detail.png?29623",
+  "description": "A noble sword, often wielded by fearless warriors",
+  "imageUri": "https://arweave.net/bd_InNY_rAEmu4ylZsNx21QG2zGzdGbQwjX60CaeNNI",
   "tieredImageUris": ["", "", "", "", "", "", ""],
   "blueprint": [
     {
       "componentType": 0,
       "itemIdOrOtomTokenId": "30743134292964981883308030024777035899442251708304773008789347656986494153707",
-      "amount": 1,
-      "criteria": []
-    },
-    {
-      "componentType": 0,
-      "itemIdOrOtomTokenId": "80208761829410857019562512949342321687846549513711446602791659410207977883078",
-      "amount": 1,
+      "amount": 2,
       "criteria": []
     }
   ],
   "traits": [
     {
       "typeName": "Damage",
-      "valueString": "100",
-      "valueNumber": 100,
+      "valueString": "50",
+      "valueNumber": 50,
       "traitType": 0
     },
     {
       "typeName": "Build Materials",
-      "valueString": "Ju3 and U77",
+      "valueString": "Two Ju3",
       "valueNumber": 0,
       "traitType": 1
     }
