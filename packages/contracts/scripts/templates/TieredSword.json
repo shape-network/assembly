@@ -1,0 +1,62 @@
+{
+  "name": "Jusonic Sword",
+  "description": "A non-fungible tiered sword made of Ju3 and U77",
+  "imageUri": "https://oldschool.runescape.wiki/images/Wilderness_sword_1_detail.png?29623",
+  "tieredImageUris": [
+    "https://oldschool.runescape.wiki/images/Wilderness_sword_1_detail.png?29623",
+    "https://oldschool.runescape.wiki/images/Wilderness_sword_2_detail.png?29623",
+    "https://oldschool.runescape.wiki/images/Wilderness_sword_3_detail.png?29623",
+    "https://oldschool.runescape.wiki/images/Wilderness_sword_4_detail.png?29623",
+    "",
+    "",
+    ""
+  ],
+  "blueprint": [
+    {
+      "componentType": 0,
+      "itemIdOrOtomTokenId": "30743134292964981883308030024777035899442251708304773008789347656986494153707",
+      "amount": 1,
+      "criteria": []
+    },
+    {
+      "componentType": 0,
+      "itemIdOrOtomTokenId": "80208761829410857019562512949342321687846549513711446602791659410207977883078",
+      "amount": 1,
+      "criteria": []
+    },
+    {
+      "componentType": 1,
+      "itemIdOrOtomTokenId": 0,
+      "amount": 1,
+      "criteria": [
+        {
+          "propertyType": 11,
+          "minValue": 0,
+          "maxValue": "115792089237316195423570985008687907853269984665640564039457584007913129639934",
+          "boolValue": false,
+          "checkBoolValue": false,
+          "stringValue": "",
+          "checkStringValue": false,
+          "bytes32Value": "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "checkBytes32Value": false
+        }
+      ]
+    }
+  ],
+  "traits": [
+    {
+      "typeName": "Damage",
+      "valueString": "100",
+      "valueNumber": 100,
+      "traitType": 0
+    },
+    {
+      "typeName": "Battles fought",
+      "valueString": "0",
+      "valueNumber": 0,
+      "traitType": 0
+    }
+  ],
+  "costInWei": 0,
+  "feeRecipient": "0x0000000000000000000000000000000000000000"
+}
