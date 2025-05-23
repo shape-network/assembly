@@ -13,7 +13,7 @@
     {
       "componentType": 0,
       "itemIdOrOtomTokenId": "103207475906385737307003328874764609497044818069100475897999853498353983732479",
-      "amount": 1,
+      "amount": 2,
       "criteria": []
     }
   ],
@@ -26,7 +26,7 @@
     },
     {
       "typeName": "Build Materials",
-      "valueString": "T15 and Sr2",
+      "valueString": "T15 and two Sr2",
       "valueNumber": 0,
       "traitType": 1
     }
