@@ -1,0 +1,23 @@
+{
+  "name": "FWBuilders Medallion",
+  "description": "This medallion is given to members of the FWBuilders guild.",
+  "imageUri": "https://arweave.net/z5s7JpeqByC4BCReFRYI8AfnQf5dJzmZfYPgyg-mlew",
+  "blueprint": [
+    {
+      "componentType": 0,
+      "itemIdOrOtomTokenId": "70693592540909995436033191318907627805555821281280814156929418637001050770917",
+      "amount": 1,
+      "criteria": []
+    }
+  ],
+  "traits": [
+    {
+      "typeName": "Guild role",
+      "valueString": "Builder",
+      "valueNumber": 0,
+      "traitType": 1
+    }
+  ],
+  "costInWei": 0,
+  "feeRecipient": "0x0000000000000000000000000000000000000000"
+}
