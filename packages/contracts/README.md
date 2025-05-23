@@ -12,15 +12,15 @@ This repo contains a few example scripts for creating Assembly items using the [
 
 ### [createFungibleItem](./scripts/createFungibleItem.ts)
 
-Used to create a fungible "Jusonic Materia". This material can be crafted using two _Ju2_ otoms.
+Used to create a fungible "Jusonic Ore". This material can be crafted using three _Ju2_ otoms.
 
 ### [createNonFungibleItem](./scripts/createNonFungibleItem.ts)
 
-Used to create a non-fungible "Jusonic Sword". This item can be crafted using one _Ju3_ and one _U77_ otom.
+Used to create a non-fungible "Invisibility Cloak". This item can be crafted using one _T15_ and two _Sr2_ otoms.
 
 ### [createNonFungibleItemWithMutator](./scripts/createNonFungibleItemWithMutator.ts)
 
-Used to create a non-fungible tiered "Jusonic Sword". This item can be crafted using one _Ju3_, one _U77_ otom and one additional miscellaneous otom. This extra otom will be used to calculate the tier of the sword.
+Used to create a non-fungible tiered "Mystic Sword". This item can be crafted using one _Ju3_, one _U77_ otom and one additional miscellaneous otom. This extra otom will be used to calculate the tier of the sword.
 
 The logic for tiering is handled in the [`SwordMutator`](./contracts/items/mutators/SwordMutator.sol). It calculates the tier based on the mass of the otom. Scaling the damage of the sword based on its tier.
 
