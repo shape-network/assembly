@@ -5,8 +5,8 @@
   "blueprint": [
     {
       "componentType": 0,
-      "itemIdOrOtomTokenId": "93237044941514029904174406376531295985740241232144081060726316849268058779627",
-      "amount": 2,
+      "itemIdOrOtomTokenId": "80208761829410857019562512949342321687846549513711446602791659410207977883078",
+      "amount": 1,
       "criteria": []
     }
   ],
@@ -19,7 +19,7 @@
     },
     {
       "typeName": "Build Materials",
-      "valueString": "Two Mt35",
+      "valueString": "U77",
       "valueNumber": 0,
       "traitType": 1
     }
