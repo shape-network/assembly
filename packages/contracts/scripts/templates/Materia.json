@@ -6,7 +6,7 @@
     {
       "componentType": 0,
       "itemIdOrOtomTokenId": "35159569680903626501449329353512578019171730918789714169601127546706358467814",
-      "amount": 1,
+      "amount": 3,
       "criteria": []
     }
   ],
@@ -25,7 +25,7 @@
     },
     {
       "typeName": "Build Materials",
-      "valueString": "Ju2",
+      "valueString": "Three Ju2",
       "valueNumber": 0,
       "traitType": 1
     }
