@@ -16,6 +16,12 @@
       "valueString": "Builder",
       "valueNumber": 0,
       "traitType": 1
+    },
+    {
+      "typeName": "Build Materials",
+      "valueString": "Xj18",
+      "valueNumber": 0,
+      "traitType": 1
     }
   ],
   "costInWei": 0,

@@ -55,6 +55,12 @@
       "valueString": "0",
       "valueNumber": 0,
       "traitType": 0
+    },
+    {
+      "typeName": "Build Materials",
+      "valueString": "Ju3 and U77",
+      "valueNumber": 0,
+      "traitType": 1
     }
   ],
   "costInWei": 0,
