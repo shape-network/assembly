@@ -1,19 +1,31 @@
 {
-  "name": "Jusonic Materia",
-  "description": "A fungible thing made of Ju2",
-  "imageUri": "https://oldschool.runescape.wiki/images/thumb/Runite_ore_detail.png/260px-Runite_ore_detail.png?7b4fd",
+  "name": "Jusonic Ore",
+  "description": "A ductile metal, known for its strength and lightweight",
+  "imageUri": "https://arweave.net/cBCEZ6bqtmdkS6Vj8dIAgXhl4O8oDSyAWuqCMlCDToU",
   "blueprint": [
     {
       "componentType": 0,
       "itemIdOrOtomTokenId": "35159569680903626501449329353512578019171730918789714169601127546706358467814",
-      "amount": 2,
+      "amount": 1,
       "criteria": []
     }
   ],
   "traits": [
     {
+      "typeName": "Strength",
+      "valueString": "70",
+      "valueNumber": 70,
+      "traitType": 0
+    },
+    {
+      "typeName": "Weight",
+      "valueString": "10",
+      "valueNumber": 10,
+      "traitType": 0
+    },
+    {
       "typeName": "Build Materials",
-      "valueString": "Two Ju2",
+      "valueString": "Ju2",
       "valueNumber": 0,
       "traitType": 1
     }
