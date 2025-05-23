@@ -1,0 +1,23 @@
+{
+  "name": "Jusonic Materia",
+  "description": "A fungible thing made of Ju2",
+  "imageUri": "https://oldschool.runescape.wiki/images/thumb/Runite_ore_detail.png/260px-Runite_ore_detail.png?7b4fd",
+  "blueprint": [
+    {
+      "componentType": 0,
+      "itemIdOrOtomTokenId": "35159569680903626501449329353512578019171730918789714169601127546706358467814",
+      "amount": 2,
+      "criteria": []
+    }
+  ],
+  "traits": [
+    {
+      "typeName": "Base Otom",
+      "valueString": "Ju2",
+      "valueNumber": 0,
+      "traitType": 1
+    }
+  ],
+  "costInWei": 0,
+  "feeRecipient": "0x0000000000000000000000000000000000000000"
+}
