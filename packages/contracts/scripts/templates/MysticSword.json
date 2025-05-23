@@ -1,12 +1,12 @@
 {
-  "name": "Jusonic Sword",
-  "description": "A non-fungible tiered sword made of Ju3 and U77",
-  "imageUri": "https://oldschool.runescape.wiki/images/Wilderness_sword_1_detail.png?29623",
+  "name": "Mystic Sword",
+  "description": "A bright sword, often wielded by Kings and Queens",
+  "imageUri": "https://arweave.net/_7TL3n0oLXpKknMojP9LwQ0tOIIp9CxvckR5ngpAsa4",
   "tieredImageUris": [
-    "https://oldschool.runescape.wiki/images/Wilderness_sword_1_detail.png?29623",
-    "https://oldschool.runescape.wiki/images/Wilderness_sword_2_detail.png?29623",
-    "https://oldschool.runescape.wiki/images/Wilderness_sword_3_detail.png?29623",
-    "https://oldschool.runescape.wiki/images/Wilderness_sword_4_detail.png?29623",
+    "https://arweave.net/_7TL3n0oLXpKknMojP9LwQ0tOIIp9CxvckR5ngpAsa4",
+    "https://arweave.net/Wq1JXnJejx2Di3JCCr0eh0pM_0noVQ14RW9i2KwNIpg",
+    "https://arweave.net/gFPW2pJOu0FwZWB54UEU-hVSzKg0GoUVw2oVWNO3dgg",
+    "https://arweave.net/Bdk91CtDb6t-N0dQdf-ImuI21L_3r0E3h6hlAX2ICeQ",
     "",
     "",
     ""
@@ -58,7 +58,7 @@
     },
     {
       "typeName": "Build Materials",
-      "valueString": "Ju3 and U77",
+      "valueString": "Ju3, U77 and one variable otom",
       "valueNumber": 0,
       "traitType": 1
     }
