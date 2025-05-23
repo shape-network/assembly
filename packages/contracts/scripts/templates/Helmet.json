@@ -1,0 +1,30 @@
+{
+  "name": "Jusonic Helmet",
+  "description": "A noble helmet, often worn by fearless warriors",
+  "imageUri": "https://arweave.net/CCwvffnliVxMGAAEraLmfNdAW7AccXK44P3-cGgKoqU",
+  "tieredImageUris": ["", "", "", "", "", "", ""],
+  "blueprint": [
+    {
+      "componentType": 0,
+      "itemIdOrOtomTokenId": "30743134292964981883308030024777035899442251708304773008789347656986494153707",
+      "amount": 1,
+      "criteria": []
+    }
+  ],
+  "traits": [
+    {
+      "typeName": "Defense",
+      "valueString": "40",
+      "valueNumber": 40,
+      "traitType": 0
+    },
+    {
+      "typeName": "Build Materials",
+      "valueString": "Ju3",
+      "valueNumber": 0,
+      "traitType": 1
+    }
+  ],
+  "costInWei": 0,
+  "feeRecipient": "0x0000000000000000000000000000000000000000"
+}
