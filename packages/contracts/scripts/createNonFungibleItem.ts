@@ -4,12 +4,12 @@ import { ethers } from 'hardhat';
 const OTOM_ITEMS_CORE_ADDRESS = '0x488B5bAEA1Eb28F48c279C9Ac4e3312790813C2e'; // Shape Sepolia
 
 const main = async () => {
-  // Grab the Sword template
-  const item = JSON.parse(fs.readFileSync('./scripts/templates/Sword.json').toString());
+  // Grab the Invisibility Cloak template
+  const item = JSON.parse(fs.readFileSync('./scripts/templates/InvisibilityCloak.json').toString());
 
   const core = await ethers.getContractAt('OtomItemsCore', OTOM_ITEMS_CORE_ADDRESS);
 
-  // Create the Sword
+  // Create the Invisibility Cloak
   await core.createNonFungibleItem(
     item.name,
     item.description,

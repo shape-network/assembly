@@ -1,26 +1,26 @@
 {
-  "name": "Jusonic Sword",
-  "description": "A noble sword, often wielded by fearless warriors",
-  "imageUri": "https://arweave.net/bd_InNY_rAEmu4ylZsNx21QG2zGzdGbQwjX60CaeNNI",
+  "name": "Jusonic Helmet",
+  "description": "A noble helmet, often worn by fearless warriors",
+  "imageUri": "https://arweave.net/CCwvffnliVxMGAAEraLmfNdAW7AccXK44P3-cGgKoqU",
   "tieredImageUris": ["", "", "", "", "", "", ""],
   "blueprint": [
     {
       "componentType": 0,
       "itemIdOrOtomTokenId": "30743134292964981883308030024777035899442251708304773008789347656986494153707",
-      "amount": 2,
+      "amount": 1,
       "criteria": []
     }
   ],
   "traits": [
     {
-      "typeName": "Damage",
-      "valueString": "50",
-      "valueNumber": 50,
+      "typeName": "Defense",
+      "valueString": "40",
+      "valueNumber": 40,
       "traitType": 0
     },
     {
       "typeName": "Build Materials",
-      "valueString": "Two Ju3",
+      "valueString": "Ju3",
       "valueNumber": 0,
       "traitType": 1
     }
