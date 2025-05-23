@@ -1,0 +1,36 @@
+{
+  "name": "Invisibility Cloak",
+  "description": "A mystical cloak that grants invisibility",
+  "imageUri": "https://arweave.net/D3uuvnLDY48wmJ_Qic5l3AUrQ1pfOaUYn79t9PJYG18",
+  "tieredImageUris": ["", "", "", "", "", "", ""],
+  "blueprint": [
+    {
+      "componentType": 0,
+      "itemIdOrOtomTokenId": "59556967404187678662646267921069430003902119556859655597906602022599940926148",
+      "amount": 1,
+      "criteria": []
+    },
+    {
+      "componentType": 0,
+      "itemIdOrOtomTokenId": "103207475906385737307003328874764609497044818069100475897999853498353983732479",
+      "amount": 1,
+      "criteria": []
+    }
+  ],
+  "traits": [
+    {
+      "typeName": "Ability",
+      "valueString": "Invisibility",
+      "valueNumber": 0,
+      "traitType": 1
+    },
+    {
+      "typeName": "Build Materials",
+      "valueString": "T15 and Sr2",
+      "valueNumber": 0,
+      "traitType": 1
+    }
+  ],
+  "costInWei": 0,
+  "feeRecipient": "0x0000000000000000000000000000000000000000"
+}
