@@ -70,7 +70,7 @@ export const assemblyCoreContractAbi = [
     name: 'ItemIsFrozen',
   },
   { type: 'error', inputs: [], name: 'MissingItemId' },
-  { type: 'error', inputs: [], name: 'MissmatchItemType' },
+  { type: 'error', inputs: [], name: 'MismatchItemType' },
   { type: 'error', inputs: [], name: 'MutatorBlockedTransfer' },
   { type: 'error', inputs: [], name: 'MutatorFailed' },
   { type: 'error', inputs: [], name: 'NotAdmin' },
