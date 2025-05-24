@@ -1,0 +1,29 @@
+{
+  "name": "Mystic Gem",
+  "description": "A bright gem, rarely seen",
+  "imageUri": "https://arweave.net/863SI77SgMeqKo9m6qjkCf-dQMNav09hO2GouLVRqKE",
+  "blueprint": [
+    {
+      "componentType": 0,
+      "itemIdOrOtomTokenId": "80208761829410857019562512949342321687846549513711446602791659410207977883078",
+      "amount": 1,
+      "criteria": []
+    }
+  ],
+  "traits": [
+    {
+      "typeName": "Rarity",
+      "valueString": "Uber Rare",
+      "valueNumber": 0,
+      "traitType": 1
+    },
+    {
+      "typeName": "Build Materials",
+      "valueString": "U77",
+      "valueNumber": 0,
+      "traitType": 1
+    }
+  ],
+  "costInWei": 0,
+  "feeRecipient": "0x0000000000000000000000000000000000000000"
+}

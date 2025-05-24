@@ -5,8 +5,8 @@ const OTOM_ITEMS_CORE_ADDRESS = '0x488B5bAEA1Eb28F48c279C9Ac4e3312790813C2e'; //
 const OTOMS_DATABASE_ADDRESS = '0xC6E01938846D3d62EafD7FF485afeE416f6D8A40'; // Shape Sepolia
 
 const main = async () => {
-  // Grab the Tiered Sword template
-  const item = JSON.parse(fs.readFileSync('./scripts/templates/TieredSword.json').toString());
+  // Grab the Mystic Sword template
+  const item = JSON.parse(fs.readFileSync('./scripts/templates/MysticSword.json').toString());
 
   // Deploy SwordMutator
   const Mutator = await ethers.getContractFactory('SwordMutator');
@@ -18,7 +18,7 @@ const main = async () => {
 
   const core = await ethers.getContractAt('OtomItemsCore', OTOM_ITEMS_CORE_ADDRESS);
 
-  // Create the Tiered Sword
+  // Create the Mystic Sword
   await core.createNonFungibleItem(
     item.name,
     item.description,
