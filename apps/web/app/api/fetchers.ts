@@ -3,6 +3,7 @@ import { assemblyCore, otomsDatabase } from '@/lib/addresses';
 import { alchemy, rpcClient } from '@/lib/clients';
 import { config } from '@/lib/config';
 import { moleculeIdToTokenId, solidityMoleculeToMolecule } from '@/lib/otoms';
+import { retryWithBackoff } from '@/lib/retry';
 import { Trait, UniverseInfo } from '@/lib/types';
 import { isNotNullish } from '@/lib/utils';
 import { NftOrdering, OwnedNftsResponse } from 'alchemy-sdk';
@@ -20,38 +21,20 @@ export async function getPagedNftsForOwner({
   cursor?: string;
   orderBy?: NftOrdering;
 }) {
-  try {
-    console.log('Calling Alchemy getNftsForOwner with:', {
-      owner,
-      contractAddresses,
-      pageKey: cursor,
-      orderBy,
-    });
+  return retryWithBackoff(
+    async () => {
+      const resp: OwnedNftsResponse = await alchemy.nft.getNftsForOwner(owner, {
+        contractAddresses,
+        pageKey: cursor,
+        orderBy,
+      });
 
-    const resp: OwnedNftsResponse = await alchemy.nft.getNftsForOwner(owner, {
-      contractAddresses,
-      pageKey: cursor,
-      orderBy,
-    });
-
-    console.log('Alchemy response:', {
-      totalCount: resp.totalCount,
-      ownedNftsCount: resp.ownedNfts.length,
-      pageKey: resp.pageKey,
-    });
-
-    return resp;
-  } catch (error) {
-    console.error('Error fetching NFTs from Alchemy:', {
-      owner,
-      contractAddresses,
-      error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
-    });
-    throw new Error(
-      `Failed to fetch NFTs from Alchemy: ${(error as Error).message || String(error)}`
-    );
-  }
+      return resp;
+    },
+    3,
+    1000,
+    5000
+  );
 }
 
 export async function getMoleculesByIds(tokenIds: string[]) {
@@ -59,18 +42,25 @@ export async function getMoleculesByIds(tokenIds: string[]) {
     return [];
   }
 
-  const rpc = rpcClient();
-  const elements = await rpc.multicall({
-    contracts: tokenIds.map(
-      (tokenId) =>
-        ({
-          address: otomsDatabase[config.chainId],
-          abi: otomsDatabaseContractAbi,
-          functionName: 'getMoleculeByTokenId',
-          args: [tokenId],
-        }) as const
-    ),
-  });
+  const elements = await retryWithBackoff(
+    async () => {
+      const rpc = rpcClient();
+      return rpc.multicall({
+        contracts: tokenIds.map(
+          (tokenId) =>
+            ({
+              address: otomsDatabase[config.chainId],
+              abi: otomsDatabaseContractAbi,
+              functionName: 'getMoleculeByTokenId',
+              args: [tokenId],
+            }) as const
+        ),
+      });
+    },
+    2,
+    500,
+    2000
+  );
 
   const results = elements
     .map((r, index) => {
