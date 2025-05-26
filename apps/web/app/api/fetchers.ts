@@ -31,9 +31,7 @@ export async function getPagedNftsForOwner({
 
       return resp;
     },
-    3,
-    1000,
-    5000
+    { maxRetries: 3, baseDelay: 1000, maxDelay: 5000 }
   );
 }
 
@@ -57,9 +55,7 @@ export async function getMoleculesByIds(tokenIds: string[]) {
         ),
       });
     },
-    2,
-    500,
-    2000
+    { maxRetries: 2, baseDelay: 500, maxDelay: 2000 }
   );
 
   const results = elements

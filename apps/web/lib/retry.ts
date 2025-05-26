@@ -1,9 +1,14 @@
+type RetryOptions = {
+  maxRetries?: number;
+  baseDelay?: number;
+  maxDelay?: number;
+};
+
 export async function retryWithBackoff<T>(
   fn: () => Promise<T>,
-  maxRetries: number = 3,
-  baseDelay: number = 1000,
-  maxDelay: number = 10000
+  options: RetryOptions = {}
 ): Promise<T> {
+  const { maxRetries = 3, baseDelay = 1000, maxDelay = 10000 } = options;
   let lastError: Error;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
