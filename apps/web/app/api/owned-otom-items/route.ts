@@ -5,6 +5,7 @@ import { Molecule, OtomItem } from '@/lib/types';
 import { isNotNullish, universeSeedToHash } from '@/lib/utils';
 import { OwnedNftsResponse } from 'alchemy-sdk';
 import { NextResponse } from 'next/server';
+import { isAddress } from 'viem';
 import { z } from 'zod';
 
 async function getNftsForUser({
@@ -41,7 +42,7 @@ async function getMolecules({
 }
 
 const GetInventoryInputSchema = z.object({
-  address: z.string(),
+  address: z.string().refine(isAddress, { message: 'Invalid address' }),
   pageKey: z.string().optional(),
 });
 
@@ -73,18 +74,26 @@ export async function POST(request: Request) {
     const otomItems = nfts.ownedNfts.flatMap((nft) => {
       const moleculeData = elements.find((m) => m.tokenId === nft.tokenId);
 
-      if (!moleculeData) return [];
+      if (!moleculeData) {
+        console.warn(`No molecule data found for tokenId: ${nft.tokenId}`);
+        return [];
+      }
 
-      const balance = nft.balance ? Number(nft.balance) : 1;
-      return Array.from({ length: balance }, (_, i) => ({
-        ...moleculeData.molecule,
-        id: `${nft.tokenId}-${i}`,
-        tokenId: nft.tokenId,
-        name: moleculeData.molecule.name,
-        universeHash: universeSeedToHash(
-          moleculeData.molecule.giving_atoms[0].structure.universe_seed
-        ),
-      }));
+      try {
+        const balance = nft.balance ? Number(nft.balance) : 1;
+        return Array.from({ length: balance }, (_, i) => ({
+          ...moleculeData.molecule,
+          id: `${nft.tokenId}-${i}`,
+          tokenId: nft.tokenId,
+          name: moleculeData.molecule.name,
+          universeHash: universeSeedToHash(
+            moleculeData.molecule.giving_atoms[0].structure.universe_seed
+          ),
+        }));
+      } catch (error) {
+        console.error(`Error processing otom item for tokenId ${nft.tokenId}:`, error);
+        return [];
+      }
     });
 
     const inventory: { elements: OtomItem[]; cursor?: string } = {

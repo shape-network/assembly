@@ -4,6 +4,7 @@ import { alchemy, rpcClient } from '@/lib/clients';
 import { config } from '@/lib/config';
 import { moleculeIdToTokenId, solidityMoleculeToMolecule } from '@/lib/otoms';
 import { Trait, UniverseInfo } from '@/lib/types';
+import { isNotNullish } from '@/lib/utils';
 import { NftOrdering, OwnedNftsResponse } from 'alchemy-sdk';
 import { unstable_cache } from 'next/cache';
 import { readContract } from 'viem/actions';
@@ -19,13 +20,38 @@ export async function getPagedNftsForOwner({
   cursor?: string;
   orderBy?: NftOrdering;
 }) {
-  const resp: OwnedNftsResponse = await alchemy.nft.getNftsForOwner(owner, {
-    contractAddresses,
-    pageKey: cursor,
-    orderBy,
-  });
+  try {
+    console.log('Calling Alchemy getNftsForOwner with:', {
+      owner,
+      contractAddresses,
+      pageKey: cursor,
+      orderBy,
+    });
 
-  return resp;
+    const resp: OwnedNftsResponse = await alchemy.nft.getNftsForOwner(owner, {
+      contractAddresses,
+      pageKey: cursor,
+      orderBy,
+    });
+
+    console.log('Alchemy response:', {
+      totalCount: resp.totalCount,
+      ownedNftsCount: resp.ownedNfts.length,
+      pageKey: resp.pageKey,
+    });
+
+    return resp;
+  } catch (error) {
+    console.error('Error fetching NFTs from Alchemy:', {
+      owner,
+      contractAddresses,
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
+    throw new Error(
+      `Failed to fetch NFTs from Alchemy: ${(error as Error).message || String(error)}`
+    );
+  }
 }
 
 export async function getMoleculesByIds(tokenIds: string[]) {
@@ -46,22 +72,30 @@ export async function getMoleculesByIds(tokenIds: string[]) {
     ),
   });
 
-  const anyErrors = elements.some((r) => r.error);
+  const results = elements
+    .map((r, index) => {
+      if (r.error) {
+        console.error(`Error fetching molecule for tokenId ${tokenIds[index]}:`, r.error);
+        return null;
+      }
 
-  if (anyErrors) {
-    console.error(
-      'Errors fetching molecules for tokenIds:',
-      elements.map((r) => r.error)
-    );
-  }
+      if (!r.result) {
+        console.warn(`No result for tokenId ${tokenIds[index]}`);
+        return null;
+      }
 
-  const results = elements.map((r) => {
-    const molecule = solidityMoleculeToMolecule(r.result!);
-    return {
-      tokenId: String(moleculeIdToTokenId(molecule.id)),
-      molecule,
-    };
-  });
+      try {
+        const molecule = solidityMoleculeToMolecule(r.result);
+        return {
+          tokenId: String(moleculeIdToTokenId(molecule.id)),
+          molecule,
+        };
+      } catch (error) {
+        console.error(`Error processing molecule for tokenId ${tokenIds[index]}:`, error);
+        return null;
+      }
+    })
+    .filter(isNotNullish);
 
   return results;
 }
