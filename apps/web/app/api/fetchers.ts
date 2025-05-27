@@ -3,7 +3,9 @@ import { assemblyCore, otomsDatabase } from '@/lib/addresses';
 import { alchemy, rpcClient } from '@/lib/clients';
 import { config } from '@/lib/config';
 import { moleculeIdToTokenId, solidityMoleculeToMolecule } from '@/lib/otoms';
+import { retryWithBackoff } from '@/lib/retry';
 import { Trait, UniverseInfo } from '@/lib/types';
+import { isNotNullish } from '@/lib/utils';
 import { NftOrdering, OwnedNftsResponse } from 'alchemy-sdk';
 import { unstable_cache } from 'next/cache';
 import { readContract } from 'viem/actions';
@@ -19,13 +21,18 @@ export async function getPagedNftsForOwner({
   cursor?: string;
   orderBy?: NftOrdering;
 }) {
-  const resp: OwnedNftsResponse = await alchemy.nft.getNftsForOwner(owner, {
-    contractAddresses,
-    pageKey: cursor,
-    orderBy,
-  });
+  return retryWithBackoff(
+    async () => {
+      const resp: OwnedNftsResponse = await alchemy.nft.getNftsForOwner(owner, {
+        contractAddresses,
+        pageKey: cursor,
+        orderBy,
+      });
 
-  return resp;
+      return resp;
+    },
+    { maxRetries: 3, baseDelay: 1000, maxDelay: 5000 }
+  );
 }
 
 export async function getMoleculesByIds(tokenIds: string[]) {
@@ -33,35 +40,48 @@ export async function getMoleculesByIds(tokenIds: string[]) {
     return [];
   }
 
-  const rpc = rpcClient();
-  const elements = await rpc.multicall({
-    contracts: tokenIds.map(
-      (tokenId) =>
-        ({
-          address: otomsDatabase[config.chainId],
-          abi: otomsDatabaseContractAbi,
-          functionName: 'getMoleculeByTokenId',
-          args: [tokenId],
-        }) as const
-    ),
-  });
+  const elements = await retryWithBackoff(
+    async () => {
+      const rpc = rpcClient();
+      return rpc.multicall({
+        contracts: tokenIds.map(
+          (tokenId) =>
+            ({
+              address: otomsDatabase[config.chainId],
+              abi: otomsDatabaseContractAbi,
+              functionName: 'getMoleculeByTokenId',
+              args: [tokenId],
+            }) as const
+        ),
+      });
+    },
+    { maxRetries: 2, baseDelay: 500, maxDelay: 2000 }
+  );
 
-  const anyErrors = elements.some((r) => r.error);
+  const results = elements
+    .map((r, index) => {
+      if (r.error) {
+        console.error(`Error fetching molecule for tokenId ${tokenIds[index]}:`, r.error);
+        return null;
+      }
 
-  if (anyErrors) {
-    console.error(
-      'Errors fetching molecules for tokenIds:',
-      elements.map((r) => r.error)
-    );
-  }
+      if (!r.result) {
+        console.warn(`No result for tokenId ${tokenIds[index]}`);
+        return null;
+      }
 
-  const results = elements.map((r) => {
-    const molecule = solidityMoleculeToMolecule(r.result!);
-    return {
-      tokenId: String(moleculeIdToTokenId(molecule.id)),
-      molecule,
-    };
-  });
+      try {
+        const molecule = solidityMoleculeToMolecule(r.result);
+        return {
+          tokenId: String(moleculeIdToTokenId(molecule.id)),
+          molecule,
+        };
+      } catch (error) {
+        console.error(`Error processing molecule for tokenId ${tokenIds[index]}:`, error);
+        return null;
+      }
+    })
+    .filter(isNotNullish);
 
   return results;
 }
