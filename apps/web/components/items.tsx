@@ -29,6 +29,7 @@ import Image from 'next/image';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { decodeEventLog, toEventSelector } from 'viem';
+import { shapeSepolia } from 'viem/chains';
 import { useAccount, useSwitchChain, useWaitForTransactionReceipt } from 'wagmi';
 
 export const ItemsToCraft: FC<{
@@ -123,7 +124,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, on
   const isPickaxe = item.id === BigInt(2);
 
   return (
-    <li className="grid w-[300px] shrink-0 grid-rows-[1fr_auto] gap-1">
+    <li className="grid w-[380px] shrink-0 grid-rows-[1fr_auto] gap-1">
       <Card className="relative w-full">
         <CraftItemButton
           droppedItemsState={droppedItemsState}
@@ -243,6 +244,10 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, on
             )}
           </div>
         </CardContent>
+
+        {config.chainId === shapeSepolia.id && (
+          <p className="text-muted-foreground/50 absolute right-2 bottom-1 text-xs">{item.id}</p>
+        )}
       </Card>
     </li>
   );
