@@ -9,7 +9,7 @@ export const itemDetailsSchema = z.object({
   name: z.string().min(2, 'Name is required'),
   description: z.string().min(2, 'Description is required'),
   imageUri: z.string().url('Image URI must be a valid URL'),
-  costInEth: z.string().max(10, 'Cost cannot exceed 10 ETH'),
+  costInEth: z.string(),
   feeRecipient: z.string().refine((val) => isAddress(val), {
     message: 'Fee recipient must be a valid address',
   }),
