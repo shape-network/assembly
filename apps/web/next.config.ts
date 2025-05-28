@@ -11,6 +11,9 @@ const nextConfig: NextConfig = {
       { hostname: 'prod-otoms.s3.us-east-1.amazonaws.com' },
       { hostname: 'dev-otoms.s3.us-east-1.amazonaws.com' },
       { hostname: 'arweave.net' },
+      { hostname: 'example.com' },
+      { hostname: 'QmPMLjtHvrKEicZaG7pVccpmaYks1WL4oWaoQko7VBj5Cm' },
+      { hostname: 'i2.seadn.io' },
     ],
   },
 };
