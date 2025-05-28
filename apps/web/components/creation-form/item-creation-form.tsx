@@ -226,7 +226,9 @@ export const ItemCreationForm: FC = () => {
           return {
             propertyType: criterion.propertyType || 0,
             minValue: BigInt(criterion.minValue || 0),
-            maxValue: BigInt(criterion.maxValue || 0xffffffff),
+            maxValue: criterion.maxValue
+              ? BigInt(criterion.maxValue)
+              : 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffn,
             boolValue: !!criterion.boolValue,
             checkBoolValue: !!criterion.checkBoolValue,
             stringValue: criterion.stringValue || '',
