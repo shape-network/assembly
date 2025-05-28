@@ -19,7 +19,9 @@ async function getCraftItems(): Promise<Item[]> {
   });
 
   const filteredResults =
-    config.chainId === shape.id ? results.filter((r) => r.id === BigInt(2)) : results;
+    config.chainId === shape.id
+      ? results.filter((r) => r.id === BigInt(2))
+      : results.filter((r) => ![8, 9, 11, 15, 16, 17].includes(Number(r.id))); // Remove FWB workshop test items
 
   const items = await Promise.all(
     filteredResults.map(async (r) => ({
