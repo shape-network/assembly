@@ -47,7 +47,7 @@ export async function getMoleculesByIds(tokenIds: string[]) {
         contracts: tokenIds.map(
           (tokenId) =>
             ({
-              address: otomsDatabase[config.chainId],
+              address: otomsDatabase[config.chain.id],
               abi: otomsDatabaseContractAbi,
               functionName: 'getMoleculeByTokenId',
               args: [tokenId],
@@ -90,7 +90,7 @@ async function _getUniverses(): Promise<UniverseInfo[]> {
   const rpc = rpcClient();
   const universeHashes = await readContract(rpc, {
     abi: otomsDatabaseContractAbi,
-    address: otomsDatabase[config.chainId],
+    address: otomsDatabase[config.chain.id],
     functionName: 'activeUniverses',
     args: [],
   });
@@ -99,7 +99,7 @@ async function _getUniverses(): Promise<UniverseInfo[]> {
     universeHashes.map(async (hash) => {
       const universeInfo = await readContract(rpc, {
         abi: otomsDatabaseContractAbi,
-        address: otomsDatabase[config.chainId],
+        address: otomsDatabase[config.chain.id],
         functionName: 'universeInformation',
         args: [hash],
       });
@@ -116,7 +116,7 @@ async function _getUniverses(): Promise<UniverseInfo[]> {
 
 export const getUniverses = unstable_cache(
   _getUniverses,
-  ['otoms-universes', String(config.chainId)],
+  ['otoms-universes', String(config.chain.id)],
   { tags: ['universes'], revalidate: 60 * 60 * 24 }
 );
 
@@ -124,7 +124,7 @@ export async function getTraitsForItem(itemId: bigint): Promise<Trait[]> {
   const rpc = rpcClient();
   const traits = await rpc.readContract({
     abi: assemblyCoreContractAbi,
-    address: assemblyCore[config.chainId],
+    address: assemblyCore[config.chain.id],
     functionName: 'getTokenTraits',
     args: [itemId],
   });

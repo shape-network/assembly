@@ -5,6 +5,7 @@ import { wagmiConfig } from '@/lib/web3';
 import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { usePathname, useSearchParams } from 'next/navigation';
+import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import posthog from 'posthog-js';
 import { PostHogProvider, usePostHog } from 'posthog-js/react';
 import { ReactNode, Suspense, useEffect } from 'react';
@@ -18,8 +19,8 @@ export const Providers = ({ children }: { children: ReactNode }) => {
     <AnalyticsProvider>
       <WagmiProvider config={wagmiConfig}>
         <QueryClientProvider client={queryClient}>
-          <RainbowKitProvider initialChain={config.chainId === shape.id ? shape : shapeSepolia}>
-            {children}
+          <RainbowKitProvider initialChain={config.chain.id === shape.id ? shape : shapeSepolia}>
+            <NuqsAdapter>{children}</NuqsAdapter>
           </RainbowKitProvider>
         </QueryClientProvider>
       </WagmiProvider>

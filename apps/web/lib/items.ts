@@ -41,7 +41,7 @@ export async function getBlueprintForItem(
     if (!!blueprint.itemIdOrOtomTokenId) {
       try {
         const nft = await alchemy.nft.getNftMetadata(
-          assemblyItems[config.chainId],
+          assemblyItems[config.chain.id],
           blueprint.itemIdOrOtomTokenId.toString()
         );
         name = nft.name ?? '?';

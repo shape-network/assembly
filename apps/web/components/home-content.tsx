@@ -116,13 +116,6 @@ export const HomeContent = () => {
                     <TabsTrigger value="items-to-craft">Items to craft</TabsTrigger>
                     {address && <TabsTrigger value="owned-otoms">Owned Items</TabsTrigger>}
                   </TabsList>
-
-                  {/* <InlineLink
-                    href={paths.repo}
-                    className="text-muted-foreground/50 hidden text-sm no-underline hover:underline sm:inline-flex"
-                  >
-                    Propose your own <ExternalLinkIcon className="size-4" />
-                  </InlineLink> */}
                 </div>
 
                 <TabsContent value="items-to-craft">
@@ -159,7 +152,7 @@ export const HomeContent = () => {
                     Contribute
                   </InlineLink>
                   <span>・</span>
-                  <InlineLink className="self-start" href={paths.docs}>
+                  <InlineLink className="self-start" href={paths.docs.assembly}>
                     Documentation
                   </InlineLink>
                 </div>
@@ -185,7 +178,7 @@ export const HomeContent = () => {
                       Source code
                     </InlineLink>
                     <span>・</span>
-                    <InlineLink className="self-start" href={paths.docs}>
+                    <InlineLink className="self-start" href={paths.docs.assembly}>
                       Documentation
                     </InlineLink>
                   </div>
