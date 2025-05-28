@@ -564,7 +564,11 @@ const CraftItemButton: FC<{
             <div className="relative h-60 w-full">
               {craftedItem?.defaultImageUri ? (
                 <Image
-                  src={paths.assemblyItemImage(craftedItem.id, craftedItem.tier ?? 1)}
+                  src={
+                    isPickaxe
+                      ? paths.assemblyItemImage(craftedItem.id, craftedItem.tier ?? 1)
+                      : craftedItem.defaultImageUri
+                  }
                   alt={craftedItem.name}
                   fill
                   className="object-contain"
@@ -625,7 +629,9 @@ export const OwnedItemCard: FC<{ item: OwnedItem }> = ({ item }) => {
         <div className="relative h-40 w-full">
           {item.defaultImageUri ? (
             <Image
-              src={paths.assemblyItemImage(item.id, item.tier ?? 1)}
+              src={
+                isPickaxe ? paths.assemblyItemImage(item.id, item.tier ?? 1) : item.defaultImageUri
+              }
               alt={item.name}
               fill
               className="object-contain py-2"
