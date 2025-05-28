@@ -19,7 +19,7 @@ export const Providers = ({ children }: { children: ReactNode }) => {
     <AnalyticsProvider>
       <WagmiProvider config={wagmiConfig}>
         <QueryClientProvider client={queryClient}>
-          <RainbowKitProvider initialChain={config.chainId === shape.id ? shape : shapeSepolia}>
+          <RainbowKitProvider initialChain={config.chain.id === shape.id ? shape : shapeSepolia}>
             <NuqsAdapter>{children}</NuqsAdapter>
           </RainbowKitProvider>
         </QueryClientProvider>

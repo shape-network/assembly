@@ -24,7 +24,7 @@ export async function POST(request: Request) {
   const { address } = result.data;
 
   const nfts = await alchemy.nft.getNftsForOwner(address, {
-    contractAddresses: [assemblyItems[config.chainId]],
+    contractAddresses: [assemblyItems[config.chain.id]],
   });
 
   const items: (OwnedItem | null)[] = await Promise.all(
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
         const rpc = rpcClient();
         const itemId = await rpc.readContract({
           abi: assemblyCoreContractAbi,
-          address: assemblyCore[config.chainId],
+          address: assemblyCore[config.chain.id],
           functionName: 'getItemIdForToken',
           args: [nftTokenId],
         });
@@ -49,19 +49,19 @@ export async function POST(request: Request) {
           contracts: [
             {
               abi: assemblyCoreContractAbi,
-              address: assemblyCore[config.chainId],
+              address: assemblyCore[config.chain.id],
               functionName: 'getItemByItemId',
               args: [itemId],
             },
             {
               abi: assemblyCoreContractAbi,
-              address: assemblyCore[config.chainId],
+              address: assemblyCore[config.chain.id],
               functionName: 'nonFungibleTokenToTier',
               args: [nftTokenId],
             },
             {
               abi: assemblyCoreContractAbi,
-              address: assemblyCore[config.chainId],
+              address: assemblyCore[config.chain.id],
               functionName: 'getTokenTraits',
               args: [nftTokenId],
             },

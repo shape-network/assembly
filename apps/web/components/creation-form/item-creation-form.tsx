@@ -31,7 +31,7 @@ import { useRouter } from 'next/navigation';
 import { useQueryState } from 'nuqs';
 import { FC, useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { parseEther, zeroAddress } from 'viem';
+import { Address, parseEther, zeroAddress } from 'viem';
 import { useWaitForTransactionReceipt } from 'wagmi';
 import { z } from 'zod';
 
@@ -226,15 +226,16 @@ export const ItemCreationForm: FC = () => {
           return {
             propertyType: criterion.propertyType || 0,
             minValue: BigInt(criterion.minValue || 0),
-            maxValue: criterion.maxValue
-              ? BigInt(criterion.maxValue)
-              : 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffn,
+            maxValue: BigInt(
+              criterion.maxValue ||
+                0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+            ),
             boolValue: !!criterion.boolValue,
             checkBoolValue: !!criterion.checkBoolValue,
             stringValue: criterion.stringValue || '',
             checkStringValue: !!criterion.checkStringValue,
             bytes32Value:
-              '0x0000000000000000000000000000000000000000000000000000000000000000' as `0x${string}`,
+              '0x0000000000000000000000000000000000000000000000000000000000000000' as Address,
             checkBytes32Value: false,
           };
         });
@@ -266,7 +267,7 @@ export const ItemCreationForm: FC = () => {
       }));
 
       writeContract({
-        address: assemblyCore[config.chainId],
+        address: assemblyCore[config.chain.id],
         args: [
           formData.name,
           formData.description,
@@ -389,11 +390,7 @@ export const ItemCreationForm: FC = () => {
       toast.success(
         <>
           Item created. See on{' '}
-          <Link
-            target="_blank"
-            rel="noopener noreferrer"
-            href={paths.explorer.transaction(data, config.chainId)}
-          >
+          <Link target="_blank" rel="noopener noreferrer" href={paths.explorer.transaction(data)}>
             ShapeScan
           </Link>
         </>,
@@ -406,11 +403,7 @@ export const ItemCreationForm: FC = () => {
       toast.loading(
         <>
           Creating the item... See on{' '}
-          <Link
-            target="_blank"
-            rel="noopener noreferrer"
-            href={paths.explorer.transaction(data, config.chainId)}
-          >
+          <Link target="_blank" rel="noopener noreferrer" href={paths.explorer.transaction(data)}>
             ShapeScan
           </Link>
         </>,

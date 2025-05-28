@@ -15,7 +15,7 @@ async function getNftsForUser({
   try {
     const response = await getPagedNftsForOwner({
       owner: address,
-      contractAddresses: [otomsCore[config.chainId]],
+      contractAddresses: [otomsCore[config.chain.id]],
       cursor: pageKey,
     });
 

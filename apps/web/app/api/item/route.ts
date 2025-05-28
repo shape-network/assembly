@@ -30,19 +30,19 @@ export async function POST(request: Request) {
       contracts: [
         {
           abi: assemblyCoreContractAbi,
-          address: assemblyCore[config.chainId],
+          address: assemblyCore[config.chain.id],
           functionName: 'getItemByItemId',
           args: [itemId],
         },
         {
           abi: assemblyCoreContractAbi,
-          address: assemblyCore[config.chainId],
+          address: assemblyCore[config.chain.id],
           functionName: 'nonFungibleTokenToTier',
           args: [itemTokenId],
         },
         {
           abi: assemblyCoreContractAbi,
-          address: assemblyCore[config.chainId],
+          address: assemblyCore[config.chain.id],
           functionName: 'getTokenTraits',
           args: [itemTokenId],
         },

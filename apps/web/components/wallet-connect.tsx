@@ -1,15 +1,15 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { config } from '@/lib/config';
 import { abbreviateHash } from '@/lib/utils';
 import { ExitIcon } from '@radix-ui/react-icons';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { mainnet } from 'viem/chains';
 import { useAccount, useDisconnect, useEnsName } from 'wagmi';
 
 export const WalletConnect = () => {
   const { address } = useAccount();
-  const { data: ensName } = useEnsName({ address, chainId: mainnet.id });
+  const { data: ensName } = useEnsName({ address, chainId: config.chain.id });
   const { disconnect } = useDisconnect();
 
   function handleDisconnect() {

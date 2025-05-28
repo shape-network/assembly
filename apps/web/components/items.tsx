@@ -240,7 +240,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, on
           </div>
         </CardContent>
 
-        {config.chainId === shapeSepolia.id && (
+        {config.chain.id === shapeSepolia.id && (
           <p className="text-muted-foreground/50 absolute right-2 bottom-1 text-xs">{item.id}</p>
         )}
       </Card>
@@ -430,7 +430,7 @@ const CraftItemButton: FC<{
 
       const craftLog = txReceipt.logs.find(
         (log) =>
-          isSameAddress(log.address, assemblyCore[config.chainId]) &&
+          isSameAddress(log.address, assemblyCore[config.chain.id]) &&
           log.topics &&
           log.topics[0] === itemCraftedSelector
       );
@@ -478,9 +478,9 @@ const CraftItemButton: FC<{
       return;
     }
 
-    if (currentWalletChain?.id !== config.chainId) {
+    if (currentWalletChain?.id !== config.chain.id) {
       try {
-        await switchChainAsync({ chainId: config.chainId });
+        await switchChainAsync({ chainId: config.chain.id });
       } catch (error) {
         toast.dismiss();
         toast.error('Failed to switch to Shape network. Please switch manually.');
@@ -504,7 +504,7 @@ const CraftItemButton: FC<{
     try {
       toast.info('Please confirm the transaction in your wallet.');
       await writeContractAsync({
-        address: assemblyCore[config.chainId],
+        address: assemblyCore[config.chain.id],
         args: [item.id, BigInt(1), variableOtomTokenIds, [], '0x'],
       });
     } catch (error) {
@@ -565,9 +565,8 @@ const CraftItemButton: FC<{
               {craftedItem?.defaultImageUri ? (
                 <Image
                   src={
-                    isPickaxe
-                      ? paths.assemblyItemImage(craftedItem.id, craftedItem.tier ?? 1)
-                      : craftedItem.defaultImageUri
+                    craftedItem?.defaultImageUri ??
+                    paths.assemblyItemImage(craftedItem.id, craftedItem.tier ?? 1)
                   }
                   alt={craftedItem.name}
                   fill
