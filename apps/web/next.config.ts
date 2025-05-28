@@ -10,6 +10,7 @@ const nextConfig: NextConfig = {
       { hostname: 'oldschool.runescape.wiki' },
       { hostname: 'prod-otoms.s3.us-east-1.amazonaws.com' },
       { hostname: 'dev-otoms.s3.us-east-1.amazonaws.com' },
+      { hostname: 'arweave.net' },
     ],
   },
 };
