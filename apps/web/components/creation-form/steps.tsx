@@ -265,7 +265,7 @@ export const NavigationButtons: FC<NavigationButtonsProps> = ({
           <ChevronRight className="h-4 w-4" />
         </Button>
       ) : (
-        <Button onClick={onSubmit}>
+        <Button onClick={onSubmit} disabled={isNextDisabled}>
           Create Item
           <ArrowRight className="h-4 w-4" />
         </Button>

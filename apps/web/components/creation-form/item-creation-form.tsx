@@ -21,14 +21,18 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useWriteAssemblyCoreContractCreateFungibleItem } from '@/generated';
 import { assemblyCore } from '@/lib/addresses';
 import { itemCreationBannerDismissedAtom } from '@/lib/atoms';
+import { config } from '@/lib/config';
 import { paths } from '@/lib/paths';
 import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
 import { useAtom } from 'jotai';
 import { XIcon } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useQueryState } from 'nuqs';
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { parseEther, zeroAddress } from 'viem';
-import { shapeSepolia } from 'viem/chains';
+import { useWaitForTransactionReceipt } from 'wagmi';
 import { z } from 'zod';
 
 const defaultFungibleItemData: FungibleItemFormData = {
@@ -55,7 +59,13 @@ export const ItemCreationForm: FC = () => {
   const [formData, setFormData] = useState<FungibleItemFormData>(defaultFungibleItemData);
   const [errors, setErrors] = useState<Record<string, string[]>>({});
 
-  const { writeContract, isPending } = useWriteAssemblyCoreContractCreateFungibleItem();
+  const [bannerDismissed, setBannerDismissed] = useAtom(itemCreationBannerDismissedAtom);
+  const router = useRouter();
+
+  const { writeContract, isPending, data } = useWriteAssemblyCoreContractCreateFungibleItem();
+  const receipt = useWaitForTransactionReceipt({
+    hash: data,
+  });
 
   // Validate specific parts of the form using Zod
   const validateItemType = () => {
@@ -254,7 +264,7 @@ export const ItemCreationForm: FC = () => {
       }));
 
       writeContract({
-        address: assemblyCore[shapeSepolia.id],
+        address: assemblyCore[config.chainId],
         args: [
           formData.name,
           formData.description,
@@ -371,7 +381,50 @@ export const ItemCreationForm: FC = () => {
     }
   }
 
-  const [bannerDismissed, setBannerDismissed] = useAtom(itemCreationBannerDismissedAtom);
+  useEffect(() => {
+    if (!data) return;
+    if (receipt.isSuccess) {
+      toast.success(
+        <>
+          Item created. See on{' '}
+          <Link
+            target="_blank"
+            rel="noopener noreferrer"
+            href={paths.explorer.transaction(data, config.selectedChain)}
+          >
+            ShapeScan
+          </Link>
+        </>,
+        { id: 'tx-confirmation', duration: 4000 }
+      );
+      router.push(paths.home);
+      return;
+    }
+    if (receipt.isPending) {
+      toast.loading(
+        <>
+          Creating the item... See on{' '}
+          <Link
+            target="_blank"
+            rel="noopener noreferrer"
+            href={paths.explorer.transaction(data, config.selectedChain)}
+          >
+            ShapeScan
+          </Link>
+        </>,
+
+        { id: 'tx-confirmation' }
+      );
+      return;
+    }
+    if (receipt.isError) {
+      toast.error(
+        <>Creation failed. Try again or contact Shape team on Discord</>,
+
+        { id: 'tx-confirmation' }
+      );
+    }
+  }, [data, receipt, router]);
 
   return (
     <div className="relative mt-64 flex flex-col gap-4">
