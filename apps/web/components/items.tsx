@@ -124,7 +124,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, on
   const isPickaxe = item.id === BigInt(2);
 
   return (
-    <li className="grid w-[380px] shrink-0 grid-rows-[1fr_auto] gap-1">
+    <li className="grid w-[300px] shrink-0 grid-rows-[1fr_auto] gap-1 sm:w-[380px]">
       <Card className="relative w-full">
         <CraftItemButton
           droppedItemsState={droppedItemsState}
@@ -142,12 +142,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, on
           <div className="flex flex-col gap-6">
             <div className="relative h-40 w-full">
               {item.defaultImageUri ? (
-                <Image
-                  src={item.defaultImageUri}
-                  alt={item.name}
-                  fill
-                  className="scale-125 object-contain"
-                />
+                <Image src={item.defaultImageUri} alt={item.name} fill className="object-contain" />
               ) : (
                 <Skeleton className="h-40 w-full" />
               )}
