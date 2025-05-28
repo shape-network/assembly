@@ -203,23 +203,18 @@ export const HomeContent = () => {
 
             {address ? (
               <div className="flex w-full flex-col gap-2">
-                {/* <div className="flex h-full w-full flex-col gap-2 overflow-hidden p-4"> */}
                 {isFloating ? (
                   <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
                     <Rnd
                       position={rndPosition}
                       size={rndSize}
                       onDragStop={(e, d) => {
-                        // Save position to persisted state
                         setRndPosition({ x: d.x, y: d.y });
                       }}
                       onResize={(e, direction, ref, delta, position) => {
-                        // Update position during resize without saving to storage
-                        // This prevents excessive writes to localStorage
                         setRndPosition(position);
                       }}
                       onResizeStop={(e, direction, ref, delta, position) => {
-                        // Save final size and position to persisted state
                         setRndSize({
                           width: parseInt(ref.style.width),
                           height: parseInt(ref.style.height),
