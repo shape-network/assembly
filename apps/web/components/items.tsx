@@ -859,9 +859,7 @@ const WildcardDropZone: FC<{
 export const HorizontallScrollWrapper: FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <ScrollArea className="w-full" orientation="horizontal">
-      <div className="overflow-x-auto">
-        <ul className="flex flex-nowrap gap-2 pb-4">{children}</ul>
-      </div>
+      <ul className="flex flex-nowrap gap-2 pb-4">{children}</ul>
     </ScrollArea>
   );
 };
