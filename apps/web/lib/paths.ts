@@ -1,5 +1,5 @@
 import { config } from '@/lib/config';
-import { Chain, shape, shapeSepolia } from 'viem/chains';
+import { shape, shapeSepolia } from 'viem/chains';
 
 export const paths = {
   home: '/',
@@ -23,24 +23,24 @@ export const paths = {
       ? `https://prod-otoms.s3.us-east-1.amazonaws.com/assembly-items/item-${String(itemId)}-tier-${tier}.svg`
       : `https://dev-otoms.s3.us-east-1.amazonaws.com/assembly-items/item-${String(itemId)}-tier-${tier}.svg`,
   explorer: {
-    home: (chain: Chain) => {
-      return chain === shapeSepolia
-        ? '`https://explorer-sepolia.shape.network`'
+    home: (chainId: number) => {
+      return chainId === shapeSepolia.id
+        ? '`https://sepolia.shapescan.xyz/`'
         : 'https://shapescan.xyz';
     },
-    block: (blockNumber: number, chain: Chain) => {
+    block: (blockNumber: number, chainId: number) => {
       const base =
-        chain === shapeSepolia ? 'https://explorer-sepolia.shape.network' : 'https://shapescan.xyz';
+        chainId === shapeSepolia.id ? 'https://sepolia.shapescan.xyz/' : 'https://shapescan.xyz';
       return `${base}/block/${blockNumber}`;
     },
-    transaction: (hash: string, chain: Chain) => {
+    transaction: (hash: string, chainId: number) => {
       const base =
-        chain === shapeSepolia ? 'https://explorer-sepolia.shape.network' : 'https://shapescan.xyz';
+        chainId === shapeSepolia.id ? 'https://sepolia.shapescan.xyz/' : 'https://shapescan.xyz';
       return `${base}/tx/${hash}`;
     },
-    address: (address: string, chain: Chain) => {
+    address: (address: string, chainId: number) => {
       const base =
-        chain === shapeSepolia ? 'https://explorer-sepolia.shape.network' : 'https://shapescan.xyz';
+        chainId === shapeSepolia.id ? 'https://sepolia.shapescan.xyz/' : 'https://shapescan.xyz';
       return `${base}/address/${address}`;
     },
   },

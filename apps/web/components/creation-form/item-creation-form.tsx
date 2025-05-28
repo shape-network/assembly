@@ -390,7 +390,7 @@ export const ItemCreationForm: FC = () => {
           <Link
             target="_blank"
             rel="noopener noreferrer"
-            href={paths.explorer.transaction(data, config.selectedChain)}
+            href={paths.explorer.transaction(data, config.chainId)}
           >
             ShapeScan
           </Link>
@@ -407,7 +407,7 @@ export const ItemCreationForm: FC = () => {
           <Link
             target="_blank"
             rel="noopener noreferrer"
-            href={paths.explorer.transaction(data, config.selectedChain)}
+            href={paths.explorer.transaction(data, config.chainId)}
           >
             ShapeScan
           </Link>
