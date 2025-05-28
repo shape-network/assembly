@@ -7,6 +7,7 @@ import { getBlueprintForItem } from '@/lib/items';
 import { Item, ItemType } from '@/lib/types';
 import { NextResponse } from 'next/server';
 import superjson from 'superjson';
+import { shape } from 'viem/chains';
 
 async function getCraftItems(): Promise<Item[]> {
   const rpc = rpcClient();
@@ -17,7 +18,8 @@ async function getCraftItems(): Promise<Item[]> {
     args: [BigInt(0), BigInt(50)], // TODO: add proper pagination
   });
 
-  const filteredResults = results.filter((r) => r.id === BigInt(2));
+  const filteredResults =
+    config.chainId === shape.id ? results.filter((r) => r.id === BigInt(2)) : results;
 
   const items = await Promise.all(
     filteredResults.map(async (r) => ({

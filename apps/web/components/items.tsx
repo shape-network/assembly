@@ -29,6 +29,7 @@ import Image from 'next/image';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { decodeEventLog, toEventSelector } from 'viem';
+import { shapeSepolia } from 'viem/chains';
 import { useAccount, useSwitchChain, useWaitForTransactionReceipt } from 'wagmi';
 
 export const ItemsToCraft: FC<{
@@ -123,7 +124,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, on
   const isPickaxe = item.id === BigInt(2);
 
   return (
-    <li className="grid w-[300px] shrink-0 grid-rows-[1fr_auto] gap-1">
+    <li className="grid w-[300px] shrink-0 grid-rows-[1fr_auto] gap-1 sm:w-[380px]">
       <Card className="relative w-full">
         <CraftItemButton
           droppedItemsState={droppedItemsState}
@@ -141,12 +142,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, on
           <div className="flex flex-col gap-6">
             <div className="relative h-40 w-full">
               {item.defaultImageUri ? (
-                <Image
-                  src={item.defaultImageUri}
-                  alt={item.name}
-                  fill
-                  className="scale-125 object-contain"
-                />
+                <Image src={item.defaultImageUri} alt={item.name} fill className="object-contain" />
               ) : (
                 <Skeleton className="h-40 w-full" />
               )}
@@ -243,6 +239,10 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, on
             )}
           </div>
         </CardContent>
+
+        {config.chainId === shapeSepolia.id && (
+          <p className="text-muted-foreground/50 absolute right-2 bottom-1 text-xs">{item.id}</p>
+        )}
       </Card>
     </li>
   );
@@ -854,9 +854,7 @@ const WildcardDropZone: FC<{
 export const HorizontallScrollWrapper: FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <ScrollArea className="w-full" orientation="horizontal">
-      <div className="overflow-x-auto">
-        <ul className="flex flex-nowrap gap-2 pb-4">{children}</ul>
-      </div>
+      <ul className="flex flex-nowrap gap-2 pb-4">{children}</ul>
     </ScrollArea>
   );
 };

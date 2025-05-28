@@ -5,7 +5,7 @@ export const paths = {
   home: '/',
   repo: 'https://github.com/shape-network/assembly',
   shape: 'https://shape.network',
-  otom: 'https://otom.xyz',
+  otom: config.chainId === shape.id ? 'https://otom.xyz' : 'https://testnet.otom.xyz',
   docs: 'https://docs.shape.network/building-on-shape/onchain-compatible/assembly',
   api: {
     ownedOtomItems: '/api/owned-otom-items',
