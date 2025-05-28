@@ -9,15 +9,45 @@ import { paths } from '@/lib/paths';
 import { checkCriteria } from '@/lib/property-utils';
 import type { BlueprintComponent, OtomItem } from '@/lib/types';
 import { DndContext, DragOverlay, type DragEndEvent, type DragStartEvent } from '@dnd-kit/core';
-import { ExternalLinkIcon } from '@radix-ui/react-icons';
+import { Cross2Icon } from '@radix-ui/react-icons';
+import { useAtom } from 'jotai';
+import { atomWithStorage } from 'jotai/utils';
+import { AppWindow } from 'lucide-react';
 import Link from 'next/link';
 import { useCallback, useMemo, useState } from 'react';
+import { Rnd } from 'react-rnd';
 import { useAccount } from 'wagmi';
+
+type WindowPosition = { x: number; y: number };
+type WindowSize = { width: number; height: number };
+
+const otomWindowPositionAtom = atomWithStorage<WindowPosition>('otom-window-position', {
+  x: 0,
+  y: 0,
+});
+const otomWindowSizeAtom = atomWithStorage<WindowSize>('otom-window-size', {
+  width: 378, // 5 columns of elements
+  height: 400,
+});
+const otomWindowIsFloatingAtom = atomWithStorage<boolean>('otom-window-is-floating', false);
 
 export const HomeContent = () => {
   const { address } = useAccount();
   const [droppedItemsState, setDroppedItemsState] = useState<DroppedItemsState>({});
   const [activeItem, setActiveItem] = useState<OtomItem | null>(null);
+  const [isFloating, setIsFloating] = useAtom(otomWindowIsFloatingAtom);
+  const [rndPosition, setRndPosition] = useAtom(otomWindowPositionAtom);
+  const [rndSize, setRndSize] = useAtom(otomWindowSizeAtom);
+  const handleOpenFloating = useCallback(() => {
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+
+    const xPos = windowWidth - rndSize.width - 50;
+    const yPos = windowHeight - rndSize.height - 40;
+
+    setRndPosition({ x: Math.max(0, xPos), y: Math.max(0, yPos) });
+    setIsFloating(true);
+  }, [rndSize, setRndPosition, setIsFloating]);
 
   const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event;
@@ -85,6 +115,46 @@ export const HomeContent = () => {
     }));
   }, []);
 
+  const renderOtomsInventory = (isFloatingView = false) => (
+    <div
+      className={
+        isFloatingView
+          ? 'flex h-full w-full flex-col gap-2 overflow-hidden p-4'
+          : 'flex flex-col gap-2'
+      }
+    >
+      <div
+        className={`flex items-baseline justify-between gap-2 ${isFloatingView ? 'rnd-drag-handle cursor-move' : ''}`}
+      >
+        <h2 className="text-primary font-bold tracking-wide uppercase">Owned Otom Elements</h2>
+        <div className="flex items-center gap-2">
+          {!isFloating ? (
+            <button
+              onClick={handleOpenFloating}
+              className="text-muted-foreground/50 flex cursor-pointer items-center justify-center gap-2 text-sm no-underline hover:underline"
+              aria-label="Open window"
+            >
+              open in a window
+              <AppWindow className="size-4" />
+            </button>
+          ) : (
+            <button
+              onClick={() => setIsFloating(false)}
+              className="text-muted-foreground/70 hover:text-primary hover:bg-muted/50 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full"
+              aria-label="Close window"
+            >
+              <Cross2Icon className="size-4" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className={isFloatingView ? 'flex-1 overflow-auto' : ''}>
+        <OtomsInventory usedCounts={usedCounts} />
+      </div>
+    </div>
+  );
+
   return (
     <div className="mx-auto grid min-h-screen max-w-7xl grid-rows-[auto_1fr] gap-4 sm:p-5">
       <header className="flex items-center justify-between p-5 sm:p-0">
@@ -133,21 +203,40 @@ export const HomeContent = () => {
 
             {address ? (
               <div className="flex w-full flex-col gap-2">
-                <div className="flex items-baseline justify-between gap-2">
-                  <h2 className="text-primary font-bold tracking-wide uppercase">
-                    Owned Otom Elements
-                  </h2>
-                  <InlineLink
-                    href={paths.otom}
-                    className="text-muted-foreground/50 hidden text-sm no-underline hover:underline sm:inline-flex"
-                  >
-                    Mine more otoms <ExternalLinkIcon className="size-4" />
-                  </InlineLink>
-                </div>
+                {/* <div className="flex h-full w-full flex-col gap-2 overflow-hidden p-4"> */}
+                {isFloating ? (
+                  <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
+                    <Rnd
+                      position={rndPosition}
+                      size={rndSize}
+                      onDragStop={(e, d) => {
+                        // Save position to persisted state
+                        setRndPosition({ x: d.x, y: d.y });
+                      }}
+                      onResize={(e, direction, ref, delta, position) => {
+                        // Update position during resize without saving to storage
+                        // This prevents excessive writes to localStorage
+                        setRndPosition(position);
+                      }}
+                      onResizeStop={(e, direction, ref, delta, position) => {
+                        // Save final size and position to persisted state
+                        setRndSize({
+                          width: parseInt(ref.style.width),
+                          height: parseInt(ref.style.height),
+                        });
+                        setRndPosition(position);
+                      }}
+                      className="bg-background border-border pointer-events-auto rounded-lg border shadow-lg"
+                      dragHandleClassName="rnd-drag-handle"
+                    >
+                      {renderOtomsInventory(true)}
+                    </Rnd>
+                  </div>
+                ) : (
+                  renderOtomsInventory(false)
+                )}
 
-                <OtomsInventory usedCounts={usedCounts} />
-
-                <div className="mt-24 flex flex-wrap gap-2">
+                <div className="mt-4 flex flex-wrap gap-2">
                   <InlineLink className="self-start" href={paths.repo}>
                     Contribute
                   </InlineLink>

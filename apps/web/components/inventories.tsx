@@ -14,8 +14,10 @@ import { isOtomAtom } from '@/lib/otoms';
 import { paths } from '@/lib/paths';
 import type { OtomItem } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { ExternalLinkIcon } from '@radix-ui/react-icons';
 import { useDeferredValue, useEffect, useMemo, useState, type FC } from 'react';
 import { useInView } from 'react-intersection-observer';
+import { InlineLink } from './ui/link';
 
 type GroupedOtomItems = {
   representativeItem: OtomItem;
@@ -138,7 +140,16 @@ export const OtomsInventory: FC<{ usedCounts: Map<string, number> }> = ({ usedCo
 
         {otomsAmount > 0 && (
           <div className="mt-4 flex flex-col gap-2">
-            <h3 className="text-muted-foreground text-sm">Otoms ({otomsAmount})</h3>
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="text-muted-foreground text-sm">Otoms ({otomsAmount})</h3>
+
+              <InlineLink
+                href={paths.otom}
+                className="text-muted-foreground/50 text-sm no-underline hover:underline"
+              >
+                Mine more otoms <ExternalLinkIcon className="size-4" />
+              </InlineLink>
+            </div>
             <ul className="grid grid-cols-[repeat(auto-fill,minmax(64px,1fr))] items-start gap-2 rounded sm:flex sm:flex-wrap">
               {inventory.otoms.map((group) => (
                 <OtomItemCard
