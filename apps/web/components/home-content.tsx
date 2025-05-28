@@ -8,9 +8,10 @@ import { WalletConnect } from '@/components/wallet-connect';
 import { paths } from '@/lib/paths';
 import { checkCriteria } from '@/lib/property-utils';
 import type { BlueprintComponent, OtomItem } from '@/lib/types';
+import { cn } from '@/lib/utils';
 import { DndContext, DragOverlay, type DragEndEvent, type DragStartEvent } from '@dnd-kit/core';
 import { Cross2Icon } from '@radix-ui/react-icons';
-import { useAtom } from 'jotai';
+import { useAtom } from 'jotai/react';
 import { atomWithStorage } from 'jotai/utils';
 import { AppWindow } from 'lucide-react';
 import Link from 'next/link';
@@ -115,44 +116,44 @@ export const HomeContent = () => {
     }));
   }, []);
 
-  const renderOtomsInventory = (isFloatingView = false) => (
-    <div
-      className={
-        isFloatingView
-          ? 'flex h-full w-full flex-col gap-2 overflow-hidden p-4'
-          : 'flex flex-col gap-2'
-      }
-    >
-      <div
-        className={`flex items-baseline justify-between gap-2 ${isFloatingView ? 'rnd-drag-handle cursor-move' : ''}`}
-      >
-        <h2 className="text-primary font-bold tracking-wide uppercase">Owned Otom Elements</h2>
-        <div className="flex items-center gap-2">
-          {!isFloating ? (
-            <button
-              onClick={handleOpenFloating}
-              className="text-muted-foreground/50 flex cursor-pointer items-center justify-center gap-2 text-sm no-underline hover:underline"
-              aria-label="Open window"
-            >
-              open in a window
-              <AppWindow className="size-4" />
-            </button>
-          ) : (
-            <button
-              onClick={() => setIsFloating(false)}
-              className="text-muted-foreground/70 hover:text-primary hover:bg-muted/50 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full"
-              aria-label="Close window"
-            >
-              <Cross2Icon className="size-4" />
-            </button>
+  const renderOtomsInventory = useMemo(
+    () => (
+      <div className={cn('flex flex-col gap-2', isFloating && 'h-full w-full overflow-hidden p-4')}>
+        <div
+          className={cn(
+            'flex items-baseline justify-between gap-2',
+            isFloating && 'rnd-drag-handle cursor-move'
           )}
+        >
+          <h2 className="text-primary font-bold tracking-wide uppercase">Owned Otom Elements</h2>
+          <div className="flex items-center gap-2">
+            {!isFloating ? (
+              <button
+                onClick={handleOpenFloating}
+                className="text-muted-foreground/50 flex cursor-pointer items-center justify-center gap-2 text-sm no-underline hover:underline"
+                aria-label="Open window"
+              >
+                open in a window
+                <AppWindow className="size-4" />
+              </button>
+            ) : (
+              <button
+                onClick={() => setIsFloating(false)}
+                className="text-muted-foreground/70 hover:text-primary hover:bg-muted/50 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full"
+                aria-label="Close window"
+              >
+                <Cross2Icon className="size-4" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className={cn('flex-1 overflow-auto', isFloating && 'h-full w-full')}>
+          <OtomsInventory usedCounts={usedCounts} />
         </div>
       </div>
-
-      <div className={isFloatingView ? 'flex-1 overflow-auto' : ''}>
-        <OtomsInventory usedCounts={usedCounts} />
-      </div>
-    </div>
+    ),
+    [isFloating, usedCounts]
   );
 
   return (
@@ -224,11 +225,11 @@ export const HomeContent = () => {
                       className="bg-background border-border pointer-events-auto rounded-lg border shadow-lg"
                       dragHandleClassName="rnd-drag-handle"
                     >
-                      {renderOtomsInventory(true)}
+                      {renderOtomsInventory}
                     </Rnd>
                   </div>
                 ) : (
-                  renderOtomsInventory(false)
+                  renderOtomsInventory
                 )}
 
                 <div className="mt-4 flex flex-wrap gap-2">
