@@ -55,7 +55,7 @@ export const ItemCreationForm: FC = () => {
     serialize: (value) => value.toString(),
   });
 
-  const [type, setType] = useState<FormItemType | ''>('');
+  const [type, setType] = useState<FormItemType | ''>('fungible');
   const [formData, setFormData] = useState<FungibleItemFormData>(defaultFungibleItemData);
   const [errors, setErrors] = useState<Record<string, string[]>>({});
 
@@ -425,7 +425,7 @@ export const ItemCreationForm: FC = () => {
     <div className="relative mt-64 flex flex-col gap-4">
       <div className="fixed inset-x-0 top-0 z-10 flex flex-col items-center justify-between gap-16 p-4">
         <div className="mx-auto w-full max-w-md">
-          <StepIndicator currentStep={step} totalSteps={4} />
+          <StepIndicator currentStep={step} totalSteps={4} setStep={setStep} />
         </div>
 
         {step === 1 && (
