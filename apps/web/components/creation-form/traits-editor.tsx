@@ -5,7 +5,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { PlusCircle, X } from 'lucide-react';
 import { FC, useState } from 'react';
 
@@ -71,81 +70,79 @@ export const TraitsEditor: FC<TraitsEditorProps> = ({ traits, onChange }) => {
 
   return (
     <div className="space-y-4">
-      <ScrollArea className="h-64 pr-4">
-        {traits.length === 0 ? (
-          <div className="flex h-24 items-center justify-center rounded-md border border-dashed">
-            <p className="text-muted-foreground">No traits added yet</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {traits.map((trait, index) => (
-              <Card key={index} className="relative">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute top-2 right-2"
-                  onClick={() => handleRemoveTrait(index)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-                <CardContent className="p-4">
-                  <div className="grid gap-4">
+      {traits.length === 0 ? (
+        <div className="flex h-24 items-center justify-center rounded-md border border-dashed">
+          <p className="text-muted-foreground">No traits added yet</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-2">
+          {traits.map((trait, index) => (
+            <Card key={index} className="relative">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-2 right-2"
+                onClick={() => handleRemoveTrait(index)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+              <CardContent className="p-4">
+                <div className="grid gap-4">
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor={`trait-name-${index}`}>Trait Name</Label>
+                    <Input
+                      id={`trait-name-${index}`}
+                      value={trait.typeName}
+                      onChange={(e) => handleTraitChange(index, 'typeName', e.target.value)}
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <Label className="mb-2 block">Trait Type</Label>
+                    <RadioGroup
+                      value={trait.traitType}
+                      onValueChange={(value: 'NUMBER' | 'STRING') =>
+                        handleTraitChange(index, 'traitType', value)
+                      }
+                      className="flex gap-4"
+                    >
+                      <div className="flex items-center gap-2">
+                        <RadioGroupItem id={`string-type-${index}`} value="STRING" />
+                        <Label htmlFor={`string-type-${index}`}>String</Label>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <RadioGroupItem id={`number-type-${index}`} value="NUMBER" />
+                        <Label htmlFor={`number-type-${index}`}>Number</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+
+                  {trait.traitType === 'STRING' ? (
                     <div className="flex flex-col gap-2">
-                      <Label htmlFor={`trait-name-${index}`}>Trait Name</Label>
+                      <Label htmlFor={`trait-value-string-${index}`}>String Value</Label>
                       <Input
-                        id={`trait-name-${index}`}
-                        value={trait.typeName}
-                        onChange={(e) => handleTraitChange(index, 'typeName', e.target.value)}
+                        id={`trait-value-string-${index}`}
+                        value={trait.valueString}
+                        onChange={(e) => handleTraitChange(index, 'valueString', e.target.value)}
                       />
                     </div>
-
+                  ) : (
                     <div className="flex flex-col gap-2">
-                      <Label className="mb-2 block">Trait Type</Label>
-                      <RadioGroup
-                        value={trait.traitType}
-                        onValueChange={(value: 'NUMBER' | 'STRING') =>
-                          handleTraitChange(index, 'traitType', value)
-                        }
-                        className="flex gap-4"
-                      >
-                        <div className="flex items-center gap-2">
-                          <RadioGroupItem id={`string-type-${index}`} value="STRING" />
-                          <Label htmlFor={`string-type-${index}`}>String</Label>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <RadioGroupItem id={`number-type-${index}`} value="NUMBER" />
-                          <Label htmlFor={`number-type-${index}`}>Number</Label>
-                        </div>
-                      </RadioGroup>
+                      <Label htmlFor={`trait-value-number-${index}`}>Number Value</Label>
+                      <Input
+                        id={`trait-value-number-${index}`}
+                        type="number"
+                        value={trait.valueNumber}
+                        onChange={(e) => handleTraitChange(index, 'valueNumber', e.target.value)}
+                      />
                     </div>
-
-                    {trait.traitType === 'STRING' ? (
-                      <div className="flex flex-col gap-2">
-                        <Label htmlFor={`trait-value-string-${index}`}>String Value</Label>
-                        <Input
-                          id={`trait-value-string-${index}`}
-                          value={trait.valueString}
-                          onChange={(e) => handleTraitChange(index, 'valueString', e.target.value)}
-                        />
-                      </div>
-                    ) : (
-                      <div className="flex flex-col gap-2">
-                        <Label htmlFor={`trait-value-number-${index}`}>Number Value</Label>
-                        <Input
-                          id={`trait-value-number-${index}`}
-                          type="number"
-                          value={trait.valueNumber}
-                          onChange={(e) => handleTraitChange(index, 'valueNumber', e.target.value)}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </ScrollArea>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       <Card>
         <CardContent className="p-4">

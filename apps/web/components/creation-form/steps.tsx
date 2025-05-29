@@ -135,16 +135,17 @@ export const FungibleItemDetailsForm: FC<FungibleItemDetailsFormProps> = ({
             onChange={(e) => onChange('costInEth', e.target.value)}
           />
         </div>
-
-        <div className="grid gap-2">
-          <Label htmlFor="feeRecipient">Fee Recipient Address (leave blank if no cost)</Label>
-          <Input
-            id="feeRecipient"
-            placeholder="0x0000000000000000000000000000000000000000"
-            value={formData.feeRecipient}
-            onChange={(e) => onChange('feeRecipient', e.target.value)}
-          />
-        </div>
+        {formData.costInEth !== '0' && (
+          <div className="grid gap-2">
+            <Label htmlFor="feeRecipient">Fee Recipient Address</Label>
+            <Input
+              id="feeRecipient"
+              placeholder="0x0000000000000000000000000000000000000000"
+              value={formData.feeRecipient}
+              onChange={(e) => onChange('feeRecipient', e.target.value)}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

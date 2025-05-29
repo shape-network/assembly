@@ -193,20 +193,20 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
   };
 
   const renderCriteriaEditor = (criteria: PropertyCriterion[], componentIndex: number | null) => (
-    <div className="bg-background mt-4 space-y-3 rounded-md p-3">
+    <div className="bg-background col-span-2 mt-4 space-y-3 rounded-md p-3">
       <h5 className="text-sm font-medium">Property Criteria</h5>
 
       {criteria.length === 0 ? (
         <p className="text-muted-foreground text-xs">No criteria added</p>
       ) : (
-        <div className="space-y-2">
+        <div className="grid grid-cols-2 gap-2">
           {criteria.map((criterion, idx) => {
             const propertyInfo = PROPERTY_TYPE_MAP[criterion.propertyType];
             const propertyName = formatPropertyName(criterion.propertyType);
 
             return (
               <Card key={idx} className="bg-primary/5 p-3">
-                <div className="grid gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   <div className="flex items-center justify-between">
                     <span className="text-sm">{propertyName}</span>
                     {componentIndex !== null && (
@@ -423,9 +423,9 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
                       }
                     >
                       <option value="otom">Otom</option>
-                      <option value="variable_otom">Variable Otom</option>
-                      <option value="fungible_item">Fungible Item</option>
-                      <option value="non_fungible_item">Non-Fungible Item</option>
+                      <option value="variable_otom">Variable Otom (Traits)</option>
+                      <option value="fungible_item">Assembly Fungible Item</option>
+                      <option value="non_fungible_item">Assembly Non-Fungible Item</option>
                     </select>
                   </div>
                   <div className="flex flex-col items-start gap-2">
@@ -483,9 +483,9 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
                 }
               >
                 <option value="otom">Otom</option>
-                <option value="variable_otom">Variable Otom</option>
-                <option value="fungible_item">Fungible Item</option>
-                <option value="non_fungible_item">Non-Fungible Item</option>
+                <option value="variable_otom">Variable Otom (Traits)</option>
+                <option value="fungible_item">Assembly Fungible Item </option>
+                <option value="non_fungible_item">Assembly Non-Fungible Item</option>
               </select>
             </div>
             <div className="flex flex-col gap-2">
