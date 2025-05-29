@@ -599,6 +599,7 @@ export const ItemCreationForm: FC = () => {
             </Card>
           );
         }
+        setStep(1);
         return null;
       case 3:
         const currentComponents =

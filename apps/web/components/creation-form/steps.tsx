@@ -368,8 +368,8 @@ export const StepIndicator: FC<StepIndicatorProps> = ({ currentStep, totalSteps,
         return (
           <div
             key={step}
-            className="flex cursor-pointer flex-col items-center"
-            onClick={() => setStep(step)}
+            className={cn('flex flex-col items-center', currentStep >= step && 'cursor-pointer')}
+            onClick={() => currentStep >= step && setStep(step)}
           >
             <div
               className={cn(
