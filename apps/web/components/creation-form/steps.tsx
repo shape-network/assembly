@@ -189,15 +189,20 @@ export const ItemTraitsEditor: FC<ItemTraitsEditorProps> = ({ traits, onChange }
 type StepIndicatorProps = {
   currentStep: number;
   totalSteps: number;
+  setStep: (step: number) => void;
 };
 
-export const StepIndicator: FC<StepIndicatorProps> = ({ currentStep, totalSteps }) => {
+export const StepIndicator: FC<StepIndicatorProps> = ({ currentStep, totalSteps, setStep }) => {
   return (
     <div className="bg-background flex justify-between rounded-full px-8 py-2">
       {Array.from({ length: totalSteps }).map((_, index) => {
         const step = index + 1;
         return (
-          <div key={step} className="flex flex-col items-center">
+          <div
+            key={step}
+            className="flex cursor-pointer flex-col items-center"
+            onClick={() => setStep(step)}
+          >
             <div
               className={cn(
                 'flex',
