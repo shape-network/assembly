@@ -245,7 +245,7 @@ export const ItemCreationForm: FC = () => {
 
   function handleNonFungibleItemInputChange(
     field: keyof NonFungibleItemFormData,
-    value: string | string[]
+    value: string | string[] | boolean
   ) {
     setNonFungibleFormData({
       ...nonFungibleFormData,
