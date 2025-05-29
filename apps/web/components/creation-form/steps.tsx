@@ -14,9 +14,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ComponentType, Criteria } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { ExternalLinkIcon } from '@radix-ui/react-icons';
 import { ArrowRight, ChevronLeft, ChevronRight, Info } from 'lucide-react';
 import { FC } from 'react';
 import { Address } from 'viem';
+import { InlineLink } from '../ui/link';
 
 type ItemTypeSelectorProps = {
   selectedType: FormItemType | null;
@@ -221,38 +223,50 @@ export const NonFungibleItemDetailsForm: FC<NonFungibleItemDetailsFormProps> = (
         <Accordion type="single" collapsible>
           <AccordionItem value="tiers">
             <AccordionTrigger>Define Tiers for your Item (T1-T7)</AccordionTrigger>
-            <AccordionContent className="space-y-4 pt-4">
+            <AccordionContent className="space-y-6 pt-2">
               <p className="text-muted-foreground text-sm">
                 Create a tiered item where different instances can have different power levels
                 (T1-T7). Tiers are calculated by your mutator contract during crafting based on the
                 components used.
               </p>
 
-              <Alert>
-                <Info className="h-4 w-4" />
-                <AlertTitle>Mutator Contract Requirements</AlertTitle>
-                <AlertDescription>
-                  <p className="mb-2">
-                    Your mutator contract must implement the IOtomItemMutator interface with these
-                    functions:
-                  </p>
-                  <ul className="ml-4 list-disc space-y-1">
-                    <li>
-                      <code>calculateTier()</code> - Determines tier (1-7) based on components and
-                      cost
-                    </li>
-                    <li>
-                      <code>onCraft()</code> - Called when item is crafted (optional custom logic)
-                    </li>
-                    <li>
-                      <code>onItemUse()</code> - Called when item is used (optional custom logic)
-                    </li>
-                    <li>
-                      <code>onTransfer()</code> - Called on transfers (optional restrictions)
-                    </li>
-                  </ul>
-                </AlertDescription>
-              </Alert>
+              <div className="space-y-2">
+                <Alert>
+                  <Info className="h-4 w-4" />
+                  <AlertTitle>Mutator Contract Requirements</AlertTitle>
+                  <AlertDescription>
+                    <p className="mb-2">
+                      Your mutator contract must implement the IOtomItemMutator interface with these
+                      functions:
+                    </p>
+                    <ul className="ml-4 list-disc space-y-1">
+                      <li>
+                        <code>calculateTier()</code> - Determines tier (1-7) based on components and
+                        cost
+                      </li>
+                      <li>
+                        <code>onCraft()</code> - Called when item is crafted (optional custom logic)
+                      </li>
+                      <li>
+                        <code>onItemUse()</code> - Called when item is used (optional custom logic)
+                      </li>
+                      <li>
+                        <code>onTransfer()</code> - Called on transfers (optional restrictions)
+                      </li>
+                    </ul>
+                  </AlertDescription>
+                </Alert>
+                <p className="text-muted-foreground text-sm">
+                  Here is the{' '}
+                  <InlineLink href="https://github.com/shape-network/assembly/blob/main/packages/contracts/contracts/interfaces/IOtomItemMutator.sol">
+                    interface <ExternalLinkIcon className="size-4" />
+                  </InlineLink>{' '}
+                  you will need, and here is an example of a{' '}
+                  <InlineLink href="https://github.com/shape-network/assembly/blob/main/packages/contracts/contracts/items/mutators/GenericMutator.sol">
+                    generic mutator <ExternalLinkIcon className="size-4" />
+                  </InlineLink>
+                </p>
+              </div>
 
               <div className="grid gap-2">
                 <Label htmlFor="mutatorContract">Mutator Contract Address (Required)</Label>
