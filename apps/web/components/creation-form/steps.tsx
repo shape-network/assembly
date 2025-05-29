@@ -1,7 +1,6 @@
 import { BlueprintEditor } from '@/components/creation-form/blueprint-editor';
 import { FormItemType } from '@/components/creation-form/schema';
 import { ItemTrait, TraitsEditor } from '@/components/creation-form/traits-editor';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -40,9 +39,13 @@ export const ItemTypeSelector: FC<ItemTypeSelectorProps> = ({ selectedType, onSe
         </Card>
       </button>
 
-      <button onClick={() => onSelect('non-fungible')} type="button" disabled className="relative">
-        <Badge className="absolute top-2 right-2 z-10">Coming Soon</Badge>
-        <Card className="cursor-not-allowed opacity-75">
+      <button onClick={() => onSelect('non-fungible')} type="button" className="cursor-pointer">
+        <Card
+          className={cn(
+            'hover:border-primary border-border h-full transition-colors',
+            selectedType === 'non-fungible' && 'border-primary'
+          )}
+        >
           <CardContent className="py-8">
             <div className="text-center">
               <h4 className="mb-2 text-lg font-medium">Non-Fungible Item</h4>
@@ -76,6 +79,13 @@ type FormDetails = {
 };
 
 export type FungibleItemFormData = FormDetails & {
+  blueprintComponents: BlueprintComponentInput[];
+  traits: ItemTrait[];
+};
+
+export type NonFungibleItemFormData = FormDetails & {
+  tieredImageUris: string[];
+  mutatorContract: string;
   blueprintComponents: BlueprintComponentInput[];
   traits: ItemTrait[];
 };
@@ -146,6 +156,116 @@ export const FungibleItemDetailsForm: FC<FungibleItemDetailsFormProps> = ({
             />
           </div>
         )}
+      </div>
+    </div>
+  );
+};
+
+type NonFungibleItemDetailsFormProps = {
+  formData: NonFungibleItemFormData;
+  onChange: (field: keyof NonFungibleItemFormData, value: string | string[]) => void;
+};
+
+export const NonFungibleItemDetailsForm: FC<NonFungibleItemDetailsFormProps> = ({
+  formData,
+  onChange,
+}) => {
+  const handleTierImageChange = (index: number, value: string) => {
+    const newTieredImageUris = [...formData.tieredImageUris];
+    newTieredImageUris[index] = value;
+    onChange('tieredImageUris', newTieredImageUris);
+  };
+
+  return (
+    <div className="space-y-4">
+      <h3 className="text-lg font-medium">Non-Fungible Item Details</h3>
+
+      <div className="grid gap-4 py-4">
+        <div className="grid gap-2">
+          <Label htmlFor="name">Name</Label>
+          <Input
+            id="name"
+            placeholder="e.g., Enchanted Sword"
+            value={formData.name}
+            onChange={(e) => onChange('name', e.target.value)}
+          />
+        </div>
+
+        <div className="grid gap-2">
+          <Label htmlFor="description">Description</Label>
+          <Input
+            id="description"
+            placeholder="e.g., A powerful weapon with dynamic properties"
+            value={formData.description}
+            onChange={(e) => onChange('description', e.target.value)}
+          />
+        </div>
+
+        <div className="grid gap-2">
+          <Label htmlFor="imageUri">Default Image URI</Label>
+          <Input
+            id="imageUri"
+            placeholder="e.g., https://example.com/image.png"
+            value={formData.imageUri}
+            onChange={(e) => onChange('imageUri', e.target.value)}
+          />
+        </div>
+
+        <div className="grid gap-2">
+          <Label>Tier Image URIs (Optional)</Label>
+          <p className="text-muted-foreground text-sm">
+            Provide custom images for each tier (T1-T7). Leave empty to use default images.
+          </p>
+          {Array.from({ length: 7 }).map((_, index) => (
+            <div key={index} className="grid gap-1">
+              <Label htmlFor={`tier-${index + 1}`} className="text-sm">
+                Tier {index + 1} Image URI
+              </Label>
+              <Input
+                id={`tier-${index + 1}`}
+                placeholder="https://example.com/tier1.png"
+                value={formData.tieredImageUris[index] || ''}
+                onChange={(e) => handleTierImageChange(index, e.target.value)}
+              />
+            </div>
+          ))}
+        </div>
+
+        <div className="grid gap-2">
+          <Label htmlFor="mutatorContract">Mutator Contract Address (Optional)</Label>
+          <Input
+            id="mutatorContract"
+            placeholder="0x0000000000000000000000000000000000000000"
+            value={formData.mutatorContract}
+            onChange={(e) => onChange('mutatorContract', e.target.value)}
+          />
+          <p className="text-muted-foreground text-sm">
+            Leave empty for no custom mutator logic. Advanced users can deploy custom mutator
+            contracts.
+          </p>
+        </div>
+
+        <div className="grid gap-2">
+          <Label htmlFor="costInEth">Cost (in ETH)</Label>
+          <Input
+            id="costInEth"
+            type="number"
+            step="0.0001"
+            placeholder="0"
+            value={formData.costInEth}
+            onChange={(e) => onChange('costInEth', e.target.value)}
+          />
+        </div>
+
+        <div className="grid gap-2">
+          <Label htmlFor="feeRecipient">Fee Recipient Address (leave blank if no cost)</Label>
+          <Input
+            id="feeRecipient"
+            placeholder="0x0000000000000000000000000000000000000000"
+            value={formData.feeRecipient}
+            onChange={(e) => onChange('feeRecipient', e.target.value)}
+          />
+        </div>
       </div>
     </div>
   );
