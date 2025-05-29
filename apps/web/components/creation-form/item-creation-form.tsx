@@ -376,7 +376,6 @@ export const ItemCreationForm: FC = () => {
             };
           });
 
-          // Get component type as a number
           let componentTypeNumber = 0;
           if (typeof component.componentType === 'string') {
             componentTypeNumber = componentTypeMap[component.componentType] || 0;
@@ -394,7 +393,6 @@ export const ItemCreationForm: FC = () => {
           };
         });
 
-        // Convert form traits to contract Trait format
         const contractTraits = fungibleFormData.traits.map((trait) => ({
           typeName: trait.typeName,
           valueString: trait.traitType === 'STRING' ? trait.valueString : '',
@@ -452,7 +450,6 @@ export const ItemCreationForm: FC = () => {
             };
           });
 
-          // Get component type as a number
           let componentTypeNumber = 0;
           if (typeof component.componentType === 'string') {
             componentTypeNumber = componentTypeMap[component.componentType] || 0;
@@ -470,7 +467,6 @@ export const ItemCreationForm: FC = () => {
           };
         });
 
-        // Convert form traits to contract Trait format
         const contractTraits = nonFungibleFormData.traits.map((trait) => ({
           typeName: trait.typeName,
           valueString: trait.traitType === 'STRING' ? trait.valueString : '',
@@ -478,7 +474,6 @@ export const ItemCreationForm: FC = () => {
           traitType: trait.traitType === 'NUMBER' ? 0 : 1,
         }));
 
-        // Prepare tier image URIs - ensure we have exactly 7 elements
         const tieredImageUris: [string, string, string, string, string, string, string] = [
           nonFungibleFormData.tieredImageUris[0] || '',
           nonFungibleFormData.tieredImageUris[1] || '',
