@@ -5,6 +5,7 @@ import {
   blueprintComponentsSchema,
   itemDetailsSchema,
   itemTypeSchema,
+  nonFungibleItemDetailsSchema,
 } from '@/components/creation-form/schema';
 import {
   BlueprintComponentInput,
@@ -14,11 +15,16 @@ import {
   ItemTraitsEditor,
   ItemTypeSelector,
   NavigationButtons,
+  NonFungibleItemDetailsForm,
+  NonFungibleItemFormData,
   StepIndicator,
 } from '@/components/creation-form/steps';
 import { ItemTrait } from '@/components/creation-form/traits-editor';
 import { Card, CardContent } from '@/components/ui/card';
-import { useWriteAssemblyCoreContractCreateFungibleItem } from '@/generated';
+import {
+  useWriteAssemblyCoreContractCreateFungibleItem,
+  useWriteAssemblyCoreContractCreateNonFungibleItem,
+} from '@/generated';
 import { assemblyCore } from '@/lib/addresses';
 import { itemCreationBannerDismissedAtom } from '@/lib/atoms';
 import { config } from '@/lib/config';
@@ -45,6 +51,18 @@ const defaultFungibleItemData: FungibleItemFormData = {
   traits: [],
 };
 
+const defaultNonFungibleItemData: NonFungibleItemFormData = {
+  name: '',
+  description: '',
+  imageUri: '',
+  tieredImageUris: Array(7).fill(''),
+  mutatorContract: '',
+  costInEth: '0',
+  feeRecipient: zeroAddress,
+  blueprintComponents: [],
+  traits: [],
+};
+
 export const ItemCreationForm: FC = () => {
   const [step, setStep] = useQueryState('step', {
     defaultValue: 1,
@@ -55,14 +73,31 @@ export const ItemCreationForm: FC = () => {
     serialize: (value) => value.toString(),
   });
 
-  const [type, setType] = useState<FormItemType | ''>('fungible');
-  const [formData, setFormData] = useState<FungibleItemFormData>(defaultFungibleItemData);
+  const [type, setType] = useState<FormItemType | ''>('');
+  const [fungibleFormData, setFungibleFormData] =
+    useState<FungibleItemFormData>(defaultFungibleItemData);
+  const [nonFungibleFormData, setNonFungibleFormData] = useState<NonFungibleItemFormData>(
+    defaultNonFungibleItemData
+  );
   const [errors, setErrors] = useState<Record<string, string[]>>({});
 
   const [bannerDismissed, setBannerDismissed] = useAtom(itemCreationBannerDismissedAtom);
   const router = useRouter();
 
-  const { writeContract, isPending, data } = useWriteAssemblyCoreContractCreateFungibleItem();
+  const {
+    writeContract: writeFungible,
+    isPending: isPendingFungible,
+    data: dataFungible,
+  } = useWriteAssemblyCoreContractCreateFungibleItem();
+  const {
+    writeContract: writeNonFungible,
+    isPending: isPendingNonFungible,
+    data: dataNonFungible,
+  } = useWriteAssemblyCoreContractCreateNonFungibleItem();
+
+  const isPending = isPendingFungible || isPendingNonFungible;
+  const data = dataFungible || dataNonFungible;
+
   const receipt = useWaitForTransactionReceipt({
     hash: data,
   });
@@ -83,7 +118,10 @@ export const ItemCreationForm: FC = () => {
 
   const validateFungibleItemDetails = () => {
     try {
-      if (parseFloat(formData.costInEth) > 0 && formData.feeRecipient === zeroAddress) {
+      if (
+        parseFloat(fungibleFormData.costInEth) > 0 &&
+        fungibleFormData.feeRecipient === zeroAddress
+      ) {
         setErrors((prev) => ({
           ...prev,
           feeRecipient: ['Fee recipient is required when cost is greater than 0'],
@@ -92,11 +130,11 @@ export const ItemCreationForm: FC = () => {
       }
 
       itemDetailsSchema.parse({
-        name: formData.name,
-        description: formData.description,
-        imageUri: formData.imageUri,
-        costInEth: formData.costInEth,
-        feeRecipient: formData.feeRecipient,
+        name: fungibleFormData.name,
+        description: fungibleFormData.description,
+        imageUri: fungibleFormData.imageUri,
+        costInEth: fungibleFormData.costInEth,
+        feeRecipient: fungibleFormData.feeRecipient,
       });
       setErrors((prev) => ({
         ...prev,
@@ -121,9 +159,65 @@ export const ItemCreationForm: FC = () => {
     }
   };
 
+  const validateNonFungibleItemDetails = () => {
+    try {
+      if (
+        parseFloat(nonFungibleFormData.costInEth) > 0 &&
+        nonFungibleFormData.feeRecipient === zeroAddress
+      ) {
+        setErrors((prev) => ({
+          ...prev,
+          feeRecipient: ['Fee recipient is required when cost is greater than 0'],
+        }));
+        return false;
+      }
+
+      // Filter out empty tier image URIs for validation
+      const validTierImageUris = nonFungibleFormData.tieredImageUris.filter(
+        (uri) => uri.trim() !== ''
+      );
+
+      nonFungibleItemDetailsSchema.parse({
+        name: nonFungibleFormData.name,
+        description: nonFungibleFormData.description,
+        imageUri: nonFungibleFormData.imageUri,
+        tieredImageUris: validTierImageUris.length > 0 ? validTierImageUris : undefined,
+        mutatorContract: nonFungibleFormData.mutatorContract || undefined,
+        costInEth: nonFungibleFormData.costInEth,
+        feeRecipient: nonFungibleFormData.feeRecipient,
+      });
+      setErrors((prev) => ({
+        ...prev,
+        name: [],
+        description: [],
+        imageUri: [],
+        tieredImageUris: [],
+        mutatorContract: [],
+        costInEth: [],
+        feeRecipient: [],
+      }));
+      return true;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const newErrors: Record<string, string[]> = {};
+        error.errors.forEach((err) => {
+          const field = err.path[0] as string;
+          newErrors[field] = newErrors[field] || [];
+          newErrors[field].push(err.message);
+        });
+        setErrors((prev) => ({ ...prev, ...newErrors }));
+      }
+      return false;
+    }
+  };
+
   const validateBlueprintComponents = () => {
     try {
-      blueprintComponentsSchema.parse(formData.blueprintComponents);
+      const components =
+        type === 'fungible'
+          ? fungibleFormData.blueprintComponents
+          : nonFungibleFormData.blueprintComponents;
+      blueprintComponentsSchema.parse(components);
       setErrors((prev) => ({ ...prev, blueprintComponents: [] }));
       return true;
     } catch (error) {
@@ -143,24 +237,48 @@ export const ItemCreationForm: FC = () => {
   }
 
   function handleFungibleItemInputChange(field: keyof FungibleItemFormData, value: string) {
-    setFormData({
-      ...formData,
+    setFungibleFormData({
+      ...fungibleFormData,
+      [field]: value,
+    });
+  }
+
+  function handleNonFungibleItemInputChange(
+    field: keyof NonFungibleItemFormData,
+    value: string | string[] | boolean
+  ) {
+    setNonFungibleFormData({
+      ...nonFungibleFormData,
       [field]: value,
     });
   }
 
   function handleBlueprintComponentsChange(components: BlueprintComponentInput[]) {
-    setFormData({
-      ...formData,
-      blueprintComponents: components,
-    });
+    if (type === 'fungible') {
+      setFungibleFormData({
+        ...fungibleFormData,
+        blueprintComponents: components,
+      });
+    } else {
+      setNonFungibleFormData({
+        ...nonFungibleFormData,
+        blueprintComponents: components,
+      });
+    }
   }
 
   function handleTraitsChange(traits: ItemTrait[]) {
-    setFormData({
-      ...formData,
-      traits,
-    });
+    if (type === 'fungible') {
+      setFungibleFormData({
+        ...fungibleFormData,
+        traits,
+      });
+    } else {
+      setNonFungibleFormData({
+        ...nonFungibleFormData,
+        traits,
+      });
+    }
   }
 
   function handlePrevStep() {
@@ -182,7 +300,11 @@ export const ItemCreationForm: FC = () => {
         isValid = validateItemType();
         break;
       case 2:
-        isValid = validateFungibleItemDetails();
+        if (type === 'fungible') {
+          isValid = validateFungibleItemDetails();
+        } else {
+          isValid = validateNonFungibleItemDetails();
+        }
         break;
       case 3:
         isValid = validateBlueprintComponents();
@@ -199,89 +321,191 @@ export const ItemCreationForm: FC = () => {
   function isCurrentStepValid() {
     if (step === 1) return !!type;
     if (step === 2 && type === 'fungible') {
-      return !!formData.name && !!formData.description && !!formData.imageUri;
+      return (
+        !!fungibleFormData.name && !!fungibleFormData.description && !!fungibleFormData.imageUri
+      );
+    }
+    if (step === 2 && type === 'non-fungible') {
+      return (
+        !!nonFungibleFormData.name &&
+        !!nonFungibleFormData.description &&
+        !!nonFungibleFormData.imageUri &&
+        !!nonFungibleFormData.mutatorContract
+      );
     }
     if (step === 3) {
-      return formData.blueprintComponents.length > 0;
+      const components =
+        type === 'fungible'
+          ? fungibleFormData.blueprintComponents
+          : nonFungibleFormData.blueprintComponents;
+      return components.length > 0;
     }
     return true;
   }
 
   function handleSubmit() {
-    if (!writeContract) {
-      console.error('Write function not available');
-      return;
-    }
+    if (type === 'fungible') {
+      if (!writeFungible) {
+        console.error('Write function not available');
+        return;
+      }
 
-    try {
-      const blueprintComponents = formData.blueprintComponents.map((component) => {
-        const componentTypeMap: Record<string, number> = {
-          otom: 0,
-          variable_otom: 1,
-          fungible_item: 2,
-          non_fungible_item: 3,
-        };
+      try {
+        const blueprintComponents = fungibleFormData.blueprintComponents.map((component) => {
+          const componentTypeMap: Record<string, number> = {
+            otom: 0,
+            variable_otom: 1,
+            fungible_item: 2,
+            non_fungible_item: 3,
+          };
 
-        const formattedCriteria = (component.criteria || []).map((criterion) => {
+          const formattedCriteria = (component.criteria || []).map((criterion) => {
+            return {
+              propertyType: criterion.propertyType || 0,
+              minValue: BigInt(criterion.minValue || 0),
+              maxValue: BigInt(
+                criterion.maxValue ||
+                  0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+              ),
+              boolValue: !!criterion.boolValue,
+              checkBoolValue: !!criterion.checkBoolValue,
+              stringValue: criterion.stringValue || '',
+              checkStringValue: !!criterion.checkStringValue,
+              bytes32Value:
+                '0x0000000000000000000000000000000000000000000000000000000000000000' as Address,
+              checkBytes32Value: false,
+            };
+          });
+
+          let componentTypeNumber = 0;
+          if (typeof component.componentType === 'string') {
+            componentTypeNumber = componentTypeMap[component.componentType] || 0;
+          } else {
+            componentTypeNumber = component.componentType;
+          }
+
           return {
-            propertyType: criterion.propertyType || 0,
-            minValue: BigInt(criterion.minValue || 0),
-            maxValue: BigInt(
-              criterion.maxValue ||
-                0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-            ),
-            boolValue: !!criterion.boolValue,
-            checkBoolValue: !!criterion.checkBoolValue,
-            stringValue: criterion.stringValue || '',
-            checkStringValue: !!criterion.checkStringValue,
-            bytes32Value:
-              '0x0000000000000000000000000000000000000000000000000000000000000000' as Address,
-            checkBytes32Value: false,
+            componentType: componentTypeNumber,
+            itemIdOrOtomTokenId: component.itemIdOrOtomTokenId
+              ? BigInt(component.itemIdOrOtomTokenId)
+              : BigInt(0),
+            amount: BigInt(component.amount),
+            criteria: formattedCriteria,
           };
         });
 
-        // Get component type as a number
-        let componentTypeNumber = 0;
-        if (typeof component.componentType === 'string') {
-          componentTypeNumber = componentTypeMap[component.componentType] || 0;
-        } else {
-          componentTypeNumber = component.componentType;
-        }
+        const contractTraits = fungibleFormData.traits.map((trait) => ({
+          typeName: trait.typeName,
+          valueString: trait.traitType === 'STRING' ? trait.valueString : '',
+          valueNumber: trait.traitType === 'NUMBER' ? BigInt(trait.valueNumber) : 0n,
+          traitType: trait.traitType === 'NUMBER' ? 0 : 1,
+        }));
 
-        return {
-          componentType: componentTypeNumber,
-          itemIdOrOtomTokenId: component.itemIdOrOtomTokenId
-            ? BigInt(component.itemIdOrOtomTokenId)
-            : BigInt(0),
-          amount: BigInt(component.amount),
-          criteria: formattedCriteria,
-        };
-      });
+        writeFungible({
+          address: assemblyCore[config.chain.id],
+          args: [
+            fungibleFormData.name,
+            fungibleFormData.description,
+            fungibleFormData.imageUri,
+            blueprintComponents,
+            contractTraits,
+            fungibleFormData.costInEth ? parseEther(fungibleFormData.costInEth) : 0n,
+            fungibleFormData.feeRecipient ?? zeroAddress,
+          ],
+        });
 
-      // Convert form traits to contract Trait format
-      const contractTraits = formData.traits.map((trait) => ({
-        typeName: trait.typeName,
-        valueString: trait.traitType === 'STRING' ? trait.valueString : '',
-        valueNumber: trait.traitType === 'NUMBER' ? BigInt(trait.valueNumber) : 0n,
-        traitType: trait.traitType === 'NUMBER' ? 0 : 1,
-      }));
+        console.log('Transaction submitted for fungible item creation');
+      } catch (error) {
+        console.error('Error submitting fungible form:', error);
+      }
+    } else if (type === 'non-fungible') {
+      if (!writeNonFungible) {
+        console.error('Write function not available');
+        return;
+      }
 
-      writeContract({
-        address: assemblyCore[config.chain.id],
-        args: [
-          formData.name,
-          formData.description,
-          formData.imageUri,
-          blueprintComponents,
-          contractTraits,
-          formData.costInEth ? parseEther(formData.costInEth) : 0n,
-          formData.feeRecipient ?? zeroAddress,
-        ],
-      });
+      try {
+        const blueprintComponents = nonFungibleFormData.blueprintComponents.map((component) => {
+          const componentTypeMap: Record<string, number> = {
+            otom: 0,
+            variable_otom: 1,
+            fungible_item: 2,
+            non_fungible_item: 3,
+          };
 
-      console.log('Transaction submitted for item creation');
-    } catch (error) {
-      console.error('Error submitting form:', error);
+          const formattedCriteria = (component.criteria || []).map((criterion) => {
+            return {
+              propertyType: criterion.propertyType || 0,
+              minValue: BigInt(criterion.minValue || 0),
+              maxValue: BigInt(
+                criterion.maxValue ||
+                  0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+              ),
+              boolValue: !!criterion.boolValue,
+              checkBoolValue: !!criterion.checkBoolValue,
+              stringValue: criterion.stringValue || '',
+              checkStringValue: !!criterion.checkStringValue,
+              bytes32Value:
+                '0x0000000000000000000000000000000000000000000000000000000000000000' as Address,
+              checkBytes32Value: false,
+            };
+          });
+
+          let componentTypeNumber = 0;
+          if (typeof component.componentType === 'string') {
+            componentTypeNumber = componentTypeMap[component.componentType] || 0;
+          } else {
+            componentTypeNumber = component.componentType;
+          }
+
+          return {
+            componentType: componentTypeNumber,
+            itemIdOrOtomTokenId: component.itemIdOrOtomTokenId
+              ? BigInt(component.itemIdOrOtomTokenId)
+              : BigInt(0),
+            amount: BigInt(component.amount),
+            criteria: formattedCriteria,
+          };
+        });
+
+        const contractTraits = nonFungibleFormData.traits.map((trait) => ({
+          typeName: trait.typeName,
+          valueString: trait.traitType === 'STRING' ? trait.valueString : '',
+          valueNumber: trait.traitType === 'NUMBER' ? BigInt(trait.valueNumber) : 0n,
+          traitType: trait.traitType === 'NUMBER' ? 0 : 1,
+        }));
+
+        const tieredImageUris: [string, string, string, string, string, string, string] = [
+          nonFungibleFormData.tieredImageUris[0] || '',
+          nonFungibleFormData.tieredImageUris[1] || '',
+          nonFungibleFormData.tieredImageUris[2] || '',
+          nonFungibleFormData.tieredImageUris[3] || '',
+          nonFungibleFormData.tieredImageUris[4] || '',
+          nonFungibleFormData.tieredImageUris[5] || '',
+          nonFungibleFormData.tieredImageUris[6] || '',
+        ];
+
+        writeNonFungible({
+          address: assemblyCore[config.chain.id],
+          args: [
+            nonFungibleFormData.name,
+            nonFungibleFormData.description,
+            nonFungibleFormData.imageUri,
+            tieredImageUris,
+            blueprintComponents,
+            contractTraits,
+            nonFungibleFormData.mutatorContract && nonFungibleFormData.mutatorContract !== ''
+              ? (nonFungibleFormData.mutatorContract as Address)
+              : zeroAddress,
+            nonFungibleFormData.costInEth ? parseEther(nonFungibleFormData.costInEth) : 0n,
+            nonFungibleFormData.feeRecipient ?? zeroAddress,
+          ],
+        });
+
+        console.log('Transaction submitted for non-fungible item creation');
+      } catch (error) {
+        console.error('Error submitting non-fungible form:', error);
+      }
     }
   }
 
@@ -306,7 +530,7 @@ export const ItemCreationForm: FC = () => {
             <Card className="mx-auto w-3xl">
               <CardContent>
                 <FungibleItemDetailsForm
-                  formData={formData}
+                  formData={fungibleFormData}
                   onChange={handleFungibleItemInputChange}
                 />
                 {Object.entries(errors)
@@ -334,15 +558,60 @@ export const ItemCreationForm: FC = () => {
               </CardContent>
             </Card>
           );
+        } else if (type === 'non-fungible') {
+          return (
+            <Card className="mx-auto w-3xl">
+              <CardContent>
+                <NonFungibleItemDetailsForm
+                  formData={nonFungibleFormData}
+                  onChange={handleNonFungibleItemInputChange}
+                />
+                {Object.entries(errors)
+                  .filter(([key]) =>
+                    [
+                      'name',
+                      'description',
+                      'imageUri',
+                      'tieredImageUris',
+                      'mutatorContract',
+                      'costInEth',
+                      'feeRecipient',
+                    ].includes(key)
+                  )
+                  .map(
+                    ([key, errors]) =>
+                      errors.length > 0 && (
+                        <div key={key} className="mt-2 text-sm text-red-500">
+                          {errors.map((error, index) => (
+                            <p key={index}>{error}</p>
+                          ))}
+                        </div>
+                      )
+                  )}
+                <NavigationButtons
+                  currentStep={step}
+                  totalSteps={4}
+                  onPrevious={handlePrevStep}
+                  onNext={handleNextStep}
+                  onSubmit={handleSubmit}
+                  isNextDisabled={!isCurrentStepValid()}
+                />
+              </CardContent>
+            </Card>
+          );
         }
-        // Add non-fungible item form here in the future
+        setStep(1);
         return null;
       case 3:
+        const currentComponents =
+          type === 'fungible'
+            ? fungibleFormData.blueprintComponents
+            : nonFungibleFormData.blueprintComponents;
         return (
           <Card className="mx-auto w-3xl">
             <CardContent>
               <BlueprintComponentsEditor
-                components={formData.blueprintComponents}
+                components={currentComponents}
                 onChange={handleBlueprintComponentsChange}
               />
               {errors.blueprintComponents && errors.blueprintComponents.length > 0 && (
@@ -364,10 +633,12 @@ export const ItemCreationForm: FC = () => {
           </Card>
         );
       case 4:
+        const currentTraits =
+          type === 'fungible' ? fungibleFormData.traits : nonFungibleFormData.traits;
         return (
           <Card className="mx-auto w-3xl">
             <CardContent>
-              <ItemTraitsEditor traits={formData.traits} onChange={handleTraitsChange} />
+              <ItemTraitsEditor traits={currentTraits} onChange={handleTraitsChange} />
               <NavigationButtons
                 currentStep={step}
                 totalSteps={4}
