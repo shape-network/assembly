@@ -220,93 +220,6 @@ export const NonFungibleItemDetailsForm: FC<NonFungibleItemDetailsFormProps> = (
           />
         </div>
 
-        <Accordion type="single" collapsible>
-          <AccordionItem value="tiers">
-            <AccordionTrigger>Define Tiers for your Item (T1-T7)</AccordionTrigger>
-            <AccordionContent className="space-y-6 pt-2">
-              <p className="text-muted-foreground text-sm">
-                Create a tiered item where different instances can have different power levels
-                (T1-T7). Tiers are calculated by your mutator contract during crafting based on the
-                components used.
-              </p>
-
-              <div className="space-y-2">
-                <Alert>
-                  <Info className="h-4 w-4" />
-                  <AlertTitle>Mutator Contract Requirements</AlertTitle>
-                  <AlertDescription>
-                    <p className="mb-2">
-                      Your mutator contract must implement the IOtomItemMutator interface with these
-                      functions:
-                    </p>
-                    <ul className="ml-4 list-disc space-y-1">
-                      <li>
-                        <code>calculateTier()</code> - Determines tier (1-7) based on components and
-                        cost
-                      </li>
-                      <li>
-                        <code>onCraft()</code> - Called when item is crafted (optional custom logic)
-                      </li>
-                      <li>
-                        <code>onItemUse()</code> - Called when item is used (optional custom logic)
-                      </li>
-                      <li>
-                        <code>onTransfer()</code> - Called on transfers (optional restrictions)
-                      </li>
-                    </ul>
-                  </AlertDescription>
-                </Alert>
-                <p className="text-muted-foreground text-sm">
-                  Here is the{' '}
-                  <InlineLink href="https://github.com/shape-network/assembly/blob/main/packages/contracts/contracts/interfaces/IOtomItemMutator.sol">
-                    interface <ExternalLinkIcon className="size-4" />
-                  </InlineLink>{' '}
-                  you will need, and here is an example of a{' '}
-                  <InlineLink href="https://github.com/shape-network/assembly/blob/main/packages/contracts/contracts/items/mutators/GenericMutator.sol">
-                    generic mutator <ExternalLinkIcon className="size-4" />
-                  </InlineLink>
-                </p>
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="mutatorContract">Mutator Contract Address (Required)</Label>
-                <Input
-                  id="mutatorContract"
-                  placeholder="0x0000000000000000000000000000000000000000"
-                  value={formData.mutatorContract}
-                  onChange={(e) => onChange('mutatorContract', e.target.value)}
-                />
-                <p className="text-muted-foreground text-sm">
-                  Required for tiered items. Your mutator contract must implement tier calculation
-                  logic (calculateTier function) to determine item tiers based on crafting
-                  components and cost.
-                </p>
-              </div>
-
-              <div className="grid gap-2 rounded-lg border p-4">
-                <Label>Tier Image URIs (Optional)</Label>
-                <p className="text-muted-foreground text-sm">
-                  Provide custom images for each tier (T1-T7). Leave empty to use default onchain
-                  SVG rendering.
-                </p>
-                {Array.from({ length: 7 }).map((_, index) => (
-                  <div key={index} className="grid gap-1">
-                    <Label htmlFor={`tier-${index + 1}`} className="text-sm">
-                      Tier {index + 1} Image URI
-                    </Label>
-                    <Input
-                      id={`tier-${index + 1}`}
-                      placeholder={`https://example.com/tier${index + 1}.png`}
-                      value={formData.tieredImageUris[index] || ''}
-                      onChange={(e) => handleTierImageChange(index, e.target.value)}
-                    />
-                  </div>
-                ))}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-
         <div className="grid gap-2">
           <Label htmlFor="costInEth">Cost (in ETH)</Label>
           <Input
@@ -327,6 +240,103 @@ export const NonFungibleItemDetailsForm: FC<NonFungibleItemDetailsFormProps> = (
             value={formData.feeRecipient}
             onChange={(e) => onChange('feeRecipient', e.target.value)}
           />
+        </div>
+
+        <div className="grid gap-2">
+          <Label htmlFor="mutatorContract">Mutator Contract Address (Required)</Label>
+          <Input
+            id="mutatorContract"
+            placeholder="0x0000000000000000000000000000000000000000"
+            value={formData.mutatorContract}
+            onChange={(e) => onChange('mutatorContract', e.target.value)}
+          />
+          <p className="text-muted-foreground text-xs">
+            Required for tiered items. Your mutator contract must implement tier calculation logic
+            (calculateTier function) to determine item tiers based on crafting components and cost.
+          </p>
+
+          <Accordion type="single" collapsible>
+            <AccordionItem value="tiers">
+              <AccordionTrigger className="-mt-1 mb-1 py-2 text-xs text-black/60 underline">
+                How to define Tiers for your Item (T1-T7)?
+              </AccordionTrigger>
+              <AccordionContent className="space-y-6 pt-2">
+                <p className="text-muted-foreground text-sm">
+                  Create a tiered item where different instances can have different power levels
+                  (T1-T7). Tiers are calculated by your mutator contract during crafting based on
+                  the components used.
+                </p>
+
+                <div className="space-y-2">
+                  <Alert>
+                    <Info className="h-4 w-4" />
+                    <AlertTitle>Mutator Contract Requirements</AlertTitle>
+                    <AlertDescription>
+                      <p className="mb-2">
+                        Your mutator contract must implement the IOtomItemMutator interface with
+                        these functions:
+                      </p>
+                      <ul className="ml-4 list-disc space-y-1">
+                        <li>
+                          <code>calculateTier()</code> - Determines tier (1-7) based on components
+                          and cost
+                        </li>
+                        <li>
+                          <code>onCraft()</code> - Called when item is crafted (optional custom
+                          logic)
+                        </li>
+                        <li>
+                          <code>onItemUse()</code> - Called when item is used (optional custom
+                          logic)
+                        </li>
+                        <li>
+                          <code>onTransfer()</code> - Called on transfers (optional restrictions)
+                        </li>
+                      </ul>
+                    </AlertDescription>
+                  </Alert>
+                  <p className="text-muted-foreground text-sm">
+                    Here is the{' '}
+                    <InlineLink href="https://github.com/shape-network/assembly/blob/main/packages/contracts/contracts/interfaces/IOtomItemMutator.sol">
+                      interface <ExternalLinkIcon className="size-4" />
+                    </InlineLink>{' '}
+                    you will need, and here is an example of a{' '}
+                    <InlineLink href="https://github.com/shape-network/assembly/blob/main/packages/contracts/contracts/items/mutators/GenericMutator.sol">
+                      generic mutator <ExternalLinkIcon className="size-4" />
+                    </InlineLink>
+                  </p>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+          <Accordion type="single" collapsible>
+            <AccordionItem value="tierImages">
+              <Label asChild>
+                <AccordionTrigger className="-mt-1 mb-1 py-2">
+                  Tier Image URIs (Optional)
+                </AccordionTrigger>
+              </Label>
+              <AccordionContent className="space-y-4">
+                <p className="text-muted-foreground text-sm">
+                  Provide custom images for each tier (T1-T7). Leave empty to use default onchain
+                  SVG rendering.
+                </p>
+                {Array.from({ length: 7 }).map((_, index) => (
+                  <div key={index} className="grid gap-1">
+                    <Label htmlFor={`tier-${index + 1}`} className="text-sm">
+                      Tier {index + 1} Image URI
+                    </Label>
+                    <Input
+                      id={`tier-${index + 1}`}
+                      placeholder={`https://example.com/tier${index + 1}.png`}
+                      value={formData.tieredImageUris[index] || ''}
+                      onChange={(e) => handleTierImageChange(index, e.target.value)}
+                    />
+                  </div>
+                ))}
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </div>
       </div>
     </div>

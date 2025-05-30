@@ -329,7 +329,8 @@ export const ItemCreationForm: FC = () => {
       return (
         !!nonFungibleFormData.name &&
         !!nonFungibleFormData.description &&
-        !!nonFungibleFormData.imageUri
+        !!nonFungibleFormData.imageUri &&
+        !!nonFungibleFormData.mutatorContract
       );
     }
     if (step === 3) {

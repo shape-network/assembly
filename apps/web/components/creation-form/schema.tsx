@@ -20,12 +20,9 @@ export const nonFungibleItemDetailsSchema = z.object({
   description: z.string().min(2, 'Description is required'),
   imageUri: z.string().url('Image URI must be a valid URL'),
   tieredImageUris: z.array(z.string()).optional(),
-  mutatorContract: z
-    .string()
-    .optional()
-    .refine((val) => !val || isAddress(val), {
-      message: 'Mutator contract must be a valid address',
-    }),
+  mutatorContract: z.string().refine((val) => !val || isAddress(val), {
+    message: 'Mutator contract must be a valid address',
+  }),
   costInEth: z.string(),
   feeRecipient: z.string().refine((val) => isAddress(val), {
     message: 'Fee recipient must be a valid address',
