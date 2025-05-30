@@ -1080,7 +1080,7 @@ contract OtomItemsCore is
                 Item storage item = _items[itemId];
 
                 // Ensure this is a non-fungible item
-                if (item.itemType != ItemType.NON_FUNGIBLE) revert MissmatchItemType();
+                if (item.itemType != ItemType.NON_FUNGIBLE) revert MismatchItemType();
 
                 // Get current traits to pass to the mutator
                 Trait[] memory currentTraits = getTokenTraits(_tokenId);
