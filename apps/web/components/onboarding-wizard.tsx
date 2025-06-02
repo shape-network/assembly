@@ -2,8 +2,6 @@
 
 import {
   AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -12,7 +10,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { paths } from '@/lib/paths';
-import { ExternalLinkIcon } from '@radix-ui/react-icons';
+import { ChevronLeftIcon, ChevronRightIcon, ExternalLinkIcon } from '@radix-ui/react-icons';
 import { useState } from 'react';
 
 type OnboardingStep = {
@@ -146,10 +144,6 @@ export function OnboardingWizard({ open, onOpenChange }: OnboardingWizardProps) 
     }
   }
 
-  function handleSkip() {
-    onOpenChange(false);
-  }
-
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="max-w-md">
@@ -181,16 +175,20 @@ export function OnboardingWizard({ open, onOpenChange }: OnboardingWizardProps) 
             <div>
               {!isFirstStep && (
                 <Button variant="outline" onClick={handlePrevious}>
-                  Previous
+                  <ChevronLeftIcon />
                 </Button>
               )}
             </div>
-            <div className="flex gap-2">
-              <AlertDialogCancel onClick={handleSkip}>Skip</AlertDialogCancel>
-              <AlertDialogAction onClick={handleNext}>
-                {isLastStep ? "Let's go!" : 'Next'}
-              </AlertDialogAction>
-            </div>
+
+            <Button onClick={handleNext} variant="ghost">
+              {isLastStep ? (
+                "Let's go!"
+              ) : (
+                <>
+                  Next <ChevronRightIcon />
+                </>
+              )}
+            </Button>
           </div>
         </AlertDialogFooter>
       </AlertDialogContent>
