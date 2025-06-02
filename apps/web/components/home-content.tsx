@@ -2,10 +2,16 @@
 
 import { ItemsInventory, OtomsInventory } from '@/components/inventories';
 import { DroppedItemsState, ItemsToCraft } from '@/components/items';
+import { OnboardingWizard } from '@/components/onboarding-wizard';
 import { InlineLink } from '@/components/ui/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { WalletConnect } from '@/components/wallet-connect';
-import { otomWindowIsFloatingAtom, otomWindowPositionAtom, otomWindowSizeAtom } from '@/lib/atoms';
+import {
+  onboardingCompletedAtom,
+  otomWindowIsFloatingAtom,
+  otomWindowPositionAtom,
+  otomWindowSizeAtom,
+} from '@/lib/atoms';
 import { paths } from '@/lib/paths';
 import { checkCriteria } from '@/lib/property-utils';
 import type { BlueprintComponent, OtomItem } from '@/lib/types';
@@ -14,7 +20,7 @@ import { DndContext, DragOverlay, type DragEndEvent, type DragStartEvent } from 
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { useAtom } from 'jotai/react';
 import { AppWindow } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Rnd } from 'react-rnd';
 import { useAccount } from 'wagmi';
 
@@ -25,6 +31,15 @@ export const HomeContent = () => {
   const [isFloating, setIsFloating] = useAtom(otomWindowIsFloatingAtom);
   const [rndPosition, setRndPosition] = useAtom(otomWindowPositionAtom);
   const [rndSize, setRndSize] = useAtom(otomWindowSizeAtom);
+  const [onboardingCompleted] = useAtom(onboardingCompletedAtom);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  useEffect(() => {
+    if (!onboardingCompleted) {
+      setShowOnboarding(true);
+    }
+  }, [onboardingCompleted]);
+
   const handleOpenFloating = useCallback(() => {
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
@@ -144,6 +159,8 @@ export const HomeContent = () => {
 
   return (
     <main className="mx-auto grid min-h-screen max-w-7xl gap-4 sm:p-5">
+      <OnboardingWizard open={showOnboarding} onOpenChange={setShowOnboarding} />
+
       <div className="flex flex-col justify-start gap-8 overflow-x-hidden px-2 py-12 sm:px-0">
         <DndContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
           <div className="flex flex-col gap-16">
