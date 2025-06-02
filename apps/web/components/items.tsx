@@ -632,7 +632,18 @@ export const OwnedItemCard: FC<{ item: OwnedItem }> = ({ item }) => {
   const isPickaxe = item.id === BigInt(2);
 
   return (
-    <li className="w-xs shrink-0 sm:w-[300px]">
+    <li className="relative w-xs shrink-0 sm:w-[300px]">
+      {isPickaxe && (
+        <Badge
+          className="bg-background absolute -bottom-2.5 left-1/2 z-10 -translate-x-1/2"
+          variant="outline"
+        >
+          <Link href={paths.otom} target="_blank" rel="noopener noreferrer">
+            For otom.xyz
+          </Link>
+        </Badge>
+      )}
+
       <Card className="h-full">
         <CardHeader>
           <CardTitle>{item.name}</CardTitle>
