@@ -20,7 +20,7 @@ import { DndContext, DragOverlay, type DragEndEvent, type DragStartEvent } from 
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { useAtom } from 'jotai/react';
 import { AppWindow } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Rnd } from 'react-rnd';
 import { useAccount } from 'wagmi';
 
@@ -31,14 +31,7 @@ export const HomeContent = () => {
   const [isFloating, setIsFloating] = useAtom(otomWindowIsFloatingAtom);
   const [rndPosition, setRndPosition] = useAtom(otomWindowPositionAtom);
   const [rndSize, setRndSize] = useAtom(otomWindowSizeAtom);
-  const [onboardingCompleted] = useAtom(onboardingCompletedAtom);
-  const [showOnboarding, setShowOnboarding] = useState(false);
-
-  useEffect(() => {
-    if (!onboardingCompleted) {
-      setShowOnboarding(true);
-    }
-  }, [onboardingCompleted]);
+  const [onboardingCompleted, setOnboardingCompleted] = useAtom(onboardingCompletedAtom);
 
   const handleOpenFloating = useCallback(() => {
     const windowWidth = window.innerWidth;
@@ -159,7 +152,10 @@ export const HomeContent = () => {
 
   return (
     <main className="mx-auto grid min-h-screen max-w-7xl gap-4 sm:p-5">
-      <OnboardingWizard open={showOnboarding} onOpenChange={setShowOnboarding} />
+      <OnboardingWizard
+        open={!onboardingCompleted}
+        onOpenChange={(open) => setOnboardingCompleted(!open)}
+      />
 
       <div className="flex flex-col justify-start gap-8 overflow-x-hidden px-2 py-12 sm:px-0">
         <DndContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>

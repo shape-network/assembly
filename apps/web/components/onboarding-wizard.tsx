@@ -11,10 +11,8 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { onboardingCompletedAtom } from '@/lib/atoms';
 import { paths } from '@/lib/paths';
 import { ExternalLinkIcon } from '@radix-ui/react-icons';
-import { useAtom } from 'jotai';
 import { useState } from 'react';
 
 type OnboardingStep = {
@@ -129,7 +127,6 @@ type OnboardingWizardProps = {
 
 export function OnboardingWizard({ open, onOpenChange }: OnboardingWizardProps) {
   const [currentStep, setCurrentStep] = useState(0);
-  const [, setOnboardingCompleted] = useAtom(onboardingCompletedAtom);
 
   const isFirstStep = currentStep === 0;
   const isLastStep = currentStep === onboardingSteps.length - 1;
@@ -137,7 +134,6 @@ export function OnboardingWizard({ open, onOpenChange }: OnboardingWizardProps) 
 
   function handleNext() {
     if (isLastStep) {
-      setOnboardingCompleted(true);
       onOpenChange(false);
     } else {
       setCurrentStep(currentStep + 1);
@@ -151,7 +147,6 @@ export function OnboardingWizard({ open, onOpenChange }: OnboardingWizardProps) 
   }
 
   function handleSkip() {
-    setOnboardingCompleted(true);
     onOpenChange(false);
   }
 
