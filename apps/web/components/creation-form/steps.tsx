@@ -27,7 +27,7 @@ type ItemTypeSelectorProps = {
 
 export const ItemTypeSelector: FC<ItemTypeSelectorProps> = ({ selectedType, onSelect }) => {
   return (
-    <div className="mt-6 grid max-w-4xl grid-cols-2 gap-4">
+    <div className="mt-6 grid max-w-4xl grid-cols-1 gap-4 sm:grid-cols-2">
       <button onClick={() => onSelect('fungible')} type="button" className="cursor-pointer">
         <Card
           className={cn(
