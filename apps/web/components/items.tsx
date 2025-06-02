@@ -6,6 +6,7 @@ import {
   useGetMoleculesFromOtomTokenId,
   useGetOtomItemsForUser,
 } from '@/app/api/hooks';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -26,6 +27,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { QuestionMarkCircledIcon } from '@radix-ui/react-icons';
 import { useAtom } from 'jotai';
 import Image from 'next/image';
+import Link from 'next/link';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { decodeEventLog, toEventSelector } from 'viem';
@@ -124,7 +126,18 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, on
   const isPickaxe = item.id === BigInt(2);
 
   return (
-    <li className="grid w-[300px] shrink-0 grid-rows-[1fr_auto] gap-1 sm:w-[380px]">
+    <li className="relative mt-4 grid w-[300px] shrink-0 grid-rows-[1fr_auto] gap-1 sm:w-[380px]">
+      {isPickaxe && (
+        <Badge
+          className="bg-background absolute -bottom-1.5 left-1/2 z-10 -translate-x-1/2"
+          variant="outline"
+        >
+          <Link href={paths.otom} target="_blank" rel="noopener noreferrer">
+            For otom.xyz
+          </Link>
+        </Badge>
+      )}
+
       <Card className="relative w-full">
         <CraftItemButton
           droppedItemsState={droppedItemsState}
