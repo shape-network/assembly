@@ -31,7 +31,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { decodeEventLog, toEventSelector } from 'viem';
+import { decodeEventLog, formatEther, toEventSelector } from 'viem';
 import { shapeSepolia } from 'viem/chains';
 import { useAccount, useSwitchChain, useWaitForTransactionReceipt } from 'wagmi';
 
@@ -177,7 +177,14 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, on
                 ]}
               />
             ) : (
-              <ItemTraits traits={item.initialTraits} />
+              <ItemTraits
+                traits={[
+                  ...item.initialTraits,
+                  ...(item.ethCostInWei
+                    ? [{ name: 'Price', value: formatEther(item.ethCostInWei) }]
+                    : []),
+                ]}
+              />
             )}
           </div>
 
@@ -523,6 +530,7 @@ const CraftItemButton: FC<{
       await writeContractAsync({
         address: assemblyCore[config.chain.id],
         args: [item.id, BigInt(1), variableOtomTokenIds, [], '0x'],
+        value: item.ethCostInWei,
       });
     } catch (error) {
       setCraftingStatus('error');
