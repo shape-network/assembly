@@ -203,7 +203,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, on
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1">
                     <p className="text-muted-foreground text-sm">Wildcards</p>
-                    <Tooltip>
+                    <Tooltip delayDuration={0}>
                       <TooltipTrigger asChild>
                         <QuestionMarkCircledIcon className="text-muted-foreground/50 size-4" />
                       </TooltipTrigger>
@@ -789,7 +789,7 @@ const WildcardDropZone: FC<{
   const canDrop = active ? checkCriteria(draggedItem!, component.criteria) : false;
 
   return (
-    <Tooltip>
+    <Tooltip delayDuration={0}>
       <TooltipTrigger asChild>
         <div ref={setNodeRef}>
           <Card

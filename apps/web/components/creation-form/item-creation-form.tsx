@@ -693,8 +693,8 @@ export const ItemCreationForm: FC = () => {
   }, [data, receipt, router]);
 
   return (
-    <div className="relative mt-64 flex flex-col gap-4">
-      <div className="fixed inset-x-0 top-0 z-10 flex flex-col items-center justify-between gap-16 p-4">
+    <div className="relative mt-8 flex flex-col gap-4 px-5 sm:mt-64">
+      <div className="z-10 flex flex-col items-center justify-between gap-16 p-4 sm:fixed sm:inset-x-0 sm:top-20">
         <div className="mx-auto w-full max-w-md">
           <StepIndicator currentStep={step} totalSteps={4} setStep={setStep} />
         </div>
@@ -724,7 +724,7 @@ export const ItemCreationForm: FC = () => {
       )}
 
       {!bannerDismissed && (
-        <div className="pointer-events-none fixed inset-x-0 bottom-0 transition-transform hover:scale-x-[100.5%] sm:flex sm:justify-center sm:px-6 sm:pb-5 lg:px-8">
+        <div className="pointer-events-none fixed inset-x-0 bottom-0 px-5 pb-5 transition-transform hover:scale-x-[100.5%] sm:flex sm:justify-center sm:px-6 lg:px-8">
           <div className="pointer-events-auto flex items-center justify-between gap-x-6 rounded-4xl bg-gray-900 px-6 py-2.5 sm:py-3 sm:pr-3.5 sm:pl-4">
             <a
               className="text-sm text-white"

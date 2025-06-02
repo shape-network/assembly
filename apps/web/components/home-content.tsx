@@ -14,7 +14,6 @@ import { Cross2Icon } from '@radix-ui/react-icons';
 import { useAtom } from 'jotai/react';
 import { atomWithStorage } from 'jotai/utils';
 import { AppWindow } from 'lucide-react';
-import Link from 'next/link';
 import { useCallback, useMemo, useState } from 'react';
 import { Rnd } from 'react-rnd';
 import { useAccount } from 'wagmi';
@@ -153,31 +152,12 @@ export const HomeContent = () => {
         </div>
       </div>
     ),
-    [isFloating, usedCounts]
+    [handleOpenFloating, isFloating, setIsFloating, usedCounts]
   );
 
   return (
-    <div className="mx-auto grid min-h-screen max-w-7xl grid-rows-[auto_1fr] gap-4 sm:p-5">
-      <header className="flex items-center justify-between p-5 sm:p-0">
-        <div className="relative">
-          <h1 className="text-primary text-2xl font-semibold tracking-wide uppercase">
-            <Link href={paths.home}>Assembly</Link>
-          </h1>
-          <span className="text-muted-foreground/50 absolute -bottom-8 left-0 text-sm whitespace-nowrap sm:-bottom-5">
-            An otom-based item crafter
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <InlineLink href={paths.otom} target="_blank" rel="noopener noreferrer" className="px-3">
-            otom.xyz
-          </InlineLink>
-
-          <WalletConnect />
-        </div>
-      </header>
-
-      <main className="flex flex-col justify-start gap-8 overflow-x-hidden px-2 py-12 sm:px-0">
+    <main className="mx-auto grid min-h-screen max-w-7xl gap-4 sm:p-5">
+      <div className="flex flex-col justify-start gap-8 overflow-x-hidden px-2 py-12 sm:px-0">
         <DndContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
           <div className="flex flex-col gap-16">
             <div className="flex flex-col gap-2">
@@ -286,7 +266,7 @@ export const HomeContent = () => {
             )}
           </DragOverlay>
         </DndContext>
-      </main>
-    </div>
+      </div>
+    </main>
   );
 };
