@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { paths } from '@/lib/paths';
+import { cn } from '@/lib/utils';
 import { ChevronLeftIcon, ChevronRightIcon, ExternalLinkIcon } from '@radix-ui/react-icons';
 import { useState } from 'react';
 
@@ -26,9 +27,8 @@ const onboardingSteps: OnboardingStep[] = [
     content: (
       <div className="space-y-3">
         <p className="text-sm">
-          Assembly is a community-driven, open-source project that enables component-based crafting
-          where items can be created using blueprints. Built on top of Otoms, it supports both
-          fungible and non-fungible items with dynamic properties.
+          Built on top of Otoms, it supports both fungible and non-fungible items with dynamic
+          properties.
         </p>
         <p className="text-sm">
           Every item you craft is minted as an ERC1155 token and stored permanently onchain, with
@@ -172,41 +172,42 @@ export function OnboardingWizard({ open, onOpenChange }: OnboardingWizardProps) 
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="max-w-md">
+      <AlertDialogContent className="sm:max-w-xl">
         <AlertDialogHeader>
-          <div className="flex items-center justify-between">
-            <AlertDialogTitle>{step.title}</AlertDialogTitle>
-            <div className="flex gap-1">
-              {onboardingSteps.map((_, index) => (
-                <div
-                  key={index}
-                  className={`h-2 w-2 rounded-full transition-colors ${
-                    index === currentStep
-                      ? 'bg-primary'
-                      : index < currentStep
-                        ? 'bg-primary/50'
-                        : 'bg-muted'
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
+          <AlertDialogTitle>{step.title}</AlertDialogTitle>
           <AlertDialogDescription>{step.description}</AlertDialogDescription>
         </AlertDialogHeader>
 
         {step.content && <div className="py-2">{step.content}</div>}
 
-        <AlertDialogFooter>
-          <div className="flex w-full justify-between">
-            <div>
-              {!isFirstStep && (
-                <Button variant="outline" onClick={handlePrevious}>
-                  <ChevronLeftIcon />
-                </Button>
-              )}
-            </div>
+        <AlertDialogFooter className="grid w-full grid-cols-3">
+          <div className="flex justify-start gap-1">
+            {!isFirstStep && (
+              <Button variant="ghost" onClick={handlePrevious}>
+                <ChevronLeftIcon />
+                Previous
+              </Button>
+            )}
+          </div>
 
-            <Button onClick={handleNext} variant="ghost">
+          <div className="flex items-center justify-center gap-1">
+            {onboardingSteps.map((_, index) => (
+              <div
+                key={index}
+                className={cn(
+                  'h-2 w-2 rounded-full transition-colors',
+                  index === currentStep
+                    ? 'bg-primary'
+                    : index < currentStep
+                      ? 'bg-primary/75'
+                      : 'bg-primary/25'
+                )}
+              />
+            ))}
+          </div>
+
+          <div className="flex justify-end gap-1">
+            <Button onClick={handleNext} variant={isLastStep ? 'default' : 'ghost'}>
               {isLastStep ? (
                 "Let's go!"
               ) : (
