@@ -26,3 +26,5 @@ export const otomWindowSizeAtom = atomWithStorage<{ width: number; height: numbe
 );
 
 export const otomWindowIsFloatingAtom = atomWithStorage<boolean>('otom-window-is-floating', false);
+
+export const onboardingCompletedAtom = atomWithStorage<boolean>('onboarding-completed', false);
