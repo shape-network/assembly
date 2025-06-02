@@ -5,6 +5,7 @@ import { DroppedItemsState, ItemsToCraft } from '@/components/items';
 import { InlineLink } from '@/components/ui/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { WalletConnect } from '@/components/wallet-connect';
+import { otomWindowIsFloatingAtom, otomWindowPositionAtom, otomWindowSizeAtom } from '@/lib/atoms';
 import { paths } from '@/lib/paths';
 import { checkCriteria } from '@/lib/property-utils';
 import type { BlueprintComponent, OtomItem } from '@/lib/types';
@@ -12,24 +13,10 @@ import { cn } from '@/lib/utils';
 import { DndContext, DragOverlay, type DragEndEvent, type DragStartEvent } from '@dnd-kit/core';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { useAtom } from 'jotai/react';
-import { atomWithStorage } from 'jotai/utils';
 import { AppWindow } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { Rnd } from 'react-rnd';
 import { useAccount } from 'wagmi';
-
-type WindowPosition = { x: number; y: number };
-type WindowSize = { width: number; height: number };
-
-const otomWindowPositionAtom = atomWithStorage<WindowPosition>('otom-window-position', {
-  x: 0,
-  y: 0,
-});
-const otomWindowSizeAtom = atomWithStorage<WindowSize>('otom-window-size', {
-  width: 378, // 5 columns of elements
-  height: 400,
-});
-const otomWindowIsFloatingAtom = atomWithStorage<boolean>('otom-window-is-floating', false);
 
 export const HomeContent = () => {
   const { address } = useAccount();
