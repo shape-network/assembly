@@ -538,7 +538,7 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
                               <InlineLink href={paths.openSea.collection}>
                                 OpenSea <ExternalLinkIcon className="h-4 w-4" />
                               </InlineLink>{' '}
-                              and copy their ids.
+                              and copy their IDs.
                             </p>
                             <p>
                               Or go to{' '}
