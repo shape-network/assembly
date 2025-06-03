@@ -26,7 +26,7 @@ export async function POST(request: Request) {
   const rpc = rpcClient();
 
   try {
-    const [itemResponse, tierResponse, traitsResponse] = await rpc.multicall({
+    const [itemResponse, tierResponse, traitsResponse, mintCountResponse] = await rpc.multicall({
       contracts: [
         {
           abi: assemblyCoreContractAbi,
@@ -46,6 +46,12 @@ export async function POST(request: Request) {
           functionName: 'getTokenTraits',
           args: [itemTokenId],
         },
+        {
+          abi: assemblyCoreContractAbi,
+          address: assemblyCore[config.chain.id],
+          functionName: 'itemMintCount',
+          args: [itemId],
+        },
       ],
       allowFailure: true,
     });
@@ -53,6 +59,8 @@ export async function POST(request: Request) {
     const itemResult = itemResponse.status === 'success' ? itemResponse.result : null;
     const tierResult = tierResponse.status === 'success' ? tierResponse.result : null;
     const traitsResult = traitsResponse.status === 'success' ? traitsResponse.result : null;
+    const mintCountResult =
+      mintCountResponse.status === 'success' ? mintCountResponse.result : null;
 
     if (!itemResult) {
       console.error(`An error occurred while fetching item ${itemId}:`, itemResponse.error);
@@ -65,6 +73,7 @@ export async function POST(request: Request) {
     const tier = Number(tierResult);
     const usagesTrait = traitsResult?.find((trait) => trait.typeName === 'Usages Remaining');
     const usagesRemaining = usagesTrait ? Number(usagesTrait.valueNumber) : null;
+    const mintCount = mintCountResult ? Number(mintCountResult) : 0;
 
     const item: OwnedItem = {
       ...itemResult,
@@ -79,6 +88,7 @@ export async function POST(request: Request) {
             value: t.valueString ?? t.valueNumber.toString(),
           }))
         : [],
+      mintCount,
     };
 
     return new NextResponse(superjson.stringify(item));
