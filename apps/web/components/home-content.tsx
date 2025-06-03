@@ -5,7 +5,6 @@ import { DroppedItemsState, ItemsToCraft } from '@/components/items';
 import { OnboardingWizard } from '@/components/onboarding-wizard';
 import { InlineLink } from '@/components/ui/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { WalletConnect } from '@/components/wallet-connect';
 import {
   inventoryWindowFloatingAtom,
   inventoryWindowPositionAtom,
@@ -20,7 +19,7 @@ import { DndContext, DragOverlay, type DragEndEvent, type DragStartEvent } from 
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { useAtom } from 'jotai/react';
 import { AppWindow } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
+import { FC, useCallback, useMemo, useState } from 'react';
 import { Rnd } from 'react-rnd';
 import { useAccount } from 'wagmi';
 
@@ -158,6 +157,8 @@ export const HomeContent = () => {
       />
 
       <div className="flex flex-col justify-start gap-8 overflow-x-hidden px-2 py-12 sm:px-0">
+        {!address && <Hero />}
+
         <DndContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
           <div className="flex flex-col gap-16">
             <div className="flex flex-col gap-2">
@@ -182,7 +183,7 @@ export const HomeContent = () => {
               </Tabs>
             </div>
 
-            {address ? (
+            {address && (
               <div className="flex w-full flex-col gap-2">
                 {isFloating ? (
                   <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
@@ -222,37 +223,6 @@ export const HomeContent = () => {
                   </InlineLink>
                 </div>
               </div>
-            ) : (
-              <div className="flex w-full flex-col items-start gap-8">
-                <div className="flex flex-col gap-4">
-                  <p>
-                    Assembly is an open-source item crafting tool on{' '}
-                    <InlineLink href={paths.shape}>Shape</InlineLink>, based on the world of{' '}
-                    <InlineLink href={paths.otom}>Otoms</InlineLink>.
-                  </p>
-                  <p>
-                    Composability is at the heart of Assembly. By combining multiple elements new
-                    items can be formed, that can be used in other projects.
-                  </p>
-                  <p>
-                    This project is completely open, anyone can contribute to improve the code or
-                    submit their own item for people to craft.
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    <InlineLink className="self-start" href={paths.repo}>
-                      Source code
-                    </InlineLink>
-                    <span>・</span>
-                    <InlineLink className="self-start" href={paths.docs.assembly}>
-                      Documentation
-                    </InlineLink>
-                  </div>
-                </div>
-
-                <div className="flex w-full flex-col items-center gap-2">
-                  <WalletConnect />
-                </div>
-              </div>
             )}
           </div>
 
@@ -268,5 +238,33 @@ export const HomeContent = () => {
         </DndContext>
       </div>
     </main>
+  );
+};
+
+const Hero: FC = () => {
+  return (
+    <div className="mx-auto flex w-full max-w-2xl flex-col items-start gap-8">
+      <h2 className="text-center text-3xl font-semibold tracking-wide text-pretty">
+        An open-source item crafting tool based on the world of{' '}
+        <InlineLink href={paths.otom} className="font-semibold">
+          Otoms
+        </InlineLink>
+      </h2>
+
+      <p className="w-full text-center text-balance">
+        Composability is at the heart of Assembly, items can be used in any project. Item creation
+        is permissionless & open to anyone.
+      </p>
+
+      <div className="flex w-full flex-wrap justify-center gap-2">
+        <InlineLink className="self-start" href={paths.repo}>
+          Source Code
+        </InlineLink>
+        <span>・</span>
+        <InlineLink className="self-start" href={paths.docs.assembly}>
+          Documentation
+        </InlineLink>
+      </div>
+    </div>
   );
 };
