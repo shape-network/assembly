@@ -5,6 +5,7 @@ import { DroppedItemsState, ItemsToCraft } from '@/components/items';
 import { OnboardingWizard } from '@/components/onboarding-wizard';
 import { InlineLink } from '@/components/ui/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { WalletConnect } from '@/components/wallet-connect';
 import {
   inventoryWindowFloatingAtom,
   inventoryWindowPositionAtom,
@@ -252,18 +253,23 @@ const Hero: FC = () => {
       </h2>
 
       <p className="w-full text-center text-balance">
-        Composability is at the heart of Assembly, items can be used in any project. Item creation
-        is permissionless & open to anyone.
+        Composability is at the heart of Assembly, items can have dynamic properties and be used in
+        any project, in a very wide range of applications. Item creation is permissionless & open to
+        anyone.
       </p>
 
-      <div className="flex w-full flex-wrap justify-center gap-2">
-        <InlineLink className="self-start" href={paths.repo}>
-          Source Code
-        </InlineLink>
-        <span>・</span>
-        <InlineLink className="self-start" href={paths.docs.assembly}>
-          Documentation
-        </InlineLink>
+      <div className="flex w-full flex-wrap justify-center gap-4">
+        <WalletConnect label="Get Started" />
+
+        <div className="flex w-full flex-wrap justify-center gap-2">
+          <InlineLink className="self-start" href={paths.repo}>
+            Source Code
+          </InlineLink>
+          <span>・</span>
+          <InlineLink className="self-start" href={paths.docs.assembly}>
+            Documentation
+          </InlineLink>
+        </div>
       </div>
     </div>
   );
