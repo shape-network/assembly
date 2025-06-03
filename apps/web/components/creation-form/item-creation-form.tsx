@@ -413,8 +413,6 @@ export const ItemCreationForm: FC = () => {
             fungibleFormData.feeRecipient ?? zeroAddress,
           ],
         });
-
-        console.log('Transaction submitted for fungible item creation');
       } catch (error) {
         console.error('Error submitting fungible form:', error);
       }
@@ -501,8 +499,6 @@ export const ItemCreationForm: FC = () => {
             nonFungibleFormData.feeRecipient ?? zeroAddress,
           ],
         });
-
-        console.log('Transaction submitted for non-fungible item creation');
       } catch (error) {
         console.error('Error submitting non-fungible form:', error);
       }

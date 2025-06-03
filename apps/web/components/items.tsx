@@ -458,7 +458,6 @@ const CraftItemButton: FC<{
           });
 
           if (decodedLog.args && 'tokenId' in decodedLog.args) {
-            console.log('decodedLog.args', decodedLog.args);
             const tokenId = decodedLog.args.tokenId;
             return typeof tokenId === 'bigint' ? tokenId.toString() : String(tokenId);
           }
@@ -755,8 +754,6 @@ const RequiredDropZone: FC<{
   function handleMouseLeave() {
     setHoveredState(null);
   }
-
-  console.log('component', component);
 
   return (
     <div ref={setNodeRef}>
