@@ -15,7 +15,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { assemblyCoreContractAbi, useWriteAssemblyCoreContractCraftItem } from '@/generated';
 import { assemblyCore } from '@/lib/addresses';
-import { hoveredOtomItemAtom } from '@/lib/atoms';
+import { droppedItemsStateAtom, hoveredOtomItemAtom } from '@/lib/atoms';
 import { config } from '@/lib/config';
 import { isOtomAtom } from '@/lib/otoms';
 import { paths } from '@/lib/paths';
@@ -25,8 +25,8 @@ import { cn, isNotNullish, isSameAddress } from '@/lib/utils';
 import { useDndContext, useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { QuestionMarkCircledIcon } from '@radix-ui/react-icons';
-import { useAtom } from 'jotai';
-import { CoinsIcon, WrenchIcon } from 'lucide-react';
+import { useAtom, useSetAtom } from 'jotai';
+import { CoinsIcon, WrenchIcon, XIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
@@ -34,10 +34,7 @@ import { toast } from 'sonner';
 import { decodeEventLog, formatEther, toEventSelector } from 'viem';
 import { useAccount, useSwitchChain, useWaitForTransactionReceipt } from 'wagmi';
 
-export const ItemsToCraft: FC<{
-  droppedItemsState: DroppedItemsState;
-  onClearSlots: (itemId: string) => void;
-}> = ({ droppedItemsState, onClearSlots }) => {
+export const ItemsToCraft: FC = () => {
   const { data, isLoading, isError } = useGetCraftableItems();
 
   if (isLoading) {
@@ -51,12 +48,7 @@ export const ItemsToCraft: FC<{
   return (
     <HorizontallScrollWrapper>
       {data.map((item) => (
-        <ItemToCraftCard
-          key={item.id}
-          item={item}
-          droppedItemsState={droppedItemsState}
-          onClearSlots={onClearSlots}
-        />
+        <ItemToCraftCard key={item.id} item={item} />
       ))}
     </HorizontallScrollWrapper>
   );
@@ -66,13 +58,12 @@ export type DroppedItemsState = Record<string, Record<number, OtomItem | null>>;
 
 type ItemToCraftCardProps = {
   item: Item;
-  droppedItemsState: DroppedItemsState;
-  onClearSlots: (itemId: string) => void;
 };
 
-const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, onClearSlots }) => {
+const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item }) => {
   const { data } = useGetOtomItemsForUser();
   const inventory = data?.pages.flatMap((page) => page.items) || [];
+  const [droppedItemsState, setDroppedItemsState] = useAtom(droppedItemsStateAtom);
 
   const droppedItemsForThisCard = droppedItemsState[String(item.id)] || {};
 
@@ -104,8 +95,11 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, on
   });
 
   const handleClearAllClick = useCallback(() => {
-    onClearSlots(String(item.id));
-  }, [item.id, onClearSlots]);
+    setDroppedItemsState((prev) => ({
+      ...prev,
+      [String(item.id)]: {},
+    }));
+  }, [item.id, setDroppedItemsState]);
 
   const hasDroppedItems = Object.values(droppedItemsForThisCard).some((item) => item !== null);
 
@@ -121,6 +115,20 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, on
     }
 
     return false;
+  }
+
+  function getElementOwned(component: BlueprintComponent): OtomItem | undefined {
+    if (!inventory || inventory.length === 0) return undefined;
+
+    if (component.componentType !== 'variable_otom') {
+      return inventory.find((i) => i.tokenId === component.itemIdOrOtomTokenId.toString());
+    }
+
+    if (isExactMatchCriteria(component.criteria)) {
+      return inventory.find((item) => checkCriteria(item, component.criteria));
+    }
+
+    return undefined;
   }
 
   const isPickaxe = config.chain.testnet ? false : item.id === BigInt(2);
@@ -218,6 +226,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, on
                       isOwned={isElementOwned(component)}
                       isDropped={isDropped}
                       index={blueprintIndex}
+                      droppedItem={getElementOwned(component)}
                     />
                   );
                 })}
@@ -740,7 +749,8 @@ const RequiredDropZone: FC<{
   isOwned: boolean;
   isDropped: boolean;
   index: number;
-}> = ({ id, component, isOwned, isDropped, index }) => {
+  droppedItem?: OtomItem | null;
+}> = ({ id, component, isOwned, isDropped, index, droppedItem }) => {
   const { isOver, setNodeRef } = useDroppable({
     id: id,
     data: {
@@ -749,6 +759,7 @@ const RequiredDropZone: FC<{
       component: component,
     },
   });
+  const setDroppedItemsState = useSetAtom(droppedItemsStateAtom);
 
   const { active } = useDndContext();
   const draggedItem = active?.data.current as OtomItem | null;
@@ -786,24 +797,62 @@ const RequiredDropZone: FC<{
     setHoveredState(null);
   }
 
+  const handleClick = useCallback(() => {
+    if (isDropped) return;
+
+    if (isOwned && droppedItem) {
+      const parts = id.split('-');
+      const itemId = parts[1];
+      setDroppedItemsState((prev) => ({
+        ...prev,
+        [itemId]: {
+          ...prev[itemId],
+          [index]: droppedItem,
+        },
+      }));
+    }
+  }, [isOwned, droppedItem, setDroppedItemsState, id, index, isDropped]);
+
+  const handleRemove = useCallback(() => {
+    const parts = id.split('-');
+    const itemId = parts[1];
+    setDroppedItemsState((prev) => ({
+      ...prev,
+      [itemId]: {
+        ...prev[itemId],
+        [index]: null,
+      } as Record<number, OtomItem>,
+    }));
+  }, [setDroppedItemsState, id, index]);
+
   return (
     <div ref={setNodeRef}>
       <Card
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         className={cn(
-          'relative py-0 transition-[colors,transform] select-none',
+          'py-0 transition-[colors,transform] select-none',
           isDropped
             ? 'bg-primary text-primary-foreground font-semibold'
             : isOwned
-              ? 'border-primary border-dashed font-semibold'
+              ? 'border-primary cursor-pointer border-dashed font-semibold'
               : 'text-muted-foreground/50 border-border font-normal',
           !isDropped && isOver && canDrop && 'ring-primary ring-2 ring-offset-2',
           !isDropped && isOver && !canDrop && 'ring-destructive ring-2 ring-offset-2',
           isHoveredTarget && !isDropped && 'bg-primary/15'
         )}
+        onClick={handleClick}
       >
-        <CardContent className="grid size-15 place-items-center px-0">
+        <CardContent className="group relative grid size-15 place-items-center px-0">
+          {isDropped && (
+            <div
+              className="absolute inset-0 z-10 hidden cursor-pointer items-center justify-center bg-white/80 group-hover:flex"
+              onClick={handleRemove}
+              title="Remove Otom"
+            >
+              <XIcon className="text-primary size-4" />
+            </div>
+          )}
           {component.componentType === 'otom' && molecule ? (
             <ElementName otom={molecule} />
           ) : (

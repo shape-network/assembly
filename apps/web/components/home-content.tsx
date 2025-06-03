@@ -26,44 +26,47 @@ export const HomeContent = () => {
 
   const { isFloating, handleOpenFloating, handleCloseFloating } = useFloatingInventory();
 
-  const handleDragEnd = useCallback((event: DragEndEvent) => {
-    const { active, over } = event;
-    setActiveItem(null);
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      setActiveItem(null);
 
-    if (!over) return;
+      if (!over) return;
 
-    const droppedItem = active.data.current as OtomItem | null;
-    const dropZoneId = String(over.id);
-    const dropZoneData = over.data.current as {
-      type: string;
-      index: number;
-      component: BlueprintComponent;
-    };
+      const droppedItem = active.data.current as OtomItem | null;
+      const dropZoneId = String(over.id);
+      const dropZoneData = over.data.current as {
+        type: string;
+        index: number;
+        component: BlueprintComponent;
+      };
 
-    if (!droppedItem || !dropZoneData) return;
+      if (!droppedItem || !dropZoneData) return;
 
-    const parts = dropZoneId.split('-');
-    const itemId = parts[1];
-    const blueprintIndex = dropZoneData.index;
-    const component = dropZoneData.component;
+      const parts = dropZoneId.split('-');
+      const itemId = parts[1];
+      const blueprintIndex = dropZoneData.index;
+      const component = dropZoneData.component;
 
-    let canDrop = false;
-    if (component.componentType === 'otom') {
-      canDrop = droppedItem.tokenId === String(component.itemIdOrOtomTokenId);
-    } else if (component.componentType === 'variable_otom') {
-      canDrop = checkCriteria(droppedItem, component.criteria);
-    }
+      let canDrop = false;
+      if (component.componentType === 'otom') {
+        canDrop = droppedItem.tokenId === String(component.itemIdOrOtomTokenId);
+      } else if (component.componentType === 'variable_otom') {
+        canDrop = checkCriteria(droppedItem, component.criteria);
+      }
 
-    if (canDrop) {
-      setDroppedItemsState({
-        ...droppedItemsState,
-        [itemId]: {
-          ...droppedItemsState[itemId],
-          [blueprintIndex]: droppedItem,
-        },
-      });
-    }
-  }, [droppedItemsState, setDroppedItemsState]);
+      if (canDrop) {
+        setDroppedItemsState({
+          ...droppedItemsState,
+          [itemId]: {
+            ...droppedItemsState[itemId],
+            [blueprintIndex]: droppedItem,
+          },
+        });
+      }
+    },
+    [droppedItemsState, setDroppedItemsState]
+  );
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
     const { active } = event;
@@ -84,14 +87,6 @@ export const HomeContent = () => {
     });
     return counts;
   }, [droppedItemsState]);
-
-  const handleClearSlots = useCallback((itemId: string) => {
-    // Removed unused droppedItemsState
-    setDroppedItemsState({
-      ...droppedItemsState,
-      [itemId]: {},
-    });
-  }, [droppedItemsState, setDroppedItemsState]);
 
   const renderOtomsInventory = useMemo(() => {
     return (
@@ -151,10 +146,7 @@ export const HomeContent = () => {
                 </div>
 
                 <TabsContent value="items-to-craft">
-                  <ItemsToCraft
-                    droppedItemsState={droppedItemsState}
-                    onClearSlots={handleClearSlots}
-                  />
+                  <ItemsToCraft />
                 </TabsContent>
 
                 <TabsContent value="owned-otoms">
