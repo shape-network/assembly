@@ -85,7 +85,7 @@ function getCachedItem(itemTokenId: bigint, itemId: bigint) {
     () => getItem(itemTokenId, itemId),
     ['item', `item-${itemId}`, `token-${itemTokenId}`],
     {
-      revalidate: 10 * 60,
+      revalidate: 5 * 60,
       tags: ['item', `item-${itemId}`, `token-${itemTokenId}`],
     }
   )();

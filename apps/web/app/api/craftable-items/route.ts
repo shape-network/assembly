@@ -57,7 +57,7 @@ async function getCraftItems(): Promise<Item[]> {
 }
 
 const getCachedCraftItems = unstable_cache(getCraftItems, ['craftable-items'], {
-  revalidate: 10 * 60,
+  revalidate: 5 * 60,
   tags: ['craftable-items'],
 });
 
