@@ -955,7 +955,7 @@ const MintCountBadge: FC<{ mintCount: string | null }> = ({ mintCount }) => {
   return mintCount ? (
     <Tooltip>
       <TooltipTrigger className="text-muted-foreground flex items-center gap-1 self-start text-xs">
-        <WrenchIcon className="text-muted-foreground size-3" /> {mintCount}x
+        <WrenchIcon className="text-muted-foreground size-3" /> {mintCount} x
       </TooltipTrigger>
 
       <TooltipContent>
