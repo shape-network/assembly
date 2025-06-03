@@ -16,9 +16,10 @@ import { Label } from '@/components/ui/label';
 import { paths } from '@/lib/paths';
 import { PROPERTY_TYPE_MAP, formatPropertyName } from '@/lib/property-utils';
 import { ComponentType, Criteria } from '@/lib/types';
-import { HelpCircle, PlusCircle, TrashIcon } from 'lucide-react';
+import { ExternalLinkIcon, HelpCircle, PlusCircle, TrashIcon } from 'lucide-react';
 import Link from 'next/link';
 import { FC, useState } from 'react';
+import { InlineLink } from '../ui/link';
 
 type PropertyCriterion = Criteria;
 
@@ -531,19 +532,21 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
                       <DialogContent>
                         <DialogHeader>
                           <DialogTitle>How to get the Otom ID</DialogTitle>
-                          <DialogDescription className="space-y-6">
+                          <DialogDescription className="mt-6 space-y-6">
                             <p>
-                              To get the Otom ID, you must go to{' '}
-                              <Link
-                                href={paths.otom}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="underline"
-                              >
-                                otoms.xyz
-                              </Link>
-                              , search for the Otom you want to use. Then, right-click on the Otom
-                              and select <b>&quot;View Details&quot;</b> as the example below:
+                              To get the Otom ID, you can check the elements on{' '}
+                              <InlineLink href={paths.openSea.collection}>
+                                OpenSea <ExternalLinkIcon className="h-4 w-4" />
+                              </InlineLink>{' '}
+                              and copy their ids.
+                            </p>
+                            <p>
+                              Or go to{' '}
+                              <InlineLink href={paths.otom}>
+                                otoms.xyz <ExternalLinkIcon className="h-4 w-4" />
+                              </InlineLink>
+                              , find the Otom you want to check the properties. Right-click on the
+                              Otom and select <b>&quot;View Details&quot;</b> as the example below.
                             </p>
                             <div className="mt-2 w-full">
                               <video
