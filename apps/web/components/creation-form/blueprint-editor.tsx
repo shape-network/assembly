@@ -543,7 +543,7 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
                                 otoms.xyz
                               </Link>
                               , search for the Otom you want to use. Then, right-click on the Otom
-                              and select <b>&quot;View Details&quot;</b> as example this example:
+                              and select <b>&quot;View Details&quot;</b> as the example below:
                             </p>
                             <div className="mt-2 w-full">
                               <video
