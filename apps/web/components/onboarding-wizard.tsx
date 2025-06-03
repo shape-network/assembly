@@ -41,13 +41,13 @@ const onboardingSteps: OnboardingStep[] = [
           creator.
         </p>
 
-        <Alert>
+        <Alert className="hidden sm:grid">
           <InfoCircledIcon />
           <AlertTitle>Assembly is completely open</AlertTitle>
           <AlertDescription>Anyone can contribute code or create their own items!</AlertDescription>
         </Alert>
 
-        <Button variant="outline" size="sm" asChild className="w-full">
+        <Button variant="outline" size="sm" asChild className="hidden w-full sm:flex">
           <a href={paths.repo} target="_blank" rel="noopener noreferrer">
             View Source Code <ExternalLinkIcon className="ml-1 h-3 w-3" />
           </a>
@@ -63,23 +63,20 @@ const onboardingSteps: OnboardingStep[] = [
         <div>
           <h4 className="font-medium">Required Components</h4>
           <p className="text-muted-foreground">
-            The exact components needed to craft the item. They can be otoms or other items
-            (fungible or non-fungible).
-          </p>
-          <p className="text-muted-foreground">
-            They have to exactly match the specified criteria: a name, or a token ID.
+            They can be otoms or other items that exactly match the specified criteria: a name, or a
+            token ID.
           </p>
         </div>
 
         <div>
           <h4 className="font-medium">Wildcards</h4>
           <p className="text-muted-foreground">
-            They are flexible slots, any otom element or item can be used as long as they match a
-            given property range, like a mass between 1 and 1000, more than 3 electrons, etc.
+            They are flexible slots for any component that matches a given property range, like a
+            mass between 1 and 1000, more than 3 electrons, etc.
           </p>
         </div>
 
-        <Button variant="outline" size="sm" asChild className="w-full">
+        <Button variant="outline" size="sm" asChild className="hidden w-full sm:flex">
           <a href={paths.otom} target="_blank" rel="noopener noreferrer">
             Get Otoms at otom.xyz <ExternalLinkIcon className="ml-1 h-3 w-3" />
           </a>
@@ -151,9 +148,9 @@ export function OnboardingWizard({ open, onOpenChange }: OnboardingWizardProps) 
         </div>
 
         <AlertDialogFooter className="grid w-full grid-cols-3">
-          <div className="flex justify-start gap-1">
+          <div className="flex items-end justify-start gap-1">
             {!isFirstStep && (
-              <Button variant="ghost" onClick={handlePrevious}>
+              <Button variant="ghost" onClick={handlePrevious} size="sm">
                 <ChevronLeftIcon />
                 Previous
               </Button>
@@ -172,8 +169,8 @@ export function OnboardingWizard({ open, onOpenChange }: OnboardingWizardProps) 
             ))}
           </div>
 
-          <div className="flex justify-end gap-1">
-            <Button onClick={handleNext} variant={isLastStep ? 'default' : 'ghost'}>
+          <div className="flex items-end justify-end gap-1">
+            <Button onClick={handleNext} variant={isLastStep ? 'default' : 'ghost'} size="sm">
               {isLastStep ? (
                 "Let's go!"
               ) : (
