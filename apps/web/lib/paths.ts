@@ -34,4 +34,8 @@ export const paths = {
     token: (tokenId: string) =>
       `${explorerUrl}/token/${assemblyItems[config.chain.id]}/instance/${tokenId}`,
   },
+  openSea: {
+    token: (tokenId: string) =>
+      `https://opensea.io/item/shape/${assemblyItems[config.chain.id]}/${tokenId}`,
+  },
 } as const;
