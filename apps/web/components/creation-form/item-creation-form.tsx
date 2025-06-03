@@ -411,6 +411,7 @@ export const ItemCreationForm: FC = () => {
             contractTraits,
             fungibleFormData.costInEth ? parseEther(fungibleFormData.costInEth) : 0n,
             fungibleFormData.feeRecipient ?? zeroAddress,
+            BigInt(1), // TODO: add customizable craft amount
           ],
         });
       } catch (error) {
