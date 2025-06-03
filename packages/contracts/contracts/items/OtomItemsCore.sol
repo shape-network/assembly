@@ -122,6 +122,7 @@ contract OtomItemsCore is
      * @param _traits Array of traits for the item
      * @param _ethCostInWei Cost in Wei to craft the item (0 for no cost)
      * @param _feeRecipient Address that receives the payment (address(0) for no recipient)
+     * @param _defaultCraftAmount Default craft amount for the item
      * @return ID of the created item
      */
     function createFungibleItem(
@@ -131,11 +132,13 @@ contract OtomItemsCore is
         BlueprintComponent[] calldata _blueprint,
         Trait[] calldata _traits,
         uint256 _ethCostInWei,
-        address _feeRecipient
+        address _feeRecipient,
+        uint256 _defaultCraftAmount
     ) external override returns (uint256) {
         if (!creationEnabled && msg.sender != owner()) revert CreationDisabled();
         if (bytes(_name).length == 0) revert InvalidName();
         if (_ethCostInWei > 0 && _feeRecipient == address(0)) revert InvalidFeeRecipient();
+        if (_defaultCraftAmount == 0) revert InvalidCraftAmount();
 
         // Validate that variable components are not used in fungible items
         for (uint256 i = 0; i < _blueprint.length; i++) {
@@ -158,6 +161,7 @@ contract OtomItemsCore is
         item.admin = msg.sender;
         item.ethCostInWei = _ethCostInWei;
         item.feeRecipient = _feeRecipient;
+        item.defaultCraftAmount = _defaultCraftAmount;
 
         item.itemType = ItemType.FUNGIBLE;
 
@@ -252,6 +256,7 @@ contract OtomItemsCore is
      * @param _traits New traits
      * @param _ethCostInWei New cost in Wei to craft the item (0 for no cost)
      * @param _feeRecipient New address that receives the payment (address(0) for no recipient)
+     * @param _defaultCraftAmount New default craft amount for the item
      */
     function updateFungibleItem(
         uint256 _itemId,
@@ -260,13 +265,15 @@ contract OtomItemsCore is
         BlueprintComponent[] calldata _blueprint,
         Trait[] calldata _traits,
         uint256 _ethCostInWei,
-        address _feeRecipient
+        address _feeRecipient,
+        uint256 _defaultCraftAmount
     ) external override notFrozen(_itemId) {
         if (_itemId >= nextItemId) revert ItemDoesNotExist();
         if (_items[_itemId].admin != msg.sender) revert NotAdmin();
         if (_items[_itemId].itemType != ItemType.FUNGIBLE) revert InvalidItem();
         if (bytes(_name).length == 0) revert InvalidName();
         if (_ethCostInWei > 0 && _feeRecipient == address(0)) revert InvalidFeeRecipient();
+        if (_defaultCraftAmount == 0) revert InvalidCraftAmount();
 
         // Validate that variable components are not used in fungible items
         for (uint256 i = 0; i < _blueprint.length; i++) {
@@ -284,7 +291,7 @@ contract OtomItemsCore is
         item.description = _description;
         item.ethCostInWei = _ethCostInWei;
         item.feeRecipient = _feeRecipient;
-
+        item.defaultCraftAmount = _defaultCraftAmount;
         // Clear existing blueprint
         delete item.blueprint;
 
@@ -380,6 +387,7 @@ contract OtomItemsCore is
         if (_itemId >= nextItemId) revert ItemDoesNotExist();
         if (_items[_itemId].admin != msg.sender) revert NotAdmin();
         _items[_itemId].admin = _admin;
+        emit ItemUpdated(_itemId);
     }
 
     /**
@@ -873,10 +881,19 @@ contract OtomItemsCore is
      * @dev Mints a fungible item
      */
     function _mintFungibleItem(uint256 itemId, uint256 amount) private {
-        _otomItems.mint(msg.sender, itemId, amount, "");
+        Item storage item = _items[itemId]; // Get the item to access defaultCraftAmount
+        uint256 defaultCraftAmount = item.defaultCraftAmount == 0 ? 1 : item.defaultCraftAmount; // legacy items can have 0, default to 1 for backwards compat
+        uint256 totalAmountToMint = defaultCraftAmount * amount; // Calculate total amount
+        _otomItems.mint(msg.sender, itemId, totalAmountToMint, "");
 
         // Emit the original ItemCrafted event for fungible items
-        emit ItemCrafted(msg.sender, itemId, amount, itemId, new ActualBlueprintComponent[](0));
+        emit ItemCrafted(
+            msg.sender,
+            itemId,
+            totalAmountToMint,
+            itemId,
+            new ActualBlueprintComponent[](0)
+        );
     }
 
     /**
@@ -1075,12 +1092,8 @@ contract OtomItemsCore is
             uint256 _tokenId = _ids[i];
             if (!isFungibleTokenId(_tokenId) && _otomItems.exists(_tokenId)) {
                 uint256 itemId = _nonFungibleTokenToItemId[_tokenId];
-                if (itemId == 0) revert MissingItemId();
 
                 Item storage item = _items[itemId];
-
-                // Ensure this is a non-fungible item
-                if (item.itemType != ItemType.NON_FUNGIBLE) revert MissmatchItemType();
 
                 // Get current traits to pass to the mutator
                 Trait[] memory currentTraits = getTokenTraits(_tokenId);
