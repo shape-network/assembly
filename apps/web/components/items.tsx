@@ -653,18 +653,18 @@ export const OwnedItemCard: FC<{ item: OwnedItem }> = ({ item }) => {
 
   return (
     <li className="relative w-xs shrink-0 sm:w-[300px]">
-      <Link href={paths.openSea.token(item.tokenId)} target="_blank" rel="noopener noreferrer">
-        {isPickaxe && (
-          <Badge
-            className="bg-background absolute -bottom-2.5 left-1/2 z-10 -translate-x-1/2"
-            variant="outline"
-          >
-            <Link href={paths.otom} target="_blank" rel="noopener noreferrer">
-              For otom.xyz
-            </Link>
-          </Badge>
-        )}
+      {isPickaxe && (
+        <Badge
+          className="bg-background absolute -bottom-2.5 left-1/2 z-10 -translate-x-1/2"
+          variant="outline"
+        >
+          <Link href={paths.otom} target="_blank" rel="noopener noreferrer">
+            For otom.xyz
+          </Link>
+        </Badge>
+      )}
 
+      <Link href={paths.openSea.token(item.tokenId)} target="_blank" rel="noopener noreferrer">
         <Card className="h-full">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
