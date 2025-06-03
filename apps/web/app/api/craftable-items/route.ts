@@ -9,7 +9,7 @@ import { unstable_cache } from 'next/cache';
 import { NextResponse } from 'next/server';
 import superjson from 'superjson';
 
-async function getCraftItems(): Promise<Item[]> {
+async function getCraftItems(): Promise<string> {
   const rpc = rpcClient();
   const results = await rpc.readContract({
     abi: assemblyTrackingContractAbi,
@@ -32,7 +32,7 @@ async function getCraftItems(): Promise<Item[]> {
     allowFailure: true,
   });
 
-  const items = await Promise.all(
+  const items: Item[] = await Promise.all(
     filteredResults.map(async (r, index) => {
       const mintCountResponse = mintCountResponses[index];
       const mintCount =
@@ -53,7 +53,7 @@ async function getCraftItems(): Promise<Item[]> {
     })
   );
 
-  return items.sort((a, b) => b.mintCount - a.mintCount);
+  return superjson.stringify(items.sort((a, b) => b.mintCount - a.mintCount));
 }
 
 const getCachedCraftItems = unstable_cache(getCraftItems, ['craftable-items'], {
@@ -63,9 +63,8 @@ const getCachedCraftItems = unstable_cache(getCraftItems, ['craftable-items'], {
 
 export async function GET() {
   const items = await getCachedCraftItems();
-  const serialized = superjson.stringify(items);
 
-  return NextResponse.json(serialized, {
+  return NextResponse.json(items, {
     headers: {
       'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
     },

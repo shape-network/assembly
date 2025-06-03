@@ -14,7 +14,7 @@ const schema = z.object({
   itemId: z.coerce.bigint(),
 });
 
-async function getItem(itemTokenId: bigint, itemId: bigint): Promise<OwnedItem> {
+async function getItem(itemTokenId: bigint, itemId: bigint): Promise<string> {
   const rpc = rpcClient();
 
   const [itemResponse, tierResponse, traitsResponse, mintCountResponse] = await rpc.multicall({
@@ -77,7 +77,7 @@ async function getItem(itemTokenId: bigint, itemId: bigint): Promise<OwnedItem> 
     mintCount,
   };
 
-  return item;
+  return superjson.stringify(item);
 }
 
 function getCachedItem(itemTokenId: bigint, itemId: bigint) {
@@ -103,7 +103,7 @@ export async function POST(request: Request) {
 
   try {
     const item = await getCachedItem(itemTokenId, itemId);
-    return new NextResponse(superjson.stringify(item), {
+    return new NextResponse(item, {
       headers: {
         'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=1200',
       },
