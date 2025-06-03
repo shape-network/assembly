@@ -166,11 +166,7 @@ export function OnboardingWizard({ open, onOpenChange }: OnboardingWizardProps) 
                 key={index}
                 className={cn(
                   'h-2 w-2 rounded-full transition-colors',
-                  index === currentStep
-                    ? 'bg-primary'
-                    : index < currentStep
-                      ? 'bg-primary/75'
-                      : 'bg-primary/25'
+                  index === currentStep ? 'bg-primary' : 'bg-primary/20'
                 )}
               />
             ))}
