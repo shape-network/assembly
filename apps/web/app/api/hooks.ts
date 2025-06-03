@@ -1,6 +1,9 @@
 'use client';
 
 import { getMoleculesByIds } from '@/app/api/fetchers';
+import { useReadAssemblyCoreContractItemMintCount } from '@/generated';
+import { assemblyCore } from '@/lib/addresses';
+import { config } from '@/lib/config';
 import { paths } from '@/lib/paths';
 import { Item, Molecule, OtomItem, OwnedItem } from '@/lib/types';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
@@ -101,5 +104,23 @@ export function useGetItem({
     staleTime: Infinity,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
+  });
+}
+
+export function useGetItemMintCount(itemId: bigint) {
+  console.log('itemId', itemId);
+  console.log('assemblyCore[config.chain.id]', assemblyCore[config.chain.id]);
+  console.log('config.chain.id', config.chain.id);
+  console.log('config.chain.name', config.chain.name);
+  console.log('process.env.NEXT_PUBLIC_CHAIN_ID', process.env.NEXT_PUBLIC_CHAIN_ID);
+
+  return useReadAssemblyCoreContractItemMintCount({
+    address: assemblyCore[config.chain.id],
+    args: [BigInt(itemId)],
+    query: {
+      staleTime: 60 * 2 * 1000,
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+    },
   });
 }
