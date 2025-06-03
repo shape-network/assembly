@@ -571,7 +571,7 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
                                 rel="noopener noreferrer"
                                 className="font-semibold underline"
                               >
-                                their difficulties here
+                                their rarity here
                               </Link>
                               .
                             </p>
