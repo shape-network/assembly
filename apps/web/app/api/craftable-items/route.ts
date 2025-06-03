@@ -5,6 +5,7 @@ import { rpcClient } from '@/lib/clients';
 import { config } from '@/lib/config';
 import { getBlueprintForItem } from '@/lib/items';
 import { Item, ItemType } from '@/lib/types';
+import { unstable_cache } from 'next/cache';
 import { NextResponse } from 'next/server';
 import superjson from 'superjson';
 
@@ -14,7 +15,7 @@ async function getCraftItems(): Promise<Item[]> {
     abi: assemblyTrackingContractAbi,
     address: assemblyTracking[config.chain.id],
     functionName: 'getAllItemsPaginated',
-    args: [BigInt(0), BigInt(50)], // TODO: add proper pagination
+    args: [BigInt(0), BigInt(100)], // TODO: add proper pagination
   });
 
   const filteredResults = config.chain.testnet
@@ -55,8 +56,18 @@ async function getCraftItems(): Promise<Item[]> {
   return items.sort((a, b) => b.mintCount - a.mintCount);
 }
 
+const getCachedCraftItems = unstable_cache(getCraftItems, ['craftable-items'], {
+  revalidate: 10 * 60,
+  tags: ['craftable-items'],
+});
+
 export async function GET() {
-  const items = await getCraftItems();
+  const items = await getCachedCraftItems();
   const serialized = superjson.stringify(items);
-  return NextResponse.json(serialized);
+
+  return NextResponse.json(serialized, {
+    headers: {
+      'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+    },
+  });
 }
