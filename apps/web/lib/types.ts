@@ -52,6 +52,7 @@ export type Item = {
   initialTraits: Trait[];
   ethCostInWei: bigint;
   defaultImageUri: string;
+  mintCount: number;
 };
 
 export type OwnedItem = Item & {

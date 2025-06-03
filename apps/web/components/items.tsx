@@ -3,7 +3,6 @@
 import {
   useGetCraftableItems,
   useGetItem,
-  useGetItemMintCount,
   useGetMoleculesFromOtomTokenId,
   useGetOtomItemsForUser,
 } from '@/app/api/hooks';
@@ -76,9 +75,6 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, on
   const { data } = useGetOtomItemsForUser();
   const inventory = data?.pages.flatMap((page) => page.items) || [];
 
-  const { data: mintCount } = useGetItemMintCount(item.id);
-  const formattedMintCount = mintCount ? Number(mintCount) : 0;
-
   const droppedItemsForThisCard = droppedItemsState[String(item.id)] || {};
 
   const requiredIndices = item.blueprint
@@ -130,6 +126,8 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, on
 
   const isPickaxe = item.id === BigInt(2);
   const isFungible = item.itemType === 0;
+  const formattedMintCount =
+    item.mintCount > 0 ? Intl.NumberFormat('en-US').format(item.mintCount) : null;
 
   return (
     <li className="relative mt-4 grid w-[300px] shrink-0 grid-rows-[1fr_auto] gap-1 sm:w-[380px]">
@@ -267,7 +265,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, on
               <div className="h-[90px]" />
             )}
 
-            {formattedMintCount > 0 ? (
+            {formattedMintCount ? (
               <Tooltip>
                 <TooltipTrigger className="text-muted-foreground flex items-center gap-1 self-start text-xs">
                   <WrenchIcon className="text-muted-foreground size-3" /> {formattedMintCount}x
@@ -275,7 +273,8 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, on
 
                 <TooltipContent>
                   <p>
-                    Item crafted {formattedMintCount > 1 ? `${formattedMintCount} times` : 'once'}
+                    Item crafted{' '}
+                    {formattedMintCount === '1' ? 'once' : `${formattedMintCount} times`}
                   </p>
                 </TooltipContent>
               </Tooltip>
