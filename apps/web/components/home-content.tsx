@@ -2,12 +2,12 @@
 
 import { FloatingInventory, useFloatingInventory } from '@/components/floating-inventory';
 import { ItemsInventory, OtomsInventory } from '@/components/inventories';
-import { DroppedItemsState, ItemsToCraft } from '@/components/items';
+import { ItemsToCraft } from '@/components/items';
 import { OnboardingWizard } from '@/components/onboarding-wizard';
 import { InlineLink } from '@/components/ui/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { WalletConnect } from '@/components/wallet-connect';
-import { onboardingCompletedAtom } from '@/lib/atoms';
+import { droppedItemsStateAtom, onboardingCompletedAtom } from '@/lib/atoms';
 import { paths } from '@/lib/paths';
 import { checkCriteria } from '@/lib/property-utils';
 import type { BlueprintComponent, OtomItem } from '@/lib/types';
@@ -20,7 +20,7 @@ import { useAccount } from 'wagmi';
 
 export const HomeContent = () => {
   const { address } = useAccount();
-  const [droppedItemsState, setDroppedItemsState] = useState<DroppedItemsState>({});
+  const [droppedItemsState, setDroppedItemsState] = useAtom(droppedItemsStateAtom);
   const [activeItem, setActiveItem] = useState<OtomItem | null>(null);
   const [onboardingCompleted, setOnboardingCompleted] = useAtom(onboardingCompletedAtom);
 
@@ -55,15 +55,15 @@ export const HomeContent = () => {
     }
 
     if (canDrop) {
-      setDroppedItemsState((prev) => ({
-        ...prev,
+      setDroppedItemsState({
+        ...droppedItemsState,
         [itemId]: {
-          ...prev[itemId],
+          ...droppedItemsState[itemId],
           [blueprintIndex]: droppedItem,
         },
-      }));
+      });
     }
-  }, []);
+  }, [droppedItemsState, setDroppedItemsState]);
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
     const { active } = event;
@@ -86,11 +86,12 @@ export const HomeContent = () => {
   }, [droppedItemsState]);
 
   const handleClearSlots = useCallback((itemId: string) => {
-    setDroppedItemsState((prev) => ({
-      ...prev,
-      [itemId]: Object.fromEntries(Object.keys(prev[itemId] || {}).map((index) => [index, null])),
-    }));
-  }, []);
+    // Removed unused droppedItemsState
+    setDroppedItemsState({
+      ...droppedItemsState,
+      [itemId]: {},
+    });
+  }, [droppedItemsState, setDroppedItemsState]);
 
   const renderOtomsInventory = useMemo(() => {
     return (
