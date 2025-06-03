@@ -9,22 +9,25 @@ export const hoveredOtomItemAtom = atom<{
 
 export const itemCreationBannerDismissedAtom = atom(false);
 
-export const otomWindowPositionAtom = atomWithStorage<{ x: number; y: number }>(
-  'otom-window-position',
+export const inventoryWindowPositionAtom = atomWithStorage<{ x: number; y: number }>(
+  'inventory-window-position',
   {
     x: 0,
     y: 0,
   }
 );
 
-export const otomWindowSizeAtom = atomWithStorage<{ width: number; height: number }>(
-  'otom-window-size',
+export const inventoryWindowSizeAtom = atomWithStorage<{ width: number; height: number }>(
+  'inventory-window-size',
   {
     width: 378, // 5 columns of elements
     height: 400,
   }
 );
 
-export const otomWindowIsFloatingAtom = atomWithStorage<boolean>('otom-window-is-floating', false);
+export const inventoryWindowFloatingAtom = atomWithStorage<boolean>(
+  'inventory-window-is-floating',
+  false
+);
 
 export const onboardingCompletedAtom = atomWithStorage<boolean>('onboarding-completed', false);

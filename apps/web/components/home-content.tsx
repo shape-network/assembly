@@ -7,10 +7,10 @@ import { InlineLink } from '@/components/ui/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { WalletConnect } from '@/components/wallet-connect';
 import {
+  inventoryWindowFloatingAtom,
+  inventoryWindowPositionAtom,
+  inventoryWindowSizeAtom,
   onboardingCompletedAtom,
-  otomWindowIsFloatingAtom,
-  otomWindowPositionAtom,
-  otomWindowSizeAtom,
 } from '@/lib/atoms';
 import { paths } from '@/lib/paths';
 import { checkCriteria } from '@/lib/property-utils';
@@ -28,9 +28,9 @@ export const HomeContent = () => {
   const { address } = useAccount();
   const [droppedItemsState, setDroppedItemsState] = useState<DroppedItemsState>({});
   const [activeItem, setActiveItem] = useState<OtomItem | null>(null);
-  const [isFloating, setIsFloating] = useAtom(otomWindowIsFloatingAtom);
-  const [rndPosition, setRndPosition] = useAtom(otomWindowPositionAtom);
-  const [rndSize, setRndSize] = useAtom(otomWindowSizeAtom);
+  const [isFloating, setIsFloating] = useAtom(inventoryWindowFloatingAtom);
+  const [rndPosition, setRndPosition] = useAtom(inventoryWindowPositionAtom);
+  const [rndSize, setRndSize] = useAtom(inventoryWindowSizeAtom);
   const [onboardingCompleted, setOnboardingCompleted] = useAtom(onboardingCompletedAtom);
 
   const handleOpenFloating = useCallback(() => {
