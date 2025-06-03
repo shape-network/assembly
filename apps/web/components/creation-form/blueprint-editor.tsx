@@ -545,8 +545,7 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
                               <InlineLink href={paths.otom}>
                                 otoms.xyz <ExternalLinkIcon className="h-4 w-4" />
                               </InlineLink>
-                              , find the Otom you want to check the properties. Right-click on the
-                              Otom and select <b>&quot;View Details&quot;</b> as the example below.
+                              , right-click on the element and select <b>&quot;View Details&quot;</b> as the example below.
                             </p>
                             <div className="mt-2 w-full">
                               <video
