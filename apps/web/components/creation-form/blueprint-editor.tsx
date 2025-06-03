@@ -523,7 +523,7 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
                           variant="ghost"
                           size="icon"
                           className="h-5 w-5 p-0"
-                          title="Otom Information"
+                          title="How to get the Otom ID"
                         >
                           <HelpCircle className="h-4 w-4" />
                         </Button>
