@@ -64,3 +64,7 @@ Contributions are welcome! If you have any improvements or features to add, plea
 5. Open a Pull Request.
 
 We appreciate your contributions Shaper!
+
+## Support & Feedback
+
+Reach out to the core team on Twitter/X [@Shape_L2](https://x.com/Shape_L2) or [@williamhzo](https://x.com/williamhzo).
