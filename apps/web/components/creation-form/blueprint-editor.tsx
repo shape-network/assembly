@@ -3,11 +3,21 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { paths } from '@/lib/paths';
 import { PROPERTY_TYPE_MAP, formatPropertyName } from '@/lib/property-utils';
 import { ComponentType, Criteria } from '@/lib/types';
-import { PlusCircle, TrashIcon } from 'lucide-react';
+import { HelpCircle, PlusCircle, TrashIcon } from 'lucide-react';
+import Link from 'next/link';
 import { FC, useState } from 'react';
 
 type PropertyCriterion = Criteria;
@@ -502,9 +512,72 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
             {/* Only show token ID field when not variable_otom */}
             {newComponent.componentType !== 'variable_otom' && (
               <div className="col-span-2 flex flex-col gap-2">
-                <Label htmlFor="new-component-id">
-                  {newComponent.componentType === 'otom' ? 'Otom Token ID' : 'Item ID'}
-                </Label>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="new-component-id">
+                    {newComponent.componentType === 'otom' ? 'Otom Token ID' : 'Item ID'}
+                  </Label>
+                  {newComponent.componentType === 'otom' && (
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-5 w-5 p-0"
+                          title="Otom Information"
+                        >
+                          <HelpCircle className="h-4 w-4" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>How to get the Otom ID</DialogTitle>
+                          <DialogDescription className="space-y-6">
+                            <p>
+                              To get the Otom ID, you must go to{' '}
+                              <Link
+                                href={paths.otom}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="underline"
+                              >
+                                otoms.xyz
+                              </Link>
+                              , search for the Otom you want to use. Then, right-click on the Otom
+                              and select <b>&quot;View Details&quot;</b> as example this example:
+                            </p>
+                            <div className="mt-2 w-full">
+                              <video
+                                src="/otoms-copy-id.mp4"
+                                autoPlay
+                                muted
+                                playsInline
+                                loop
+                                className="h-auto w-full rounded-md border border-gray-200"
+                                onLoadedMetadata={(e) => {
+                                  const video = e.target as HTMLVideoElement;
+                                  video.playbackRate = 0.5;
+                                }}
+                              />
+                            </div>
+
+                            <p>
+                              You can also find a list of Otoms (Universe Alpha) and{' '}
+                              <Link
+                                href="https://docs.google.com/spreadsheets/d/e/2PACX-1vSY6nasDSVjnOCGaxls_3UtO7K-t1d5MlOdmJMgW9uQQOdOCTOmWQnxUaODxWXbP61zPLzJa69hMzHL/pubhtml?gid=461026717&single=true"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="font-semibold underline"
+                              >
+                                their difficulties here
+                              </Link>
+                              .
+                            </p>
+                          </DialogDescription>
+                        </DialogHeader>
+                      </DialogContent>
+                    </Dialog>
+                  )}
+                </div>
                 <Input
                   id="new-component-id"
                   placeholder="Enter ID"
