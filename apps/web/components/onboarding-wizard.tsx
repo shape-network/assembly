@@ -31,7 +31,7 @@ const onboardingSteps: OnboardingStep[] = [
     title: 'Welcome to Assembly!',
     description: 'A composable & community-driven item crafting system.',
     content: (
-      <div className="flex flex-col gap-4">
+      <div className="mt-5 flex flex-col gap-4">
         <p>
           Built on top of Otoms, every item you craft is minted as an ERC1155 token and stored
           permanently onchain.
@@ -46,6 +46,12 @@ const onboardingSteps: OnboardingStep[] = [
           <AlertTitle>Assembly is completely open</AlertTitle>
           <AlertDescription>Anyone can contribute code or create their own items!</AlertDescription>
         </Alert>
+
+        <Button variant="outline" size="sm" asChild className="w-full">
+          <a href={paths.repo} target="_blank" rel="noopener noreferrer">
+            View Source Code <ExternalLinkIcon className="ml-1 h-3 w-3" />
+          </a>
+        </Button>
       </div>
     ),
   },
@@ -53,7 +59,7 @@ const onboardingSteps: OnboardingStep[] = [
     title: 'How to Craft Items?',
     description: 'The item creator defines required components and wildcards.',
     content: (
-      <div className="flex flex-col gap-4">
+      <div className="mt-5 flex flex-col gap-4">
         <div>
           <h4 className="font-medium">Required Components</h4>
           <p className="text-muted-foreground">
@@ -68,21 +74,11 @@ const onboardingSteps: OnboardingStep[] = [
         <div>
           <h4 className="font-medium">Wildcards</h4>
           <p className="text-muted-foreground">
-            Wildcards are flexible slots, any otom element or item can be used as long as they match
-            a given property range
-          </p>
-          <p className="text-muted-foreground">
-            They have to match the specified criteria: a name, or a token ID.
+            They are flexible slots, any otom element or item can be used as long as they match a
+            given property range, like a mass between 1 and 1000, more than 3 electrons, etc.
           </p>
         </div>
 
-        <div>
-          <h4 className="font-medium">Crafting Process</h4>
-          <p className="text-muted-foreground">
-            Drag components into blueprint slots. The system verifies you have the required
-            components, burns them during crafting, and mints your new item with appropriate traits.
-          </p>
-        </div>
         <Button variant="outline" size="sm" asChild className="w-full">
           <a href={paths.otom} target="_blank" rel="noopener noreferrer">
             Get Otoms at otom.xyz <ExternalLinkIcon className="ml-1 h-3 w-3" />
@@ -93,16 +89,17 @@ const onboardingSteps: OnboardingStep[] = [
   },
   {
     title: 'Item Types & Tiers',
-    description: 'Understand fungible vs non-fungible items and the tier system.',
+    description: 'Fungible vs non-fungible items and the tier system.',
     content: (
-      <div className="flex flex-col gap-2">
+      <div className="mt-5 flex flex-col gap-4">
         <div>
           <h4 className="font-medium">Fungible Items</h4>
           <p className="text-muted-foreground">
-            Resources or consumables that stack in inventory (like bricks, logs, ore). All instances
-            are identical with the same properties.
+            Resources or consumables that stack in your inventory (like bricks, logs, ore). All
+            instances are identical with the same properties.
           </p>
         </div>
+
         <div>
           <h4 className="font-medium">Non-Fungible Items</h4>
           <p className="text-muted-foreground">
@@ -110,50 +107,6 @@ const onboardingSteps: OnboardingStep[] = [
             Each instance can have different traits that change through usage.
           </p>
         </div>
-        <div className="bg-muted/50 rounded-lg p-3">
-          <p className="text-muted-foreground text-xs">
-            💡 Non-fungible items have tiers calculated by mutator contracts based on components
-            used and can be &quot;used&quot; to modify their traits over time.
-          </p>
-        </div>
-        <Button variant="outline" size="sm" asChild className="w-full">
-          <a href={paths.otom} target="_blank" rel="noopener noreferrer">
-            Explore the Otom ecosystem <ExternalLinkIcon className="ml-1 h-3 w-3" />
-          </a>
-        </Button>
-      </div>
-    ),
-  },
-  {
-    title: 'Create Your Own Items',
-    description: 'Ready to become a creator? Design and submit your own blueprints.',
-    content: (
-      <div className="flex flex-col gap-2">
-        <p>
-          Assembly is completely open! Once you understand the crafting system, you can create your
-          own item blueprints with custom properties, traits, and even mutator contracts for
-          advanced functionality.
-        </p>
-        <div className="space-y-2">
-          <h4 className="font-medium">What you can create:</h4>
-          <ul className="text-muted-foreground ml-4 space-y-1">
-            <li>• Tools and equipment with special abilities</li>
-            <li>• Resources with custom properties and use cases</li>
-            <li>• Complex items requiring rare Otom combinations</li>
-            <li>• Interactive items with mutator contracts</li>
-          </ul>
-        </div>
-        <div className="bg-muted/50 rounded-lg p-3">
-          <p className="text-muted-foreground text-xs">
-            💡 All item metadata is stored onchain with SVG rendering. You can contribute to the
-            project or submit items for the community to craft!
-          </p>
-        </div>
-        <Button variant="outline" size="sm" asChild className="w-full">
-          <a href={paths.create} target="_blank" rel="noopener noreferrer">
-            Start Creating Items <ExternalLinkIcon className="ml-1 h-3 w-3" />
-          </a>
-        </Button>
       </div>
     ),
   },
@@ -187,13 +140,15 @@ export function OnboardingWizard({ open, onOpenChange }: OnboardingWizardProps) 
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="sm:max-w-xl">
-        <AlertDialogHeader>
-          <AlertDialogTitle>{step.title}</AlertDialogTitle>
-          <AlertDialogDescription>{step.description}</AlertDialogDescription>
-        </AlertDialogHeader>
+      <AlertDialogContent className="grid grid-rows-[1fr_auto] sm:min-h-[522px] sm:max-w-xl">
+        <div>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{step.title}</AlertDialogTitle>
+            <AlertDialogDescription>{step.description}</AlertDialogDescription>
+          </AlertDialogHeader>
 
-        {step.content && <div className="py-2">{step.content}</div>}
+          {step.content && <div className="py-2">{step.content}</div>}
+        </div>
 
         <AlertDialogFooter className="grid w-full grid-cols-3">
           <div className="flex justify-start gap-1">
