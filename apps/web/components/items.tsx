@@ -26,6 +26,7 @@ import { useDndContext, useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { QuestionMarkCircledIcon } from '@radix-ui/react-icons';
 import { useAtom } from 'jotai';
+import { CoinsIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
@@ -124,6 +125,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, on
   }
 
   const isPickaxe = item.id === BigInt(2);
+  const isFungible = item.itemType === 0;
 
   return (
     <li className="relative mt-4 grid w-[300px] shrink-0 grid-rows-[1fr_auto] gap-1 sm:w-[380px]">
@@ -148,7 +150,10 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, on
         />
 
         <CardHeader className="relative">
-          <CardTitle>{item.name}</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            {isFungible && <FungibleItemBadge />}
+            {item.name}
+          </CardTitle>
         </CardHeader>
 
         <CardContent className="flex h-full flex-col justify-between gap-6">
@@ -629,6 +634,7 @@ export const OwnedItemCard: FC<{ item: OwnedItem }> = ({ item }) => {
   const traits = item.initialTraits.filter((t) => t.name !== 'Usages Remaining');
 
   const isPickaxe = item.id === BigInt(2);
+  const isFungible = item.itemType === 0;
 
   return (
     <li className="relative w-xs shrink-0 sm:w-[300px]">
@@ -645,7 +651,10 @@ export const OwnedItemCard: FC<{ item: OwnedItem }> = ({ item }) => {
 
       <Card className="h-full">
         <CardHeader>
-          <CardTitle>{item.name}</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            {isFungible && <FungibleItemBadge />}
+            {item.name}
+          </CardTitle>
         </CardHeader>
 
         <div className="relative h-40 w-full">
@@ -904,6 +913,20 @@ export const ItemsToCraftSkeleton: FC = () => {
         </li>
       ))}
     </HorizontallScrollWrapper>
+  );
+};
+
+export const FungibleItemBadge: FC = () => {
+  return (
+    <Tooltip>
+      <TooltipTrigger>
+        <CoinsIcon className="size-4" />
+      </TooltipTrigger>
+
+      <TooltipContent>
+        <p>Fungible item: all instances and their properties are identical.</p>
+      </TooltipContent>
+    </Tooltip>
   );
 };
 
