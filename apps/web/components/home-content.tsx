@@ -245,7 +245,7 @@ export const HomeContent = () => {
 const Hero: FC = () => {
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col items-start gap-8">
-      <h2 className="text-center text-3xl font-semibold tracking-wide text-pretty">
+      <h2 className="text-center text-2xl font-semibold tracking-wide text-pretty sm:text-3xl">
         An open-source item crafting tool based on the world of{' '}
         <InlineLink href={paths.otom} className="font-semibold">
           Otoms

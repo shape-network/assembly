@@ -51,7 +51,7 @@ export default function RootLayout({
                   href={paths.otom}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3"
+                  className="hidden px-3 sm:block"
                 >
                   otom.xyz
                 </InlineLink>
