@@ -60,7 +60,6 @@
       "type": "error"
     },
     { "inputs": [], "name": "MissingItemId", "type": "error" },
-    { "inputs": [], "name": "MissmatchItemType", "type": "error" },
     { "inputs": [], "name": "MutatorBlockedTransfer", "type": "error" },
     { "inputs": [], "name": "MutatorFailed", "type": "error" },
     { "inputs": [], "name": "NotAdmin", "type": "error" },
@@ -329,7 +328,8 @@
           "type": "tuple[]"
         },
         { "internalType": "uint256", "name": "_ethCostInWei", "type": "uint256" },
-        { "internalType": "address", "name": "_feeRecipient", "type": "address" }
+        { "internalType": "address", "name": "_feeRecipient", "type": "address" },
+        { "internalType": "uint256", "name": "_defaultCraftAmount", "type": "uint256" }
       ],
       "name": "createFungibleItem",
       "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
@@ -455,7 +455,8 @@
             { "internalType": "address", "name": "mutatorContract", "type": "address" },
             { "internalType": "uint256", "name": "ethCostInWei", "type": "uint256" },
             { "internalType": "address", "name": "feeRecipient", "type": "address" },
-            { "internalType": "string[7]", "name": "defaultTierImageUris", "type": "string[7]" }
+            { "internalType": "string[7]", "name": "defaultTierImageUris", "type": "string[7]" },
+            { "internalType": "uint256", "name": "defaultCraftAmount", "type": "uint256" }
           ],
           "internalType": "struct Item",
           "name": "",
@@ -767,7 +768,8 @@
           "type": "tuple[]"
         },
         { "internalType": "uint256", "name": "_ethCostInWei", "type": "uint256" },
-        { "internalType": "address", "name": "_feeRecipient", "type": "address" }
+        { "internalType": "address", "name": "_feeRecipient", "type": "address" },
+        { "internalType": "uint256", "name": "_defaultCraftAmount", "type": "uint256" }
       ],
       "name": "updateFungibleItem",
       "outputs": [],

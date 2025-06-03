@@ -1,6 +1,7 @@
 {
   "abi": [
     { "inputs": [], "name": "InvalidInitialization", "type": "error" },
+    { "inputs": [], "name": "InvalidInput", "type": "error" },
     { "inputs": [], "name": "InvalidItem", "type": "error" },
     { "inputs": [], "name": "NotInitializing", "type": "error" },
     { "inputs": [], "name": "NotOtomItems", "type": "error" },
@@ -69,6 +70,16 @@
       "type": "function"
     },
     {
+      "inputs": [
+        { "internalType": "uint256[]", "name": "_tokenIds", "type": "uint256[]" },
+        { "internalType": "address[]", "name": "_currentOwners", "type": "address[]" }
+      ],
+      "name": "batchReconcileTokens",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
       "inputs": [],
       "name": "core",
       "outputs": [{ "internalType": "contract IOtomItemsCore", "name": "", "type": "address" }],
@@ -108,7 +119,9 @@
                     { "internalType": "bool", "name": "boolValue", "type": "bool" },
                     { "internalType": "bool", "name": "checkBoolValue", "type": "bool" },
                     { "internalType": "string", "name": "stringValue", "type": "string" },
-                    { "internalType": "bool", "name": "checkStringValue", "type": "bool" }
+                    { "internalType": "bool", "name": "checkStringValue", "type": "bool" },
+                    { "internalType": "bytes32", "name": "bytes32Value", "type": "bytes32" },
+                    { "internalType": "bool", "name": "checkBytes32Value", "type": "bool" }
                   ],
                   "internalType": "struct PropertyCriterion[]",
                   "name": "criteria",
@@ -122,7 +135,8 @@
             { "internalType": "address", "name": "mutatorContract", "type": "address" },
             { "internalType": "uint256", "name": "ethCostInWei", "type": "uint256" },
             { "internalType": "address", "name": "feeRecipient", "type": "address" },
-            { "internalType": "string[7]", "name": "defaultTierImageUris", "type": "string[7]" }
+            { "internalType": "string[7]", "name": "defaultTierImageUris", "type": "string[7]" },
+            { "internalType": "uint256", "name": "defaultCraftAmount", "type": "uint256" }
           ],
           "internalType": "struct Item[]",
           "name": "",
@@ -210,6 +224,16 @@
       "type": "function"
     },
     {
+      "inputs": [
+        { "internalType": "uint256", "name": "_tokenId", "type": "uint256" },
+        { "internalType": "address", "name": "_currentOwner", "type": "address" }
+      ],
+      "name": "reconcileToken",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
       "inputs": [],
       "name": "renounceOwnership",
       "outputs": [],
@@ -233,6 +257,27 @@
     {
       "inputs": [{ "internalType": "address", "name": "newOwner", "type": "address" }],
       "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        { "internalType": "uint256", "name": "_itemId", "type": "uint256" },
+        { "internalType": "uint256[]", "name": "_tokenIds", "type": "uint256[]" }
+      ],
+      "name": "updateGlobalTokenList",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        { "internalType": "uint256", "name": "_itemId", "type": "uint256" },
+        { "internalType": "address[]", "name": "_owners", "type": "address[]" },
+        { "internalType": "uint256[][]", "name": "_ownerTokenIds", "type": "uint256[][]" }
+      ],
+      "name": "updateOwnerTokenLists",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
