@@ -7,7 +7,7 @@ import { ExitIcon } from '@radix-ui/react-icons';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount, useDisconnect, useEnsName } from 'wagmi';
 
-export const WalletConnect = () => {
+export const WalletConnect = ({ label }: { label?: string }) => {
   const { address } = useAccount();
   const { data: ensName } = useEnsName({ address, chainId: config.chain.id });
   const { disconnect } = useDisconnect();
@@ -28,7 +28,7 @@ export const WalletConnect = () => {
             </button>
           </span>
         ) : (
-          <Button onClick={openConnectModal}>Connect Wallet</Button>
+          <Button onClick={openConnectModal}>{label ?? 'Connect Wallet'}</Button>
         )
       }
     </ConnectButton.Custom>
