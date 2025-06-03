@@ -108,15 +108,9 @@ export function useGetItem({
 }
 
 export function useGetItemMintCount(itemId: bigint) {
-  console.log('itemId', itemId);
-  console.log('assemblyCore[config.chain.id]', assemblyCore[config.chain.id]);
-  console.log('config.chain.id', config.chain.id);
-  console.log('config.chain.name', config.chain.name);
-  console.log('process.env.NEXT_PUBLIC_CHAIN_ID', process.env.NEXT_PUBLIC_CHAIN_ID);
-
   return useReadAssemblyCoreContractItemMintCount({
     address: assemblyCore[config.chain.id],
-    args: [BigInt(itemId)],
+    args: [itemId],
     query: {
       staleTime: 60 * 2 * 1000,
       refetchOnWindowFocus: false,

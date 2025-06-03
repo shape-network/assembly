@@ -3,6 +3,7 @@
 import {
   useGetCraftableItems,
   useGetItem,
+  useGetItemMintCount,
   useGetMoleculesFromOtomTokenId,
   useGetOtomItemsForUser,
 } from '@/app/api/hooks';
@@ -26,7 +27,7 @@ import { useDndContext, useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { QuestionMarkCircledIcon } from '@radix-ui/react-icons';
 import { useAtom } from 'jotai';
-import { CoinsIcon } from 'lucide-react';
+import { CoinsIcon, WrenchIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
@@ -74,6 +75,9 @@ type ItemToCraftCardProps = {
 const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, onClearSlots }) => {
   const { data } = useGetOtomItemsForUser();
   const inventory = data?.pages.flatMap((page) => page.items) || [];
+
+  const { data: mintCount } = useGetItemMintCount(item.id);
+  const formattedMintCount = mintCount ? Number(mintCount) : 0;
 
   const droppedItemsForThisCard = droppedItemsState[String(item.id)] || {};
 
@@ -261,6 +265,22 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, on
               </div>
             ) : (
               <div className="h-[90px]" />
+            )}
+
+            {formattedMintCount > 0 ? (
+              <Tooltip>
+                <TooltipTrigger className="text-muted-foreground flex items-center gap-1 self-start text-xs">
+                  <WrenchIcon className="text-muted-foreground size-3" /> {formattedMintCount}x
+                </TooltipTrigger>
+
+                <TooltipContent>
+                  <p>
+                    Item crafted {formattedMintCount > 1 ? `${formattedMintCount} times` : 'once'}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            ) : (
+              <span />
             )}
           </div>
         </CardContent>
@@ -646,60 +666,64 @@ export const OwnedItemCard: FC<{ item: OwnedItem }> = ({ item }) => {
 
   return (
     <li className="relative w-xs shrink-0 sm:w-[300px]">
-      {isPickaxe && (
-        <Badge
-          className="bg-background absolute -bottom-2.5 left-1/2 z-10 -translate-x-1/2"
-          variant="outline"
-        >
-          <Link href={paths.otom} target="_blank" rel="noopener noreferrer">
-            For otom.xyz
-          </Link>
-        </Badge>
-      )}
+      <Link href={paths.explorer.token(item.tokenId)} target="_blank" rel="noopener noreferrer">
+        {isPickaxe && (
+          <Badge
+            className="bg-background absolute -bottom-2.5 left-1/2 z-10 -translate-x-1/2"
+            variant="outline"
+          >
+            <Link href={paths.otom} target="_blank" rel="noopener noreferrer">
+              For otom.xyz
+            </Link>
+          </Badge>
+        )}
 
-      <Card className="h-full">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            {isFungible && <FungibleItemBadge />}
-            {item.name}
-          </CardTitle>
-        </CardHeader>
+        <Card className="h-full">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              {isFungible && <FungibleItemBadge />}
+              {item.name}
+            </CardTitle>
+          </CardHeader>
 
-        <div className="relative h-40 w-full">
-          {item.defaultImageUri ? (
-            <Image
-              src={
-                isPickaxe ? paths.assemblyItemImage(item.id, item.tier ?? 1) : item.defaultImageUri
-              }
-              alt={item.name}
-              fill
-              className="object-contain py-2"
-            />
-          ) : (
-            <Skeleton className="h-40 w-full" />
-          )}
-        </div>
+          <div className="relative h-40 w-full">
+            {item.defaultImageUri ? (
+              <Image
+                src={
+                  isPickaxe
+                    ? paths.assemblyItemImage(item.id, item.tier ?? 1)
+                    : item.defaultImageUri
+                }
+                alt={item.name}
+                fill
+                className="object-contain py-2"
+              />
+            ) : (
+              <Skeleton className="h-40 w-full" />
+            )}
+          </div>
 
-        <CardContent className="flex flex-col gap-6">
-          {isPickaxe ? (
-            <ItemTraits
-              traits={[
-                item.tier ? { name: 'Tier', value: item.tier } : null,
-                { name: 'Mining Power', value: getPickaxeMiningPower(item.tier ?? 1) },
-                { name: 'Remaining Usages', value: item.usagesRemaining ?? '?' },
-              ].filter(isNotNullish)}
-            />
-          ) : (
-            <ItemTraits
-              traits={[
-                item.tier ? { name: 'Tier', value: item.tier } : null,
-                ...traits,
-                { name: 'Remaining Usages', value: item.usagesRemaining ?? '?' },
-              ].filter(isNotNullish)}
-            />
-          )}
-        </CardContent>
-      </Card>
+          <CardContent className="flex flex-col gap-6">
+            {isPickaxe ? (
+              <ItemTraits
+                traits={[
+                  item.tier ? { name: 'Tier', value: item.tier } : null,
+                  { name: 'Mining Power', value: getPickaxeMiningPower(item.tier ?? 1) },
+                  { name: 'Remaining Usages', value: item.usagesRemaining ?? '?' },
+                ].filter(isNotNullish)}
+              />
+            ) : (
+              <ItemTraits
+                traits={[
+                  item.tier ? { name: 'Tier', value: item.tier } : null,
+                  ...traits,
+                  { name: 'Remaining Usages', value: item.usagesRemaining ?? '?' },
+                ].filter(isNotNullish)}
+              />
+            )}
+          </CardContent>
+        </Card>
+      </Link>
     </li>
   );
 };
