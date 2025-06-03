@@ -191,6 +191,7 @@ export const HomeContent = () => {
                     <Rnd
                       position={rndPosition}
                       size={rndSize}
+                      bounds={'window'}
                       onDragStop={(e, d) => {
                         setRndPosition({ x: d.x, y: d.y });
                       }}
