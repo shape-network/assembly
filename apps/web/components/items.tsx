@@ -265,22 +265,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, on
               <div className="h-[90px]" />
             )}
 
-            {formattedMintCount ? (
-              <Tooltip>
-                <TooltipTrigger className="text-muted-foreground flex items-center gap-1 self-start text-xs">
-                  <WrenchIcon className="text-muted-foreground size-3" /> {formattedMintCount}x
-                </TooltipTrigger>
-
-                <TooltipContent>
-                  <p>
-                    Item crafted{' '}
-                    {formattedMintCount === '1' ? 'once' : `${formattedMintCount} times`}
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            ) : (
-              <span />
-            )}
+            <MintCountBadge mintCount={formattedMintCount} />
           </div>
         </CardContent>
 
@@ -663,6 +648,9 @@ export const OwnedItemCard: FC<{ item: OwnedItem }> = ({ item }) => {
   const isPickaxe = item.id === BigInt(2);
   const isFungible = item.itemType === 0;
 
+  const formattedMintCount =
+    item.mintCount > 0 ? Intl.NumberFormat('en-US').format(item.mintCount) : null;
+
   return (
     <li className="relative w-xs shrink-0 sm:w-[300px]">
       <Link href={paths.explorer.token(item.tokenId)} target="_blank" rel="noopener noreferrer">
@@ -720,6 +708,8 @@ export const OwnedItemCard: FC<{ item: OwnedItem }> = ({ item }) => {
                 ].filter(isNotNullish)}
               />
             )}
+
+            <MintCountBadge mintCount={formattedMintCount} />
           </CardContent>
         </Card>
       </Link>
@@ -947,7 +937,7 @@ export const ItemsToCraftSkeleton: FC = () => {
   );
 };
 
-export const FungibleItemBadge: FC = () => {
+const FungibleItemBadge: FC = () => {
   return (
     <Tooltip>
       <TooltipTrigger>
@@ -958,6 +948,22 @@ export const FungibleItemBadge: FC = () => {
         <p>Fungible item: all instances and their properties are identical.</p>
       </TooltipContent>
     </Tooltip>
+  );
+};
+
+const MintCountBadge: FC<{ mintCount: string | null }> = ({ mintCount }) => {
+  return mintCount ? (
+    <Tooltip>
+      <TooltipTrigger className="text-muted-foreground flex items-center gap-1 self-start text-xs">
+        <WrenchIcon className="text-muted-foreground size-3" /> {mintCount}x
+      </TooltipTrigger>
+
+      <TooltipContent>
+        <p>Item crafted {mintCount === '1' ? 'once' : `${mintCount} times`}</p>
+      </TooltipContent>
+    </Tooltip>
+  ) : (
+    <span />
   );
 };
 
