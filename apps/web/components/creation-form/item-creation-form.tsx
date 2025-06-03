@@ -690,22 +690,21 @@ export const ItemCreationForm: FC = () => {
   }, [data, receipt, router]);
 
   return (
-    <div className="relative mt-8 flex flex-col gap-4 px-5 sm:mt-64">
+    <div className="relative mt-8 flex flex-col gap-4 px-5 sm:mt-44">
       <div className="z-10 flex flex-col items-center justify-between gap-16 p-4 sm:fixed sm:inset-x-0 sm:top-20">
         <div className="mx-auto w-full max-w-md">
           <StepIndicator currentStep={step} totalSteps={4} setStep={setStep} />
         </div>
-
-        {step === 1 && (
-          <div className="mx-auto flex w-full max-w-xl flex-col items-center gap-2">
-            <h1 className="text-2xl font-medium">New Assembly Item</h1>
-            <h2 className="text-muted-foreground text-center text-pretty">
-              Create an item to be used in the Assembly system and more
-            </h2>
-          </div>
-        )}
       </div>
 
+      {step === 1 && (
+        <div className="mx-auto flex w-full max-w-xl flex-col items-center gap-2">
+          <h1 className="text-2xl font-medium">New Assembly Item</h1>
+          <h2 className="text-muted-foreground text-center text-pretty">
+            Create an item to be used in the Assembly system and more
+          </h2>
+        </div>
+      )}
       {renderCurrentStep()}
 
       {step === 1 && (

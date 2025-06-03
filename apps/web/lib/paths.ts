@@ -37,5 +37,6 @@ export const paths = {
   openSea: {
     token: (tokenId: string) =>
       `https://opensea.io/item/shape/${assemblyItems[config.chain.id]}/${tokenId}`,
+    collection: `https://opensea.io/contract/shape/${assemblyItems[config.chain.id]}`,
   },
 } as const;
