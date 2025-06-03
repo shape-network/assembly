@@ -1,3 +1,4 @@
+import { assemblyItems } from '@/lib/addresses';
 import { config } from '@/lib/config';
 
 const explorerUrl = config.chain.testnet
@@ -30,5 +31,11 @@ export const paths = {
     block: (blockNumber: number) => `${explorerUrl}/block/${blockNumber}`,
     transaction: (hash: string) => `${explorerUrl}/tx/${hash}`,
     address: (address: string) => `${explorerUrl}/address/${address}`,
+    token: (tokenId: string) =>
+      `${explorerUrl}/token/${assemblyItems[config.chain.id]}/instance/${tokenId}`,
+  },
+  openSea: {
+    token: (tokenId: string) =>
+      `https://opensea.io/item/shape/${assemblyItems[config.chain.id]}/${tokenId}`,
   },
 } as const;

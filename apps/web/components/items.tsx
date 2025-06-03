@@ -26,7 +26,7 @@ import { useDndContext, useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { QuestionMarkCircledIcon } from '@radix-ui/react-icons';
 import { useAtom } from 'jotai';
-import { CoinsIcon } from 'lucide-react';
+import { CoinsIcon, WrenchIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
@@ -126,6 +126,8 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, on
 
   const isPickaxe = item.id === BigInt(2);
   const isFungible = item.itemType === 0;
+  const formattedMintCount =
+    item.mintCount > 0 ? Intl.NumberFormat('en-US').format(item.mintCount) : null;
 
   return (
     <li className="relative mt-4 grid w-[300px] shrink-0 grid-rows-[1fr_auto] gap-1 sm:w-[380px]">
@@ -262,6 +264,8 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, on
             ) : (
               <div className="h-[90px]" />
             )}
+
+            <MintCountBadge mintCount={formattedMintCount} />
           </div>
         </CardContent>
 
@@ -644,62 +648,71 @@ export const OwnedItemCard: FC<{ item: OwnedItem }> = ({ item }) => {
   const isPickaxe = item.id === BigInt(2);
   const isFungible = item.itemType === 0;
 
+  const formattedMintCount =
+    item.mintCount > 0 ? Intl.NumberFormat('en-US').format(item.mintCount) : null;
+
   return (
     <li className="relative w-xs shrink-0 sm:w-[300px]">
-      {isPickaxe && (
-        <Badge
-          className="bg-background absolute -bottom-2.5 left-1/2 z-10 -translate-x-1/2"
-          variant="outline"
-        >
-          <Link href={paths.otom} target="_blank" rel="noopener noreferrer">
-            For otom.xyz
-          </Link>
-        </Badge>
-      )}
+      <Link href={paths.openSea.token(item.tokenId)} target="_blank" rel="noopener noreferrer">
+        {isPickaxe && (
+          <Badge
+            className="bg-background absolute -bottom-2.5 left-1/2 z-10 -translate-x-1/2"
+            variant="outline"
+          >
+            <Link href={paths.otom} target="_blank" rel="noopener noreferrer">
+              For otom.xyz
+            </Link>
+          </Badge>
+        )}
 
-      <Card className="h-full">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            {isFungible && <FungibleItemBadge />}
-            {item.name}
-          </CardTitle>
-        </CardHeader>
+        <Card className="h-full">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              {isFungible && <FungibleItemBadge />}
+              {item.name}
+            </CardTitle>
+          </CardHeader>
 
-        <div className="relative h-40 w-full">
-          {item.defaultImageUri ? (
-            <Image
-              src={
-                isPickaxe ? paths.assemblyItemImage(item.id, item.tier ?? 1) : item.defaultImageUri
-              }
-              alt={item.name}
-              fill
-              className="object-contain py-2"
-            />
-          ) : (
-            <Skeleton className="h-40 w-full" />
-          )}
-        </div>
+          <div className="relative h-40 w-full">
+            {item.defaultImageUri ? (
+              <Image
+                src={
+                  isPickaxe
+                    ? paths.assemblyItemImage(item.id, item.tier ?? 1)
+                    : item.defaultImageUri
+                }
+                alt={item.name}
+                fill
+                className="object-contain py-2"
+              />
+            ) : (
+              <Skeleton className="h-40 w-full" />
+            )}
+          </div>
 
-        <CardContent className="flex flex-col gap-6">
-          {isPickaxe ? (
-            <ItemTraits
-              traits={[
-                item.tier ? { name: 'Tier', value: item.tier } : null,
-                { name: 'Mining Power', value: getPickaxeMiningPower(item.tier ?? 1) },
-                { name: 'Remaining Usages', value: item.usagesRemaining ?? '?' },
-              ].filter(isNotNullish)}
-            />
-          ) : (
-            <ItemTraits
-              traits={[
-                item.tier ? { name: 'Tier', value: item.tier } : null,
-                ...traits,
-                { name: 'Remaining Usages', value: item.usagesRemaining ?? '?' },
-              ].filter(isNotNullish)}
-            />
-          )}
-        </CardContent>
-      </Card>
+          <CardContent className="flex flex-col gap-6">
+            {isPickaxe ? (
+              <ItemTraits
+                traits={[
+                  item.tier ? { name: 'Tier', value: item.tier } : null,
+                  { name: 'Mining Power', value: getPickaxeMiningPower(item.tier ?? 1) },
+                  { name: 'Remaining Usages', value: item.usagesRemaining ?? '?' },
+                ].filter(isNotNullish)}
+              />
+            ) : (
+              <ItemTraits
+                traits={[
+                  item.tier ? { name: 'Tier', value: item.tier } : null,
+                  ...traits,
+                  { name: 'Remaining Usages', value: item.usagesRemaining ?? '?' },
+                ].filter(isNotNullish)}
+              />
+            )}
+
+            <MintCountBadge mintCount={formattedMintCount} />
+          </CardContent>
+        </Card>
+      </Link>
     </li>
   );
 };
@@ -924,7 +937,7 @@ export const ItemsToCraftSkeleton: FC = () => {
   );
 };
 
-export const FungibleItemBadge: FC = () => {
+const FungibleItemBadge: FC = () => {
   return (
     <Tooltip>
       <TooltipTrigger>
@@ -935,6 +948,22 @@ export const FungibleItemBadge: FC = () => {
         <p>Fungible item: all instances and their properties are identical.</p>
       </TooltipContent>
     </Tooltip>
+  );
+};
+
+const MintCountBadge: FC<{ mintCount: string | null }> = ({ mintCount }) => {
+  return mintCount ? (
+    <Tooltip>
+      <TooltipTrigger className="text-muted-foreground flex items-center gap-1 self-start text-xs">
+        <WrenchIcon className="text-muted-foreground size-3" /> {mintCount}x
+      </TooltipTrigger>
+
+      <TooltipContent>
+        <p>Item crafted {mintCount === '1' ? 'once' : `${mintCount} times`}</p>
+      </TooltipContent>
+    </Tooltip>
+  ) : (
+    <span />
   );
 };
 
