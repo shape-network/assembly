@@ -545,7 +545,8 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
                               <InlineLink href={paths.otom}>
                                 otoms.xyz <ExternalLinkIcon className="h-4 w-4" />
                               </InlineLink>
-                              , right-click on the element and select <b>&quot;View Details&quot;</b> as the example below.
+                              , right-click on the element and select{' '}
+                              <b>&quot;View Details&quot;</b> as the example below.
                             </p>
                             <div className="mt-2 w-full">
                               <video
@@ -565,7 +566,7 @@ export const BlueprintEditor: FC<BlueprintEditorProps> = ({ components, onChange
                             <p>
                               You can also find a list of Otoms (Universe Alpha) and{' '}
                               <Link
-                                href="https://docs.google.com/spreadsheets/d/e/2PACX-1vSY6nasDSVjnOCGaxls_3UtO7K-t1d5MlOdmJMgW9uQQOdOCTOmWQnxUaODxWXbP61zPLzJa69hMzHL/pubhtml?gid=461026717&single=true"
+                                href="https://docs.google.com/spreadsheets/d/e/2PACX-1vTq60eL23OixHeiyRwZzgJfalT9LfFfjQuaDzmfMR51yEpr3qjBr4houYNNeyZI_-yVQv5iezTY53y1/pubhtml?gid=1848041062&single=true"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="font-semibold underline"
