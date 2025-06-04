@@ -22,7 +22,7 @@ async function getCraftItems(): Promise<string> {
     ? results
     : results.filter((r) => !HIDDEN_ITEMS.includes(r.id));
 
-  const mintCountResponses = await rpc.multicall({
+  const supplyResponses = await rpc.multicall({
     contracts: filteredResults.map((r) => ({
       abi: assemblyTrackingContractAbi,
       address: assemblyTracking[config.chain.id],
@@ -34,9 +34,8 @@ async function getCraftItems(): Promise<string> {
 
   const items: Item[] = await Promise.all(
     filteredResults.map(async (r, index) => {
-      const mintCountResponse = mintCountResponses[index];
-      const mintCount =
-        mintCountResponse.status === 'success' ? Number(mintCountResponse.result) : 0;
+      const supplyResponse = supplyResponses[index];
+      const supply = supplyResponse.status === 'success' ? Number(supplyResponse.result) : 0;
 
       return {
         id: r.id,
@@ -48,12 +47,12 @@ async function getCraftItems(): Promise<string> {
         ethCostInWei: r.ethCostInWei,
         blueprint: await Promise.all(r.blueprint.map(getBlueprintForItem)),
         initialTraits: await getTraitsForItem(r.id),
-        mintCount,
+        supply,
       };
     })
   );
 
-  return superjson.stringify(items.sort((a, b) => b.mintCount - a.mintCount));
+  return superjson.stringify(items.sort((a, b) => b.supply - a.supply));
 }
 
 const getCachedCraftItems = unstable_cache(getCraftItems, ['craftable-items'], {

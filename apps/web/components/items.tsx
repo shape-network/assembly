@@ -133,8 +133,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item }) => {
 
   const isPickaxe = config.chain.testnet ? false : item.id === BigInt(2);
   const isFungible = item.itemType === 0;
-  const formattedMintCount =
-    item.mintCount > 0 ? Intl.NumberFormat('en-US').format(item.mintCount) : null;
+  const formattedSupply = item.supply > 0 ? Intl.NumberFormat('en-US').format(item.supply) : null;
 
   return (
     <li className="relative grid w-[300px] shrink-0 grid-rows-[1fr_auto] gap-1 sm:w-[380px]">
@@ -283,7 +282,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item }) => {
               <div className="h-[90px]" />
             )}
 
-            <MintCountBadge mintCount={formattedMintCount} />
+            <SupplyBadge supply={formattedSupply} />
           </div>
         </CardContent>
 
@@ -670,8 +669,7 @@ export const OwnedItemCard: FC<{ item: OwnedItem }> = ({ item }) => {
   const isPickaxe = config.chain.testnet ? false : item.id === BigInt(2);
   const isFungible = item.itemType === 0;
 
-  const formattedMintCount =
-    item.mintCount > 0 ? Intl.NumberFormat('en-US').format(item.mintCount) : null;
+  const formattedSupply = item.supply > 0 ? Intl.NumberFormat('en-US').format(item.supply) : null;
 
   return (
     <li className="relative w-xs shrink-0 sm:w-[380px]">
@@ -742,7 +740,7 @@ export const OwnedItemCard: FC<{ item: OwnedItem }> = ({ item }) => {
           </CardContent>
 
           <div className="px-4">
-            <MintCountBadge mintCount={formattedMintCount} />
+            <SupplyBadge supply={formattedSupply} />
           </div>
         </Card>
       </Link>
@@ -1025,15 +1023,16 @@ const FungibleItemBadge: FC = () => {
   );
 };
 
-const MintCountBadge: FC<{ mintCount: string | null }> = ({ mintCount }) => {
-  return mintCount ? (
+const SupplyBadge: FC<{ supply: string | null }> = ({ supply }) => {
+  return supply ? (
     <Tooltip>
       <TooltipTrigger className="text-muted-foreground flex items-center gap-1 self-start text-xs">
-        <WrenchIcon className="text-muted-foreground size-3" /> {mintCount} x
+        <WrenchIcon className="text-muted-foreground size-3" /> {supply} x
       </TooltipTrigger>
 
       <TooltipContent>
-        <p>Item crafted {mintCount === '1' ? 'once' : `${mintCount} times`}</p>
+        <p>Current circulating supply: </p>
+        <p>Crafted amount - burned amount</p>
       </TooltipContent>
     </Tooltip>
   ) : (

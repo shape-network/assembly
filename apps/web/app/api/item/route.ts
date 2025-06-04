@@ -17,7 +17,7 @@ const schema = z.object({
 async function getItem(itemTokenId: bigint, itemId: bigint): Promise<string> {
   const rpc = rpcClient();
 
-  const [itemResponse, tierResponse, traitsResponse, mintCountResponse] = await rpc.multicall({
+  const [itemResponse, tierResponse, traitsResponse, supplyResponse] = await rpc.multicall({
     contracts: [
       {
         abi: assemblyCoreContractAbi,
@@ -50,7 +50,7 @@ async function getItem(itemTokenId: bigint, itemId: bigint): Promise<string> {
   const itemResult = itemResponse.status === 'success' ? itemResponse.result : null;
   const tierResult = tierResponse.status === 'success' ? tierResponse.result : null;
   const traitsResult = traitsResponse.status === 'success' ? traitsResponse.result : null;
-  const mintCountResult = mintCountResponse.status === 'success' ? mintCountResponse.result : null;
+  const supplyResult = supplyResponse.status === 'success' ? supplyResponse.result : null;
 
   if (!itemResult) {
     throw new Error(`Item ${itemId} not found or could not be retrieved`);
@@ -59,7 +59,7 @@ async function getItem(itemTokenId: bigint, itemId: bigint): Promise<string> {
   const tier = Number(tierResult);
   const usagesTrait = traitsResult?.find((trait) => trait.typeName === 'Usages Remaining');
   const usagesRemaining = usagesTrait ? Number(usagesTrait.valueNumber) : null;
-  const mintCount = mintCountResult ? Number(mintCountResult) : 0;
+  const supply = supplyResult ? Number(supplyResult) : 0;
 
   const item: OwnedItem = {
     ...itemResult,
@@ -74,7 +74,7 @@ async function getItem(itemTokenId: bigint, itemId: bigint): Promise<string> {
           value: t.valueString ?? t.valueNumber.toString(),
         }))
       : [],
-    mintCount,
+    supply,
   };
 
   return superjson.stringify(item);
