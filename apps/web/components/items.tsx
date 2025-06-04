@@ -176,7 +176,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item }) => {
             </div>
 
             <CardDescription
-              className="line-clamp-3 min-h-10 text-center italic"
+              className="line-clamp-2 min-h-10 text-center italic"
               title={item.description}
             >
               {item.description}
