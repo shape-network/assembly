@@ -160,7 +160,7 @@ export const HomeContent = () => {
             </div>
 
             {address && (
-              <div className="flex w-full flex-col gap-2">
+              <div className="flex w-full flex-col items-center gap-2 sm:items-start">
                 <FloatingInventory>{renderOtomsInventory}</FloatingInventory>
 
                 <div className="mt-4 flex flex-wrap gap-2">
