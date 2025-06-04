@@ -11,6 +11,7 @@ import { droppedItemsStateAtom, onboardingCompletedAtom } from '@/lib/atoms';
 import { paths } from '@/lib/paths';
 import { checkCriteria } from '@/lib/property-utils';
 import type { BlueprintComponent, OtomItem } from '@/lib/types';
+import { cn } from '@/lib/utils';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { useAtom } from 'jotai/react';
@@ -90,9 +91,12 @@ export const HomeContent = () => {
 
   const renderOtomsInventory = useMemo(() => {
     return (
-      <div className={`flex flex-col gap-2 ${isFloating ? 'h-full w-full overflow-hidden' : ''}`}>
+      <div className={cn('flex flex-col gap-2', isFloating && 'h-full w-full overflow-hidden')}>
         <div
-          className={`flex items-baseline justify-between gap-2 ${isFloating ? 'rnd-drag-handle cursor-move' : ''}`}
+          className={cn(
+            'flex items-baseline justify-between gap-2',
+            isFloating && 'rnd-drag-handle cursor-move'
+          )}
         >
           <h2 className="text-primary font-bold tracking-wide uppercase">Owned Otom Elements</h2>
           <div className="flex items-center gap-2">
@@ -117,7 +121,7 @@ export const HomeContent = () => {
           </div>
         </div>
 
-        <div className={`flex-1 overflow-auto ${isFloating ? 'h-full w-full' : ''}`}>
+        <div className={cn('flex-1 overflow-auto', isFloating && 'h-full w-full')}>
           <OtomsInventory usedCounts={usedCounts} />
         </div>
       </div>
