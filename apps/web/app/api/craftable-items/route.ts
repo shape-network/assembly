@@ -1,6 +1,6 @@
 import { getTraitsForItem } from '@/app/api/fetchers';
-import { assemblyCoreContractAbi, assemblyTrackingContractAbi } from '@/generated';
-import { assemblyCore, assemblyTracking } from '@/lib/addresses';
+import { assemblyTrackingContractAbi } from '@/generated';
+import { assemblyTracking } from '@/lib/addresses';
 import { rpcClient } from '@/lib/clients';
 import { config } from '@/lib/config';
 import { getBlueprintForItem, HIDDEN_ITEMS } from '@/lib/items';
@@ -22,11 +22,11 @@ async function getCraftItems(): Promise<string> {
     ? results
     : results.filter((r) => !HIDDEN_ITEMS.includes(r.id));
 
-  const mintCountResponses = await rpc.multicall({
+  const supplyResponses = await rpc.multicall({
     contracts: filteredResults.map((r) => ({
-      abi: assemblyCoreContractAbi,
-      address: assemblyCore[config.chain.id],
-      functionName: 'itemMintCount' as const,
+      abi: assemblyTrackingContractAbi,
+      address: assemblyTracking[config.chain.id],
+      functionName: 'getItemSupply',
       args: [r.id],
     })),
     allowFailure: true,
@@ -34,9 +34,8 @@ async function getCraftItems(): Promise<string> {
 
   const items: Item[] = await Promise.all(
     filteredResults.map(async (r, index) => {
-      const mintCountResponse = mintCountResponses[index];
-      const mintCount =
-        mintCountResponse.status === 'success' ? Number(mintCountResponse.result) : 0;
+      const supplyResponse = supplyResponses[index];
+      const supply = supplyResponse.status === 'success' ? Number(supplyResponse.result) : 0;
 
       return {
         id: r.id,
@@ -48,12 +47,12 @@ async function getCraftItems(): Promise<string> {
         ethCostInWei: r.ethCostInWei,
         blueprint: await Promise.all(r.blueprint.map(getBlueprintForItem)),
         initialTraits: await getTraitsForItem(r.id),
-        mintCount,
+        supply,
       };
     })
   );
 
-  return superjson.stringify(items.sort((a, b) => b.mintCount - a.mintCount));
+  return superjson.stringify(items.sort((a, b) => b.supply - a.supply));
 }
 
 const getCachedCraftItems = unstable_cache(getCraftItems, ['craftable-items'], {
