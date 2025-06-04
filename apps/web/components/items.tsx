@@ -32,7 +32,6 @@ import Link from 'next/link';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { decodeEventLog, formatEther, toEventSelector } from 'viem';
-import { shapeSepolia } from 'viem/chains';
 import { useAccount, useSwitchChain, useWaitForTransactionReceipt } from 'wagmi';
 
 export const ItemsToCraft: FC<{
@@ -124,7 +123,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, on
     return false;
   }
 
-  const isPickaxe = item.id === BigInt(2);
+  const isPickaxe = config.chain.testnet ? false : item.id === BigInt(2);
   const isFungible = item.itemType === 0;
   const formattedMintCount =
     item.mintCount > 0 ? Intl.NumberFormat('en-US').format(item.mintCount) : null;
@@ -269,8 +268,10 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, on
           </div>
         </CardContent>
 
-        {config.chain.id === shapeSepolia.id && (
-          <p className="text-muted-foreground/50 absolute right-2 bottom-1 text-xs">{item.id}</p>
+        {process.env.NODE_ENV === 'development' && (
+          <p className="text-muted-foreground/50 absolute right-2 bottom-1 text-xs">
+            dev itemId: {item.id}
+          </p>
         )}
       </Card>
     </li>
@@ -570,7 +571,7 @@ const CraftItemButton: FC<{
     }
   }, [isTxError, craftingStatus, item.name]);
 
-  const isPickaxe = item.id === BigInt(2);
+  const isPickaxe = config.chain.testnet ? false : item.id === BigInt(2);
 
   const disabled = !isCraftable || craftingStatus === 'pending' || isTxConfirming;
 
@@ -645,7 +646,7 @@ const CraftItemButton: FC<{
 export const OwnedItemCard: FC<{ item: OwnedItem }> = ({ item }) => {
   const traits = item.initialTraits.filter((t) => t.name !== 'Usages Remaining');
 
-  const isPickaxe = item.id === BigInt(2);
+  const isPickaxe = config.chain.testnet ? false : item.id === BigInt(2);
   const isFungible = item.itemType === 0;
 
   const formattedMintCount =
