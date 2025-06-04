@@ -137,7 +137,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item }) => {
     item.mintCount > 0 ? Intl.NumberFormat('en-US').format(item.mintCount) : null;
 
   return (
-    <li className="relative mt-4 grid w-[300px] shrink-0 grid-rows-[1fr_auto] gap-1 sm:w-[380px]">
+    <li className="relative grid w-[300px] shrink-0 grid-rows-[1fr_auto] gap-1 sm:w-[380px]">
       {isPickaxe && (
         <Badge
           className="bg-background absolute -bottom-1.5 left-1/2 z-10 -translate-x-1/2"
@@ -159,7 +159,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item }) => {
         />
 
         <CardHeader className="relative">
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="z-10 flex items-center gap-2">
             {isFungible && <FungibleItemBadge />}
             {item.name}
           </CardTitle>
@@ -169,14 +169,19 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item }) => {
           <div className="flex flex-col gap-6">
             <div className="relative h-40 w-full">
               {item.defaultImageUri ? (
-                <Image src={item.defaultImageUri} alt={item.name} fill className="object-contain" />
+                <Image
+                  src={item.defaultImageUri}
+                  alt={item.name}
+                  fill
+                  className={cn('object-contain', isPickaxe && 'scale-180')}
+                />
               ) : (
                 <Skeleton className="h-40 w-full" />
               )}
             </div>
 
             <CardDescription
-              className="line-clamp-2 min-h-10 text-center italic"
+              className="z-10 line-clamp-2 min-h-10 text-center italic"
               title={item.description}
             >
               {item.description}
@@ -669,7 +674,8 @@ export const OwnedItemCard: FC<{ item: OwnedItem }> = ({ item }) => {
     item.mintCount > 0 ? Intl.NumberFormat('en-US').format(item.mintCount) : null;
 
   return (
-    <li className="relative w-xs shrink-0 sm:w-[300px]">
+    // <li className="relative grid w-[300px] shrink-0 grid-rows-[1fr_auto] gap-1 sm:w-[380px]">
+    <li className="relative w-xs shrink-0 sm:w-[380px]">
       {isPickaxe && (
         <Badge
           className="bg-background absolute -bottom-2.5 left-1/2 z-10 -translate-x-1/2"
@@ -690,24 +696,31 @@ export const OwnedItemCard: FC<{ item: OwnedItem }> = ({ item }) => {
             </CardTitle>
           </CardHeader>
 
-          <div className="relative h-40 w-full">
-            {item.defaultImageUri ? (
-              <Image
-                src={
-                  isPickaxe
-                    ? paths.assemblyItemImage(item.id, item.tier ?? 1)
-                    : item.defaultImageUri
-                }
-                alt={item.name}
-                fill
-                className="object-contain py-2"
-              />
-            ) : (
-              <Skeleton className="h-40 w-full" />
-            )}
-          </div>
-
           <CardContent className="flex flex-col gap-6">
+            <div className="relative h-40 w-full">
+              {item.defaultImageUri ? (
+                <Image
+                  src={
+                    isPickaxe
+                      ? paths.assemblyItemImage(item.id, item.tier ?? 1)
+                      : item.defaultImageUri
+                  }
+                  alt={item.name}
+                  fill
+                  className="object-contain"
+                />
+              ) : (
+                <Skeleton className="h-40 w-full" />
+              )}
+            </div>
+
+            <CardDescription
+              className="line-clamp-2 min-h-10 text-center italic"
+              title={item.description}
+            >
+              {item.description}
+            </CardDescription>
+
             {isPickaxe ? (
               <ItemTraits
                 traits={[
@@ -721,7 +734,9 @@ export const OwnedItemCard: FC<{ item: OwnedItem }> = ({ item }) => {
                 traits={[
                   item.tier ? { name: 'Tier', value: item.tier } : null,
                   ...traits,
-                  { name: 'Remaining Usages', value: item.usagesRemaining ?? '?' },
+                  item.usagesRemaining
+                    ? { name: 'Remaining Usages', value: item.usagesRemaining }
+                    : null,
                 ].filter(isNotNullish)}
               />
             )}
@@ -987,7 +1002,7 @@ export const ItemsToCraftSkeleton: FC = () => {
   return (
     <HorizontallScrollWrapper>
       {Array.from({ length: 4 }).map((_, index) => (
-        <li key={index} className="w-xs flex-shrink-0 sm:w-[300px]">
+        <li key={index} className="w-xs flex-shrink-0 sm:w-[380px]">
           <Skeleton className="h-[578px] w-full" />
         </li>
       ))}
