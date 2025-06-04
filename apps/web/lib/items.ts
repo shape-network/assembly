@@ -106,3 +106,7 @@ export async function getBlueprintForItem(
     criteria: parsedCriteria,
   };
 }
+
+export const HIDDEN_ITEMS: bigint[] = [
+  BigInt(1), // test pickaxe
+];
