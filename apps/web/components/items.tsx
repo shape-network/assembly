@@ -24,9 +24,9 @@ import { BlueprintComponent, Item, Molecule, OtomItem, OwnedItem, Trait } from '
 import { cn, isNotNullish, isSameAddress } from '@/lib/utils';
 import { useDndContext, useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
-import { QuestionMarkCircledIcon } from '@radix-ui/react-icons';
+import { QuestionMarkCircledIcon, TrashIcon } from '@radix-ui/react-icons';
 import { useAtom, useSetAtom } from 'jotai';
-import { CoinsIcon, WrenchIcon, XIcon } from 'lucide-react';
+import { CoinsIcon, WrenchIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
@@ -852,13 +852,14 @@ const RequiredDropZone: FC<{
       >
         <CardContent className="group relative grid size-15 place-items-center px-0">
           {isDropped && (
-            <div
-              className="absolute inset-0 z-10 hidden cursor-pointer items-center justify-center bg-white/80 group-hover:flex"
+            <button
+              type="button"
+              className="absolute inset-0 z-10 hidden cursor-pointer items-center justify-center bg-white/25 group-hover:flex"
               onClick={handleRemove}
-              title="Remove Otom"
+              title="Remove component"
             >
-              <XIcon className="text-primary size-4" />
-            </div>
+              <TrashIcon className="absolute top-1 right-1 size-4 text-white" />
+            </button>
           )}
           {component.componentType === 'otom' && molecule ? (
             <ElementName otom={molecule} />
