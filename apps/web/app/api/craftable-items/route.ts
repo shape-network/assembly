@@ -3,7 +3,7 @@ import { assemblyCoreContractAbi, assemblyTrackingContractAbi } from '@/generate
 import { assemblyCore, assemblyTracking } from '@/lib/addresses';
 import { rpcClient } from '@/lib/clients';
 import { config } from '@/lib/config';
-import { getBlueprintForItem } from '@/lib/items';
+import { getBlueprintForItem, HIDDEN_ITEMS } from '@/lib/items';
 import { Item, ItemType } from '@/lib/types';
 import { unstable_cache } from 'next/cache';
 import { NextResponse } from 'next/server';
@@ -20,7 +20,7 @@ async function getCraftItems(): Promise<string> {
 
   const filteredResults = config.chain.testnet
     ? results
-    : results.filter((r) => r.id === BigInt(2));
+    : results.filter((r) => !HIDDEN_ITEMS.includes(r.id));
 
   const mintCountResponses = await rpc.multicall({
     contracts: filteredResults.map((r) => ({
