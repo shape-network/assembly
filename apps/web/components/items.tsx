@@ -175,7 +175,12 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item }) => {
               )}
             </div>
 
-            <CardDescription className="text-center italic">{item.description}</CardDescription>
+            <CardDescription
+              className="line-clamp-3 min-h-10 text-center italic"
+              title={item.description}
+            >
+              {item.description}
+            </CardDescription>
 
             {isPickaxe ? (
               <ItemTraits
@@ -637,8 +642,10 @@ const CraftItemButton: FC<{
                     <ItemTraits
                       traits={[
                         craftedItem.tier ? { name: 'Tier', value: craftedItem.tier } : null,
-                        ...craftedItem?.initialTraits,
-                        { name: 'Usages', value: craftedItem.usagesRemaining ?? '?' },
+                        ...craftedItem?.initialTraits.filter((t) => t.name !== 'Usages Remaining'),
+                        craftedItem.usagesRemaining
+                          ? { name: 'Usages', value: craftedItem.usagesRemaining }
+                          : null,
                       ].filter(isNotNullish)}
                     />
                   )}
