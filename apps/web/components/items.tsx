@@ -674,7 +674,6 @@ export const OwnedItemCard: FC<{ item: OwnedItem }> = ({ item }) => {
     item.mintCount > 0 ? Intl.NumberFormat('en-US').format(item.mintCount) : null;
 
   return (
-    // <li className="relative grid w-[300px] shrink-0 grid-rows-[1fr_auto] gap-1 sm:w-[380px]">
     <li className="relative w-xs shrink-0 sm:w-[380px]">
       {isPickaxe && (
         <Badge
@@ -688,7 +687,7 @@ export const OwnedItemCard: FC<{ item: OwnedItem }> = ({ item }) => {
       )}
 
       <Link href={paths.openSea.token(item.tokenId)} target="_blank" rel="noopener noreferrer">
-        <Card className="h-full">
+        <Card className="grid h-full grid-rows-[auto_1fr_auto]">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               {isFungible && <FungibleItemBadge />}
@@ -740,9 +739,11 @@ export const OwnedItemCard: FC<{ item: OwnedItem }> = ({ item }) => {
                 ].filter(isNotNullish)}
               />
             )}
-
-            <MintCountBadge mintCount={formattedMintCount} />
           </CardContent>
+
+          <div className="px-4">
+            <MintCountBadge mintCount={formattedMintCount} />
+          </div>
         </Card>
       </Link>
     </li>
