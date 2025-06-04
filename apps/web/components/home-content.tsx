@@ -1,87 +1,73 @@
 'use client';
 
+import { FloatingInventory, useFloatingInventory } from '@/components/floating-inventory';
 import { ItemsInventory, OtomsInventory } from '@/components/inventories';
-import { DroppedItemsState, ItemsToCraft } from '@/components/items';
+import { ItemsToCraft } from '@/components/items';
 import { OnboardingWizard } from '@/components/onboarding-wizard';
 import { InlineLink } from '@/components/ui/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { WalletConnect } from '@/components/wallet-connect';
-import {
-  inventoryWindowFloatingAtom,
-  inventoryWindowPositionAtom,
-  inventoryWindowSizeAtom,
-  onboardingCompletedAtom,
-} from '@/lib/atoms';
+import { droppedItemsStateAtom, onboardingCompletedAtom } from '@/lib/atoms';
 import { paths } from '@/lib/paths';
 import { checkCriteria } from '@/lib/property-utils';
 import type { BlueprintComponent, OtomItem } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { DndContext, DragOverlay, type DragEndEvent, type DragStartEvent } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { useAtom } from 'jotai/react';
 import { AppWindow } from 'lucide-react';
 import { FC, useCallback, useMemo, useState } from 'react';
-import { Rnd } from 'react-rnd';
 import { useAccount } from 'wagmi';
 
 export const HomeContent = () => {
   const { address } = useAccount();
-  const [droppedItemsState, setDroppedItemsState] = useState<DroppedItemsState>({});
+  const [droppedItemsState, setDroppedItemsState] = useAtom(droppedItemsStateAtom);
   const [activeItem, setActiveItem] = useState<OtomItem | null>(null);
-  const [isFloating, setIsFloating] = useAtom(inventoryWindowFloatingAtom);
-  const [rndPosition, setRndPosition] = useAtom(inventoryWindowPositionAtom);
-  const [rndSize, setRndSize] = useAtom(inventoryWindowSizeAtom);
   const [onboardingCompleted, setOnboardingCompleted] = useAtom(onboardingCompletedAtom);
 
-  const handleOpenFloating = useCallback(() => {
-    const windowWidth = window.innerWidth;
-    const windowHeight = window.innerHeight;
+  const { isFloating, handleOpenFloating, handleCloseFloating } = useFloatingInventory();
 
-    const xPos = windowWidth - rndSize.width - 50;
-    const yPos = windowHeight - rndSize.height - 40;
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      setActiveItem(null);
 
-    setRndPosition({ x: Math.max(0, xPos), y: Math.max(0, yPos) });
-    setIsFloating(true);
-  }, [rndSize, setRndPosition, setIsFloating]);
+      if (!over) return;
 
-  const handleDragEnd = useCallback((event: DragEndEvent) => {
-    const { active, over } = event;
-    setActiveItem(null);
+      const droppedItem = active.data.current as OtomItem | null;
+      const dropZoneId = String(over.id);
+      const dropZoneData = over.data.current as {
+        type: string;
+        index: number;
+        component: BlueprintComponent;
+      };
 
-    if (!over) return;
+      if (!droppedItem || !dropZoneData) return;
 
-    const droppedItem = active.data.current as OtomItem | null;
-    const dropZoneId = String(over.id);
-    const dropZoneData = over.data.current as {
-      type: string;
-      index: number;
-      component: BlueprintComponent;
-    };
+      const parts = dropZoneId.split('-');
+      const itemId = parts[1];
+      const blueprintIndex = dropZoneData.index;
+      const component = dropZoneData.component;
 
-    if (!droppedItem || !dropZoneData) return;
+      let canDrop = false;
+      if (component.componentType === 'otom') {
+        canDrop = droppedItem.tokenId === String(component.itemIdOrOtomTokenId);
+      } else if (component.componentType === 'variable_otom') {
+        canDrop = checkCriteria(droppedItem, component.criteria);
+      }
 
-    const parts = dropZoneId.split('-');
-    const itemId = parts[1];
-    const blueprintIndex = dropZoneData.index;
-    const component = dropZoneData.component;
-
-    let canDrop = false;
-    if (component.componentType === 'otom') {
-      canDrop = droppedItem.tokenId === String(component.itemIdOrOtomTokenId);
-    } else if (component.componentType === 'variable_otom') {
-      canDrop = checkCriteria(droppedItem, component.criteria);
-    }
-
-    if (canDrop) {
-      setDroppedItemsState((prev) => ({
-        ...prev,
-        [itemId]: {
-          ...prev[itemId],
-          [blueprintIndex]: droppedItem,
-        },
-      }));
-    }
-  }, []);
+      if (canDrop) {
+        setDroppedItemsState({
+          ...droppedItemsState,
+          [itemId]: {
+            ...droppedItemsState[itemId],
+            [blueprintIndex]: droppedItem,
+          },
+        });
+      }
+    },
+    [droppedItemsState, setDroppedItemsState]
+  );
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
     const { active } = event;
@@ -103,16 +89,9 @@ export const HomeContent = () => {
     return counts;
   }, [droppedItemsState]);
 
-  const handleClearSlots = useCallback((itemId: string) => {
-    setDroppedItemsState((prev) => ({
-      ...prev,
-      [itemId]: Object.fromEntries(Object.keys(prev[itemId] || {}).map((index) => [index, null])),
-    }));
-  }, []);
-
-  const renderOtomsInventory = useMemo(
-    () => (
-      <div className={cn('flex flex-col gap-2', isFloating && 'h-full w-full overflow-hidden p-4')}>
+  const renderOtomsInventory = useMemo(() => {
+    return (
+      <div className={cn('flex flex-col gap-2', isFloating && 'h-full w-full overflow-hidden')}>
         <div
           className={cn(
             'flex items-baseline justify-between gap-2',
@@ -132,7 +111,7 @@ export const HomeContent = () => {
               </button>
             ) : (
               <button
-                onClick={() => setIsFloating(false)}
+                onClick={handleCloseFloating}
                 className="text-muted-foreground/70 hover:text-primary hover:bg-muted/50 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full"
                 aria-label="Close window"
               >
@@ -146,9 +125,8 @@ export const HomeContent = () => {
           <OtomsInventory usedCounts={usedCounts} />
         </div>
       </div>
-    ),
-    [handleOpenFloating, isFloating, setIsFloating, usedCounts]
-  );
+    );
+  }, [handleOpenFloating, handleCloseFloating, isFloating, usedCounts]);
 
   return (
     <main className="mx-auto grid min-h-screen max-w-7xl gap-4 sm:p-5">
@@ -172,10 +150,7 @@ export const HomeContent = () => {
                 </div>
 
                 <TabsContent value="items-to-craft">
-                  <ItemsToCraft
-                    droppedItemsState={droppedItemsState}
-                    onClearSlots={handleClearSlots}
-                  />
+                  <ItemsToCraft />
                 </TabsContent>
 
                 <TabsContent value="owned-otoms">
@@ -186,34 +161,7 @@ export const HomeContent = () => {
 
             {address && (
               <div className="flex w-full flex-col gap-2">
-                {isFloating ? (
-                  <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
-                    <Rnd
-                      position={rndPosition}
-                      size={rndSize}
-                      bounds={'window'}
-                      onDragStop={(e, d) => {
-                        setRndPosition({ x: d.x, y: d.y });
-                      }}
-                      onResize={(e, direction, ref, delta, position) => {
-                        setRndPosition(position);
-                      }}
-                      onResizeStop={(e, direction, ref, delta, position) => {
-                        setRndSize({
-                          width: parseInt(ref.style.width),
-                          height: parseInt(ref.style.height),
-                        });
-                        setRndPosition(position);
-                      }}
-                      className="bg-background border-border pointer-events-auto rounded-lg border shadow-lg"
-                      dragHandleClassName="rnd-drag-handle"
-                    >
-                      {renderOtomsInventory}
-                    </Rnd>
-                  </div>
-                ) : (
-                  renderOtomsInventory
-                )}
+                <FloatingInventory>{renderOtomsInventory}</FloatingInventory>
 
                 <div className="mt-4 flex flex-wrap gap-2">
                   <InlineLink className="self-start" href={paths.repo}>
