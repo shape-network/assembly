@@ -1,6 +1,6 @@
 import { getTraitsForItem } from '@/app/api/fetchers';
-import { assemblyCoreContractAbi, assemblyTrackingContractAbi } from '@/generated';
-import { assemblyCore, assemblyTracking } from '@/lib/addresses';
+import { assemblyTrackingContractAbi } from '@/generated';
+import { assemblyTracking } from '@/lib/addresses';
 import { rpcClient } from '@/lib/clients';
 import { config } from '@/lib/config';
 import { getBlueprintForItem, HIDDEN_ITEMS } from '@/lib/items';
@@ -24,9 +24,9 @@ async function getCraftItems(): Promise<string> {
 
   const mintCountResponses = await rpc.multicall({
     contracts: filteredResults.map((r) => ({
-      abi: assemblyCoreContractAbi,
-      address: assemblyCore[config.chain.id],
-      functionName: 'itemMintCount' as const,
+      abi: assemblyTrackingContractAbi,
+      address: assemblyTracking[config.chain.id],
+      functionName: 'getItemSupply',
       args: [r.id],
     })),
     allowFailure: true,

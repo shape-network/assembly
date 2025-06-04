@@ -1,5 +1,5 @@
-import { assemblyCoreContractAbi } from '@/generated';
-import { assemblyCore, assemblyItems } from '@/lib/addresses';
+import { assemblyCoreContractAbi, assemblyTrackingContractAbi } from '@/generated';
+import { assemblyCore, assemblyItems, assemblyTracking } from '@/lib/addresses';
 import { alchemy, rpcClient } from '@/lib/clients';
 import { config } from '@/lib/config';
 import { ItemType, OwnedItem } from '@/lib/types';
@@ -67,9 +67,9 @@ export async function POST(request: Request) {
                 args: [nftTokenId],
               },
               {
-                abi: assemblyCoreContractAbi,
-                address: assemblyCore[config.chain.id],
-                functionName: 'itemMintCount',
+                abi: assemblyTrackingContractAbi,
+                address: assemblyTracking[config.chain.id],
+                functionName: 'getItemSupply',
                 args: [itemId],
               },
             ],

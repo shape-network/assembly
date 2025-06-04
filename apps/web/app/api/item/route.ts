@@ -1,5 +1,5 @@
-import { assemblyCoreContractAbi } from '@/generated';
-import { assemblyCore } from '@/lib/addresses';
+import { assemblyCoreContractAbi, assemblyTrackingContractAbi } from '@/generated';
+import { assemblyCore, assemblyTracking } from '@/lib/addresses';
 import { rpcClient } from '@/lib/clients';
 import { config } from '@/lib/config';
 import { ItemType, OwnedItem } from '@/lib/types';
@@ -38,9 +38,9 @@ async function getItem(itemTokenId: bigint, itemId: bigint): Promise<string> {
         args: [itemTokenId],
       },
       {
-        abi: assemblyCoreContractAbi,
-        address: assemblyCore[config.chain.id],
-        functionName: 'itemMintCount',
+        abi: assemblyTrackingContractAbi,
+        address: assemblyTracking[config.chain.id],
+        functionName: 'getItemSupply',
         args: [itemId],
       },
     ],
