@@ -1032,7 +1032,7 @@ const SupplyBadge: FC<{ supply: string | null }> = ({ supply }) => {
 
       <TooltipContent>
         <p>Current circulating supply: </p>
-        <p>Crafted amount - burned amount</p>
+        <p className="italic">crafted amount - burned amount (used)</p>
       </TooltipContent>
     </Tooltip>
   ) : (
