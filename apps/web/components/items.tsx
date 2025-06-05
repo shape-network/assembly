@@ -47,11 +47,11 @@ export const ItemsToCraft: FC = () => {
   }
 
   return (
-    <HorizontallScrollWrapper>
+    <VerticalScrollWrapper>
       {data.map((item) => (
         <ItemToCraftCard key={item.id} item={item} />
       ))}
-    </HorizontallScrollWrapper>
+    </VerticalScrollWrapper>
   );
 };
 
@@ -137,7 +137,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item }) => {
   const formattedSupply = item.supply > 0 ? Intl.NumberFormat('en-US').format(item.supply) : null;
 
   return (
-    <li className="relative grid w-[300px] shrink-0 grid-rows-[1fr_auto] gap-1 sm:w-[380px]">
+    <li className="relative grid w-full shrink-0 grid-rows-[1fr_auto] gap-1">
       {isPickaxe && (
         <Badge
           className="bg-background absolute -bottom-1.5 left-1/2 z-10 -translate-x-1/2"
@@ -690,7 +690,7 @@ export const OwnedItemCard: FC<{ item: OwnedItem }> = ({ item }) => {
   const formattedSupply = item.supply > 0 ? Intl.NumberFormat('en-US').format(item.supply) : null;
 
   return (
-    <li className="relative w-xs shrink-0 sm:w-[380px]">
+    <li className="relative w-full">
       {isPickaxe && (
         <Badge
           className="bg-background absolute -bottom-2.5 left-1/2 z-10 -translate-x-1/2"
@@ -999,10 +999,10 @@ const WildcardDropZone: FC<{
   );
 };
 
-export const HorizontallScrollWrapper: FC<{ children: React.ReactNode }> = ({ children }) => {
+export const VerticalScrollWrapper: FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <ScrollArea className="w-full" orientation="horizontal">
-      <ul className="flex flex-nowrap gap-2 pb-4">{children}</ul>
+    <ScrollArea className="w-full" orientation="vertical">
+      <ul className="grid grid-cols-1 gap-4 pb-4 sm:grid-cols-2 lg:grid-cols-3">{children}</ul>
     </ScrollArea>
   );
 };
@@ -1019,13 +1019,13 @@ export const InventorySkeleton: FC = () => {
 
 export const ItemsToCraftSkeleton: FC = () => {
   return (
-    <HorizontallScrollWrapper>
+    <VerticalScrollWrapper>
       {Array.from({ length: 4 }).map((_, index) => (
-        <li key={index} className="w-xs flex-shrink-0 sm:w-[380px]">
+        <li key={index} className="w-full">
           <Skeleton className="h-[578px] w-full" />
         </li>
       ))}
-    </HorizontallScrollWrapper>
+    </VerticalScrollWrapper>
   );
 };
 

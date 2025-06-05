@@ -1,10 +1,10 @@
 import { useGetItemsForUser, useGetOtomItemsForUser } from '@/app/api/hooks';
 import {
-  HorizontallScrollWrapper,
   InventorySkeleton,
   ItemsToCraftSkeleton,
   OtomItemCard,
   OwnedItemCard,
+  VerticalScrollWrapper,
 } from '@/components/items';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -201,10 +201,10 @@ export const ItemsInventory: FC = () => {
     );
 
   return (
-    <HorizontallScrollWrapper>
+    <VerticalScrollWrapper>
       {data.map((item) => (
         <OwnedItemCard key={item.tokenId} item={item} />
       ))}
-    </HorizontallScrollWrapper>
+    </VerticalScrollWrapper>
   );
 };
