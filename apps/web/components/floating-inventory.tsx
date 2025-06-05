@@ -12,9 +12,11 @@ import { Cross2Icon } from '@radix-ui/react-icons';
 import { useAtom } from 'jotai/react';
 import { useCallback, useEffect, useMemo } from 'react';
 import { Rnd } from 'react-rnd';
+import { useAccount } from 'wagmi';
 
 // Component manages its own state with no props needed
 export const FloatingInventory = () => {
+  const { isConnected } = useAccount();
   const [droppedItemsState] = useAtom(droppedItemsStateAtom);
 
   // Calculate which items are being used in crafting
@@ -68,6 +70,14 @@ export const FloatingInventory = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, [ensureWindowInBounds]);
+
+  useEffect(() => {
+    if (isConnected) {
+      setIsFloating(true);
+    }
+  }, [isConnected, setIsFloating]);
+
+  if (!isConnected) return null;
 
   return (
     <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
