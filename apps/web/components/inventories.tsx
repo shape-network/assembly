@@ -109,7 +109,7 @@ export const OtomsInventory: FC<{ usedCounts: Map<string, number> }> = ({ usedCo
 
       <ScrollArea className="relative h-full max-h-[50vh] flex-col sm:max-h-[36vh]">
         {!isCreatePage && (
-          <p className="text-muted-foreground mb-4 text-sm italic">
+          <p className="text-muted-foreground mb-4 text-xs italic select-none">
             Drag components into the desired slot to craft an item.
           </p>
         )}

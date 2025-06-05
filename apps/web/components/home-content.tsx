@@ -82,7 +82,7 @@ export const HomeContent = () => {
 
   return (
     <DndContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
-      <main className="mx-auto grid min-h-screen max-w-7xl gap-4 sm:p-5">
+      <main className="mx-auto grid max-w-7xl gap-4 sm:p-5">
         <OnboardingWizard
           open={!!address && !onboardingCompleted}
           onOpenChange={(open) => setOnboardingCompleted(!open)}

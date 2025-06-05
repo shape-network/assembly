@@ -112,7 +112,9 @@ export const FloatingInventory = () => {
             <div className="h-full w-full overflow-hidden p-4">
               <div className="flex h-full w-full flex-col gap-2 overflow-hidden">
                 <div className="rnd-drag-handle flex cursor-move items-baseline justify-between gap-2">
-                  <h2 className="text-primary font-bold tracking-wide uppercase">Your Inventory</h2>
+                  <h2 className="text-primary font-bold tracking-wide uppercase select-none">
+                    Your Inventory
+                  </h2>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setIsFloating(false)}
