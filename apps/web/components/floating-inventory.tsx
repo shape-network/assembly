@@ -48,20 +48,21 @@ export const FloatingInventory = () => {
     }
   }, [rndPosition, rndSize, setRndPosition]);
 
-  // Ensure the floating window is positioned properly when it opens
+  const handleOpeningPosition = useCallback(() => {
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+
+    const xPos = windowWidth - rndSize.width - 155;
+    const yPos = windowHeight - rndSize.height - 100;
+
+    setRndPosition({ x: Math.max(0, xPos), y: Math.max(0, yPos) });
+  }, [rndSize, setRndPosition]);
+
   useEffect(() => {
     if (isFloating) {
-      const windowWidth = window.innerWidth;
-      const windowHeight = window.innerHeight;
-
-      // Position in the center-right of the screen, but not too low to avoid navbar overlap
-      // The navbar is at the bottom-right with some padding
-      const xPos = windowWidth - rndSize.width - 100;
-      const yPos = windowHeight - rndSize.height - 120; // Higher position to avoid navbar
-
-      setRndPosition({ x: Math.max(0, xPos), y: Math.max(0, yPos) });
+      handleOpeningPosition();
     }
-  }, [isFloating, rndSize, setRndPosition]);
+  }, [isFloating, handleOpeningPosition]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -75,8 +76,9 @@ export const FloatingInventory = () => {
   useEffect(() => {
     if (isConnected) {
       setIsFloating(true);
+      handleOpeningPosition();
     }
-  }, [isConnected, setIsFloating]);
+  }, [isConnected, setIsFloating, handleOpeningPosition]);
 
   if (!isConnected) return null;
 
@@ -115,15 +117,15 @@ export const FloatingInventory = () => {
                   <h2 className="text-primary font-bold tracking-wide uppercase select-none">
                     Your Inventory
                   </h2>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setIsFloating(false)}
-                      className="text-muted-foreground/70 hover:text-primary hover:bg-muted/50 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full"
-                      aria-label="Close window"
-                    >
-                      <Cross2Icon className="size-4" />
-                    </button>
-                  </div>
+                </div>
+                <div className="absolute top-3 right-3 z-10">
+                  <button
+                    onClick={() => setIsFloating(false)}
+                    className="text-muted-foreground/70 hover:text-primary hover:bg-muted/50 z-10 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full"
+                    aria-label="Close window"
+                  >
+                    <Cross2Icon className="size-4" />
+                  </button>
                 </div>
 
                 <div className="h-full w-full flex-1 overflow-auto">
