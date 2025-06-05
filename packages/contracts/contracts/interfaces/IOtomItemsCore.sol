@@ -140,7 +140,6 @@ interface IOtomItemsCore {
     error ItemIsFrozen(uint256 itemId);
     error InsufficientPayment(uint256 required, uint256 provided);
     error PaymentFailed();
-    error RefundFailed();
     error InsufficientMatchingOtoms(uint256 required, uint256 available);
     error InsufficientMatchingItems(uint256 required, uint256 available);
     error InsufficientItemTier(uint256 tokenId, uint256 currentTier, uint256 requiredTier);
@@ -154,11 +153,10 @@ interface IOtomItemsCore {
     error OnlyFungible();
     error TraitNotFound();
     error InvalidTier(uint256 tier);
-    error MutatorBlockedTransfer();
+    error MutatorBlocked();
     error MissingItemId();
-    error CraftBlocked();
     error ItemAlreadyFrozen();
-    error InvalidTraitType();
+    error NotOtomItems();
 
     function createFungibleItem(
         string memory _name,

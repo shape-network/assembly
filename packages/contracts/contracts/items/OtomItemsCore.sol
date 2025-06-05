@@ -466,6 +466,10 @@ contract OtomItemsCore is
 
         bool requiresItemsOrOtoms = true;
 
+        if (item.itemType == ItemType.NON_FUNGIBLE && _amount != 1) revert InvalidCraftAmount();
+
+        uint256 actualPayment = _processPayment(item, _amount);
+
         if (item.mutatorContract != address(0)) {
             try
                 IOtomItemMutator(item.mutatorContract).onCraft(
@@ -477,16 +481,12 @@ contract OtomItemsCore is
                     _data
                 )
             returns (bool _allowed, bool _requiresItemsOrOtoms) {
-                if (!_allowed) revert CraftBlocked();
+                if (!_allowed) revert MutatorBlocked();
                 requiresItemsOrOtoms = _requiresItemsOrOtoms;
             } catch {
                 revert MutatorFailed();
             }
         }
-
-        if (item.itemType == ItemType.NON_FUNGIBLE && _amount != 1) revert InvalidCraftAmount();
-
-        uint256 actualPayment = _processPayment(item, _amount);
 
         if (requiresItemsOrOtoms) {
             _validateComponents(item, _amount, _variableOtomIds, _nonFungibleTokenIds);
@@ -545,7 +545,7 @@ contract OtomItemsCore is
             // Return any excess payment
             if (msg.value > totalCost) {
                 (bool refundSuccess, ) = msg.sender.call{value: msg.value - totalCost}("");
-                if (!refundSuccess) revert RefundFailed();
+                if (!refundSuccess) revert PaymentFailed();
             }
 
             return totalCost; // Return actual cost paid
@@ -1086,6 +1086,8 @@ contract OtomItemsCore is
         uint256[] memory _ids,
         uint256[] memory _values
     ) external {
+        if (msg.sender != address(_otomItems)) revert NotOtomItems();
+
         bool allowTransfer = true;
 
         for (uint256 i = 0; i < _ids.length; i++) {
@@ -1116,7 +1118,7 @@ contract OtomItemsCore is
                 }
             }
 
-            if (!allowTransfer) revert MutatorBlockedTransfer();
+            if (!allowTransfer) revert MutatorBlocked();
         }
     }
 
