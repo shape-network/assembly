@@ -1,3 +1,4 @@
+import { Navbar } from '@/components/navbar';
 import { Providers } from '@/components/providers';
 import { InlineLink } from '@/components/ui/link';
 import { Toaster } from '@/components/ui/sonner';
@@ -61,6 +62,7 @@ export default function RootLayout({
             </header>
 
             {children}
+            <Navbar />
             <Toaster />
           </Providers>
         </div>

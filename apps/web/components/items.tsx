@@ -17,16 +17,17 @@ import { assemblyCoreContractAbi, useWriteAssemblyCoreContractCraftItem } from '
 import { assemblyCore } from '@/lib/addresses';
 import { droppedItemsStateAtom, hoveredOtomItemAtom } from '@/lib/atoms';
 import { config } from '@/lib/config';
+import { useCopyToClipboard } from '@/lib/hooks';
 import { isOtomAtom } from '@/lib/otoms';
 import { paths } from '@/lib/paths';
 import { checkCriteria, formatPropertyName, isExactMatchCriteria } from '@/lib/property-utils';
 import { BlueprintComponent, Item, Molecule, OtomItem, OwnedItem, Trait } from '@/lib/types';
-import { cn, isNotNullish, isSameAddress } from '@/lib/utils';
+import { abbreviateHash, cn, isNotNullish, isSameAddress } from '@/lib/utils';
 import { useDndContext, useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { QuestionMarkCircledIcon, TrashIcon } from '@radix-ui/react-icons';
 import { useAtom, useSetAtom } from 'jotai';
-import { CoinsIcon, WrenchIcon } from 'lucide-react';
+import { ClipboardCopyIcon, CoinsIcon, WrenchIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
@@ -153,7 +154,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item }) => {
           droppedItemsState={droppedItemsState}
           isCraftable={isCraftable}
           item={item}
-          className="absolute top-2 right-2 z-10 h-8 px-3"
+          className="absolute top-2 right-2 z-20 h-8 px-3"
           onCraftSuccess={handleClearAllClick}
         />
 
@@ -303,6 +304,7 @@ type OtomItemCardProps = {
 };
 
 export const OtomItemCard: FC<OtomItemCardProps> = ({ representativeItem, count, usedCounts }) => {
+  const { isCopied, copyToClipboard } = useCopyToClipboard();
   const { data: craftableItems } = useGetCraftableItems();
   const [hoveredState, setHoveredState] = useAtom(hoveredOtomItemAtom);
 
@@ -416,6 +418,22 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({ representativeItem, count,
         <p>Toughness: {representativeItem.toughness.toFixed(3)}</p>
         <p>Ductility: {representativeItem.ductility.toFixed(3)}</p>
         <p>Mass: {mass}</p>
+        <div className="flex items-center gap-2">
+          <p>Token ID: {abbreviateHash(representativeItem.tokenId, 3, 4)}</p>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-5 w-5"
+            onClick={(e) => {
+              e.stopPropagation();
+              copyToClipboard(representativeItem.tokenId);
+              toast.success('Token ID copied to clipboard');
+            }}
+          >
+            <ClipboardCopyIcon className="h-3 w-3" />
+            {isCopied && <span className="sr-only">Copied</span>}
+          </Button>
+        </div>
       </TooltipContent>
     </Tooltip>
   );
@@ -872,7 +890,9 @@ const RequiredDropZone: FC<{
               onClick={handleRemove}
               title="Remove component"
             >
-              <TrashIcon className="absolute top-1 right-1 size-4 text-white" />
+              <span className="absolute top-1 right-1 rounded bg-white/90 p-[3px]">
+                <TrashIcon className="text-primary size-4" />
+              </span>
             </button>
           )}
           {component.componentType === 'otom' && molecule ? (

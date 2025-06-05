@@ -1,7 +1,7 @@
 'use client';
 
-import { FloatingInventory, useFloatingInventory } from '@/components/floating-inventory';
-import { ItemsInventory, OtomsInventory } from '@/components/inventories';
+import { FloatingInventory } from '@/components/floating-inventory';
+import { ItemsInventory } from '@/components/inventories';
 import { ItemsToCraft } from '@/components/items';
 import { OnboardingWizard } from '@/components/onboarding-wizard';
 import { InlineLink } from '@/components/ui/link';
@@ -11,12 +11,9 @@ import { droppedItemsStateAtom, onboardingCompletedAtom } from '@/lib/atoms';
 import { paths } from '@/lib/paths';
 import { checkCriteria } from '@/lib/property-utils';
 import type { BlueprintComponent, OtomItem } from '@/lib/types';
-import { cn } from '@/lib/utils';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
-import { Cross2Icon } from '@radix-ui/react-icons';
 import { useAtom } from 'jotai/react';
-import { AppWindow } from 'lucide-react';
-import { FC, useCallback, useMemo, useState } from 'react';
+import { FC, useCallback, useState } from 'react';
 import { useAccount } from 'wagmi';
 
 export const HomeContent = () => {
@@ -24,8 +21,6 @@ export const HomeContent = () => {
   const [droppedItemsState, setDroppedItemsState] = useAtom(droppedItemsStateAtom);
   const [activeItem, setActiveItem] = useState<OtomItem | null>(null);
   const [onboardingCompleted, setOnboardingCompleted] = useAtom(onboardingCompletedAtom);
-
-  const { isFloating, handleOpenFloating, handleCloseFloating } = useFloatingInventory();
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
@@ -77,68 +72,17 @@ export const HomeContent = () => {
     }
   }, []);
 
-  const usedCounts = useMemo(() => {
-    const counts = new Map<string, number>();
-    Object.values(droppedItemsState).forEach((itemDrops) => {
-      Object.values(itemDrops).forEach((item) => {
-        if (item) {
-          counts.set(item.tokenId, (counts.get(item.tokenId) || 0) + 1);
-        }
-      });
-    });
-    return counts;
-  }, [droppedItemsState]);
-
-  const renderOtomsInventory = useMemo(() => {
-    return (
-      <div className={cn('flex flex-col gap-2', isFloating && 'h-full w-full overflow-hidden')}>
-        <div
-          className={cn(
-            'flex items-baseline justify-between gap-2',
-            isFloating && 'rnd-drag-handle cursor-move'
-          )}
-        >
-          <h2 className="text-primary font-bold tracking-wide uppercase">Owned Otom Elements</h2>
-          <div className="flex items-center gap-2">
-            {!isFloating ? (
-              <button
-                onClick={handleOpenFloating}
-                className="text-muted-foreground/50 flex cursor-pointer items-center justify-center gap-2 text-sm no-underline hover:underline"
-                aria-label="Open window"
-              >
-                open in a window
-                <AppWindow className="size-4" />
-              </button>
-            ) : (
-              <button
-                onClick={handleCloseFloating}
-                className="text-muted-foreground/70 hover:text-primary hover:bg-muted/50 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full"
-                aria-label="Close window"
-              >
-                <Cross2Icon className="size-4" />
-              </button>
-            )}
-          </div>
-        </div>
-
-        <div className={cn('flex-1 overflow-auto', isFloating && 'h-full w-full')}>
-          <OtomsInventory usedCounts={usedCounts} />
-        </div>
-      </div>
-    );
-  }, [handleOpenFloating, handleCloseFloating, isFloating, usedCounts]);
-
   return (
-    <main className="mx-auto grid min-h-screen max-w-7xl gap-4 sm:p-5">
-      <OnboardingWizard
-        open={!!address && !onboardingCompleted}
-        onOpenChange={(open) => setOnboardingCompleted(!open)}
-      />
+    <DndContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
+      <main className="mx-auto grid min-h-screen max-w-7xl gap-4 sm:p-5">
+        <OnboardingWizard
+          open={!!address && !onboardingCompleted}
+          onOpenChange={(open) => setOnboardingCompleted(!open)}
+        />
 
-      <div className="flex flex-col justify-start gap-8 overflow-x-hidden px-2 py-12 sm:px-0">
-        {!address && <Hero />}
+        <div className="flex flex-col justify-start gap-8 overflow-x-hidden px-2 py-12 sm:px-0">
+          {!address && <Hero />}
 
-        <DndContext onDragEnd={handleDragEnd} onDragStart={handleDragStart}>
           <div className="flex flex-col gap-16">
             <div className="flex flex-col gap-2">
               <Tabs defaultValue="items-to-craft">
@@ -161,8 +105,6 @@ export const HomeContent = () => {
 
             {address && (
               <div className="flex w-full flex-col items-center gap-2 sm:items-start">
-                <FloatingInventory>{renderOtomsInventory}</FloatingInventory>
-
                 <div className="mt-4 flex flex-wrap gap-2">
                   <InlineLink className="self-start" href={paths.repo}>
                     Contribute
@@ -185,9 +127,10 @@ export const HomeContent = () => {
               </div>
             )}
           </DragOverlay>
-        </DndContext>
-      </div>
-    </main>
+        </div>
+      </main>
+      <FloatingInventory />
+    </DndContext>
   );
 };
 
