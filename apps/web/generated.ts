@@ -11,7 +11,6 @@ import {
 
 export const assemblyCoreContractAbi = [
   { type: 'constructor', inputs: [], stateMutability: 'nonpayable' },
-  { type: 'error', inputs: [], name: 'CraftBlocked' },
   { type: 'error', inputs: [], name: 'CreationDisabled' },
   { type: 'error', inputs: [], name: 'CriteriaNotMet' },
   { type: 'error', inputs: [], name: 'InsufficientItemBalance' },
@@ -60,7 +59,6 @@ export const assemblyCoreContractAbi = [
     inputs: [{ name: 'tier', internalType: 'uint256', type: 'uint256' }],
     name: 'InvalidTier',
   },
-  { type: 'error', inputs: [], name: 'InvalidTraitType' },
   { type: 'error', inputs: [], name: 'InvalidTraits' },
   { type: 'error', inputs: [], name: 'ItemAlreadyFrozen' },
   { type: 'error', inputs: [], name: 'ItemDoesNotExist' },
@@ -70,10 +68,11 @@ export const assemblyCoreContractAbi = [
     name: 'ItemIsFrozen',
   },
   { type: 'error', inputs: [], name: 'MissingItemId' },
-  { type: 'error', inputs: [], name: 'MutatorBlockedTransfer' },
+  { type: 'error', inputs: [], name: 'MutatorBlocked' },
   { type: 'error', inputs: [], name: 'MutatorFailed' },
   { type: 'error', inputs: [], name: 'NotAdmin' },
   { type: 'error', inputs: [], name: 'NotInitializing' },
+  { type: 'error', inputs: [], name: 'NotOtomItems' },
   {
     type: 'error',
     inputs: [
@@ -96,7 +95,6 @@ export const assemblyCoreContractAbi = [
   },
   { type: 'error', inputs: [], name: 'PaymentFailed' },
   { type: 'error', inputs: [], name: 'ReentrancyGuardReentrantCall' },
-  { type: 'error', inputs: [], name: 'RefundFailed' },
   { type: 'error', inputs: [], name: 'TraitNotFound' },
   {
     type: 'event',
