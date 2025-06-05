@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { useAtom, useAtomValue } from 'jotai/react';
 import { BackpackIcon, HelpCircle, PencilRulerIcon } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
+import { usePostHog } from 'posthog-js/react';
 import { FC } from 'react';
 import { useAccount } from 'wagmi';
 import { OnboardingWizard } from './onboarding-wizard';
@@ -25,6 +26,7 @@ export const Navbar: FC<GameMenuProps> = ({ className }) => {
   const bannerDismissed = useAtomValue(itemCreationBannerDismissedAtom);
   const { address } = useAccount();
   const router = useRouter();
+  const posthog = usePostHog();
 
   const toggleInventory = () => {
     if (isFloating) {
@@ -37,6 +39,7 @@ export const Navbar: FC<GameMenuProps> = ({ className }) => {
   const onCreationClick = () => {
     router.push(paths.create);
     handleCloseFloating();
+    posthog?.capture('click', { event: 'click_navbar', action: 'create_item' });
   };
 
   if (!address) return null;
@@ -68,7 +71,10 @@ export const Navbar: FC<GameMenuProps> = ({ className }) => {
           <MenuButton
             icon={<HelpCircle className="size-5" />}
             tooltip="Help"
-            onClick={() => setOnboardingCompleted(false)}
+            onClick={() => {
+              setOnboardingCompleted(false);
+              posthog?.capture('click', { event: 'click_navbar', action: 'help' });
+            }}
           />
         </div>
         <OnboardingWizard

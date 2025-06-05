@@ -30,6 +30,7 @@ import { useAtom, useSetAtom } from 'jotai';
 import { ClipboardCopyIcon, CoinsIcon, WrenchIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePostHog } from 'posthog-js/react';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { decodeEventLog, formatEther, toEventSelector } from 'viem';
@@ -476,6 +477,7 @@ const CraftItemButton: FC<{
     'idle'
   );
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const posthog = usePostHog();
 
   const { data: hash, writeContractAsync } = useWriteAssemblyCoreContractCraftItem();
   const {
@@ -536,6 +538,12 @@ const CraftItemButton: FC<{
   });
 
   async function handleCraftItem() {
+    posthog?.capture('click', {
+      event: 'craft_item',
+      itemId: String(item.id),
+      itemName: item.name,
+    });
+
     if (!switchChainAsync) {
       toast.error(
         'Could not automatically switch to Shape network. Please ensure your wallet network is set to Shape.'
@@ -584,7 +592,7 @@ const CraftItemButton: FC<{
     if (hash && isTxConfirming && craftingStatus === 'pending') {
       toast.loading('Item is being crafted...', { id: 'loading' });
     }
-  }, [hash, isTxConfirming, craftingStatus]);
+  }, [hash, isTxConfirming, craftingStatus, posthog, item.id]);
 
   useEffect(() => {
     if (isTxConfirmed && craftingStatus === 'pending') {
@@ -593,6 +601,10 @@ const CraftItemButton: FC<{
       toast.dismiss('loading');
       setShowSuccessDialog(true);
       refetchOtomItems();
+      posthog?.capture('item_crafted', {
+        itemId: String(item.id),
+        itemName: item.name,
+      });
       if (onCraftSuccess) {
         onCraftSuccess(String(item.id));
       }
@@ -799,6 +811,7 @@ const RequiredDropZone: FC<{
     },
   });
   const setDroppedItemsState = useSetAtom(droppedItemsStateAtom);
+  const posthog = usePostHog();
 
   const { active } = useDndContext();
   const draggedItem = active?.data.current as OtomItem | null;
@@ -849,8 +862,13 @@ const RequiredDropZone: FC<{
           [index]: droppedItem,
         },
       }));
+      posthog?.capture('click', {
+        event: 'add_component',
+        itemId,
+        componentType: component.componentType,
+      });
     }
-  }, [isOwned, droppedItem, setDroppedItemsState, id, index, isDropped]);
+  }, [isOwned, droppedItem, setDroppedItemsState, id, index, isDropped, posthog, component]);
 
   const handleRemove = useCallback(() => {
     const parts = id.split('-');
@@ -862,7 +880,12 @@ const RequiredDropZone: FC<{
         [index]: null,
       } as Record<number, OtomItem>,
     }));
-  }, [setDroppedItemsState, id, index]);
+    posthog?.capture('click', {
+      event: 'remove_component',
+      itemId,
+      componentType: component.componentType,
+    });
+  }, [setDroppedItemsState, id, index, posthog, component]);
 
   return (
     <div ref={setNodeRef}>

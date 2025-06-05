@@ -10,6 +10,7 @@ import {
 import { cn } from '@/lib/utils';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { useAtom } from 'jotai/react';
+import { usePostHog } from 'posthog-js/react';
 import { useCallback, useEffect, useMemo } from 'react';
 import { Rnd } from 'react-rnd';
 import { useAccount } from 'wagmi';
@@ -139,6 +140,7 @@ export const useFloatingInventory = () => {
   const [isFloating, setIsFloating] = useAtom(inventoryWindowFloatingAtom);
   const [, setRndPosition] = useAtom(inventoryWindowPositionAtom);
   const [rndSize] = useAtom(inventoryWindowSizeAtom);
+  const posthog = usePostHog();
 
   const handleOpenFloating = useCallback(() => {
     const windowWidth = window.innerWidth;
@@ -149,11 +151,13 @@ export const useFloatingInventory = () => {
 
     setRndPosition({ x: Math.max(0, xPos), y: Math.max(0, yPos) });
     setIsFloating(true);
-  }, [rndSize, setRndPosition, setIsFloating]);
+    posthog?.capture('inventory', { event: 'opened' });
+  }, [rndSize, setRndPosition, setIsFloating, posthog]);
 
   const handleCloseFloating = useCallback(() => {
     setIsFloating(false);
-  }, [setIsFloating]);
+    posthog?.capture('inventory', { event: 'closed' });
+  }, [setIsFloating, posthog]);
 
   return {
     isFloating,

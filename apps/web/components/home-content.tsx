@@ -13,6 +13,7 @@ import { checkCriteria } from '@/lib/property-utils';
 import type { BlueprintComponent, OtomItem } from '@/lib/types';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { useAtom } from 'jotai/react';
+import { usePostHog } from 'posthog-js/react';
 import { FC, useCallback, useState } from 'react';
 import { useAccount } from 'wagmi';
 
@@ -21,6 +22,7 @@ export const HomeContent = () => {
   const [droppedItemsState, setDroppedItemsState] = useAtom(droppedItemsStateAtom);
   const [activeItem, setActiveItem] = useState<OtomItem | null>(null);
   const [onboardingCompleted, setOnboardingCompleted] = useAtom(onboardingCompletedAtom);
+  const posthog = usePostHog();
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
@@ -59,6 +61,12 @@ export const HomeContent = () => {
             [blueprintIndex]: droppedItem,
           },
         });
+        posthog?.capture('fill_required_element', {
+          itemId,
+          blueprintIndex,
+          componentType: component.componentType,
+          droppedItem,
+        });
       }
     },
     [droppedItemsState, setDroppedItemsState]
@@ -88,8 +96,24 @@ export const HomeContent = () => {
               <Tabs defaultValue="items-to-craft">
                 <div className="flex items-baseline justify-between gap-2">
                   <TabsList>
-                    <TabsTrigger value="items-to-craft">Items to craft</TabsTrigger>
-                    {address && <TabsTrigger value="owned-otoms">Owned Items</TabsTrigger>}
+                    <TabsTrigger
+                      value="items-to-craft"
+                      onClick={() =>
+                        posthog?.capture('click', { event: 'change_tab', action: 'items_to_craft' })
+                      }
+                    >
+                      Items to craft
+                    </TabsTrigger>
+                    {address && (
+                      <TabsTrigger
+                        value="owned-otoms"
+                        onClick={() =>
+                          posthog?.capture('click', { event: 'change_tab', action: 'owned_otoms' })
+                        }
+                      >
+                        Owned Items
+                      </TabsTrigger>
+                    )}
                   </TabsList>
                 </div>
 
@@ -106,11 +130,23 @@ export const HomeContent = () => {
             {address && (
               <div className="flex w-full flex-col items-center gap-2 sm:items-start">
                 <div className="mt-4 flex flex-wrap gap-2">
-                  <InlineLink className="self-start" href={paths.repo}>
+                  <InlineLink
+                    className="self-start"
+                    href={paths.repo}
+                    onClick={() =>
+                      posthog?.capture('click', { event: 'click_link', action: 'source_code' })
+                    }
+                  >
                     Contribute
                   </InlineLink>
                   <span>・</span>
-                  <InlineLink className="self-start" href={paths.docs.assembly}>
+                  <InlineLink
+                    className="self-start"
+                    href={paths.docs.assembly}
+                    onClick={() =>
+                      posthog?.capture('click', { event: 'click_link', action: 'documentation' })
+                    }
+                  >
                     Documentation
                   </InlineLink>
                 </div>
@@ -135,6 +171,8 @@ export const HomeContent = () => {
 };
 
 const Hero: FC = () => {
+  const posthog = usePostHog();
+
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col items-start gap-8">
       <h2 className="text-center text-2xl font-semibold tracking-wide text-pretty sm:text-3xl">
@@ -154,11 +192,23 @@ const Hero: FC = () => {
         <WalletConnect label="Get Started" />
 
         <div className="flex w-full flex-wrap justify-center gap-2">
-          <InlineLink className="self-start" href={paths.repo}>
+          <InlineLink
+            className="self-start"
+            href={paths.repo}
+            onClick={() =>
+              posthog?.capture('click', { event: 'click_link', action: 'source_code' })
+            }
+          >
             Source Code
           </InlineLink>
           <span>・</span>
-          <InlineLink className="self-start" href={paths.docs.assembly}>
+          <InlineLink
+            className="self-start"
+            href={paths.docs.assembly}
+            onClick={() =>
+              posthog?.capture('click', { event: 'click_link', action: 'documentation' })
+            }
+          >
             Documentation
           </InlineLink>
         </div>
