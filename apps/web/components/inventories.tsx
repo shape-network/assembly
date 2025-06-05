@@ -1,10 +1,10 @@
 import { useGetItemsForUser, useGetOtomItemsForUser } from '@/app/api/hooks';
 import {
-  HorizontallScrollWrapper,
   InventorySkeleton,
   ItemsToCraftSkeleton,
   OtomItemCard,
   OwnedItemCard,
+  VerticalScrollWrapper,
 } from '@/components/items';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -13,8 +13,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { isOtomAtom } from '@/lib/otoms';
 import { paths } from '@/lib/paths';
 import type { OtomItem } from '@/lib/types';
-import { cn } from '@/lib/utils';
 import { ExternalLinkIcon } from '@radix-ui/react-icons';
+import { usePathname } from 'next/navigation';
 import { useDeferredValue, useEffect, useMemo, useState, type FC } from 'react';
 import { useInView } from 'react-intersection-observer';
 import { InlineLink } from './ui/link';
@@ -27,12 +27,13 @@ type GroupedOtomItems = {
 
 export const OtomsInventory: FC<{ usedCounts: Map<string, number> }> = ({ usedCounts }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const pathname = usePathname();
   const deferredSearchTerm = useDeferredValue(searchTerm);
 
   const [moleculesRef, moleculesInView] = useInView();
   const [otomsRef, otomsInView] = useInView();
 
-  const [bottomSentinelRef, isBottomSentinelInView] = useInView();
+  const [bottomSentinelRef] = useInView();
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
     useGetOtomItemsForUser();
@@ -91,6 +92,7 @@ export const OtomsInventory: FC<{ usedCounts: Map<string, number> }> = ({ usedCo
 
   const moleculesAmount = inventory.molecules.reduce((acc, group) => acc + group.count, 0);
   const otomsAmount = inventory.otoms.reduce((acc, group) => acc + group.count, 0);
+  const isCreatePage = pathname === paths.create;
 
   return (
     <div className="flex flex-col gap-4">
@@ -106,14 +108,16 @@ export const OtomsInventory: FC<{ usedCounts: Map<string, number> }> = ({ usedCo
       )}
 
       <ScrollArea className="relative h-full max-h-[50vh] flex-col sm:max-h-[36vh]">
-        <p className="text-muted-foreground mb-4 text-sm italic">
-          Drag components into the desired slot to craft an item.
-        </p>
+        {!isCreatePage && (
+          <p className="text-muted-foreground mb-4 text-sm italic">
+            Drag components into the desired slot to craft an item.
+          </p>
+        )}
 
         <Input
           type="search"
           placeholder="Search owned otoms (eg Ju)"
-          className="mb-4 max-w-xs"
+          className="mb-4 w-full"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           disabled={isInventoryEmpty}
@@ -171,13 +175,6 @@ export const OtomsInventory: FC<{ usedCounts: Map<string, number> }> = ({ usedCo
         )}
 
         <div ref={bottomSentinelRef} className="h-px" />
-
-        <div
-          className={cn(
-            'from-background via-background/50 absolute inset-x-0 bottom-0 h-4 w-full bg-gradient-to-t to-transparent transition-opacity',
-            isBottomSentinelInView ? 'opacity-0' : 'opacity-100'
-          )}
-        />
       </ScrollArea>
     </div>
   );
@@ -204,10 +201,10 @@ export const ItemsInventory: FC = () => {
     );
 
   return (
-    <HorizontallScrollWrapper>
+    <VerticalScrollWrapper>
       {data.map((item) => (
         <OwnedItemCard key={item.tokenId} item={item} />
       ))}
-    </HorizontallScrollWrapper>
+    </VerticalScrollWrapper>
   );
 };

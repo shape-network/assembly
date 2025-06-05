@@ -17,18 +17,20 @@ import { assemblyCoreContractAbi, useWriteAssemblyCoreContractCraftItem } from '
 import { assemblyCore } from '@/lib/addresses';
 import { droppedItemsStateAtom, hoveredOtomItemAtom } from '@/lib/atoms';
 import { config } from '@/lib/config';
+import { useCopyToClipboard } from '@/lib/hooks';
 import { isOtomAtom } from '@/lib/otoms';
 import { paths } from '@/lib/paths';
 import { checkCriteria, formatPropertyName, isExactMatchCriteria } from '@/lib/property-utils';
 import { BlueprintComponent, Item, Molecule, OtomItem, OwnedItem, Trait } from '@/lib/types';
-import { cn, isNotNullish, isSameAddress } from '@/lib/utils';
+import { abbreviateHash, cn, isNotNullish, isSameAddress } from '@/lib/utils';
 import { useDndContext, useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { QuestionMarkCircledIcon, TrashIcon } from '@radix-ui/react-icons';
 import { useAtom, useSetAtom } from 'jotai';
-import { CoinsIcon, WrenchIcon } from 'lucide-react';
+import { ClipboardCopyIcon, CoinsIcon, WrenchIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePostHog } from 'posthog-js/react';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { decodeEventLog, formatEther, toEventSelector } from 'viem';
@@ -46,11 +48,11 @@ export const ItemsToCraft: FC = () => {
   }
 
   return (
-    <HorizontallScrollWrapper>
+    <VerticalScrollWrapper>
       {data.map((item) => (
         <ItemToCraftCard key={item.id} item={item} />
       ))}
-    </HorizontallScrollWrapper>
+    </VerticalScrollWrapper>
   );
 };
 
@@ -136,7 +138,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item }) => {
   const formattedSupply = item.supply > 0 ? Intl.NumberFormat('en-US').format(item.supply) : null;
 
   return (
-    <li className="relative grid w-[300px] shrink-0 grid-rows-[1fr_auto] gap-1 sm:w-[380px]">
+    <li className="relative grid w-full shrink-0 grid-rows-[1fr_auto] gap-1">
       {isPickaxe && (
         <Badge
           className="bg-background absolute -bottom-1.5 left-1/2 z-10 -translate-x-1/2"
@@ -153,7 +155,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item }) => {
           droppedItemsState={droppedItemsState}
           isCraftable={isCraftable}
           item={item}
-          className="absolute top-2 right-2 z-10 h-8 px-3"
+          className="absolute top-2 right-2 z-20 h-8 px-3"
           onCraftSuccess={handleClearAllClick}
         />
 
@@ -303,6 +305,7 @@ type OtomItemCardProps = {
 };
 
 export const OtomItemCard: FC<OtomItemCardProps> = ({ representativeItem, count, usedCounts }) => {
+  const { isCopied, copyToClipboard } = useCopyToClipboard();
   const { data: craftableItems } = useGetCraftableItems();
   const [hoveredState, setHoveredState] = useAtom(hoveredOtomItemAtom);
 
@@ -416,6 +419,22 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({ representativeItem, count,
         <p>Toughness: {representativeItem.toughness.toFixed(3)}</p>
         <p>Ductility: {representativeItem.ductility.toFixed(3)}</p>
         <p>Mass: {mass}</p>
+        <div className="flex items-center gap-2">
+          <p>Token ID: {abbreviateHash(representativeItem.tokenId, 3, 4)}</p>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-5 w-5"
+            onClick={(e) => {
+              e.stopPropagation();
+              copyToClipboard(representativeItem.tokenId);
+              toast.success('Token ID copied to clipboard');
+            }}
+          >
+            <ClipboardCopyIcon className="h-3 w-3" />
+            {isCopied && <span className="sr-only">Copied</span>}
+          </Button>
+        </div>
       </TooltipContent>
     </Tooltip>
   );
@@ -458,6 +477,7 @@ const CraftItemButton: FC<{
     'idle'
   );
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const posthog = usePostHog();
 
   const { data: hash, writeContractAsync } = useWriteAssemblyCoreContractCraftItem();
   const {
@@ -518,6 +538,12 @@ const CraftItemButton: FC<{
   });
 
   async function handleCraftItem() {
+    posthog?.capture('click', {
+      event: 'craft_item',
+      itemId: String(item.id),
+      itemName: item.name,
+    });
+
     if (!switchChainAsync) {
       toast.error(
         'Could not automatically switch to Shape network. Please ensure your wallet network is set to Shape.'
@@ -566,7 +592,7 @@ const CraftItemButton: FC<{
     if (hash && isTxConfirming && craftingStatus === 'pending') {
       toast.loading('Item is being crafted...', { id: 'loading' });
     }
-  }, [hash, isTxConfirming, craftingStatus]);
+  }, [hash, isTxConfirming, craftingStatus, posthog, item.id]);
 
   useEffect(() => {
     if (isTxConfirmed && craftingStatus === 'pending') {
@@ -575,6 +601,10 @@ const CraftItemButton: FC<{
       toast.dismiss('loading');
       setShowSuccessDialog(true);
       refetchOtomItems();
+      posthog?.capture('item_crafted', {
+        itemId: String(item.id),
+        itemName: item.name,
+      });
       if (onCraftSuccess) {
         onCraftSuccess(String(item.id));
       }
@@ -672,7 +702,7 @@ export const OwnedItemCard: FC<{ item: OwnedItem }> = ({ item }) => {
   const formattedSupply = item.supply > 0 ? Intl.NumberFormat('en-US').format(item.supply) : null;
 
   return (
-    <li className="relative w-xs shrink-0 sm:w-[380px]">
+    <li className="relative w-full">
       {isPickaxe && (
         <Badge
           className="bg-background absolute -bottom-2.5 left-1/2 z-10 -translate-x-1/2"
@@ -781,6 +811,7 @@ const RequiredDropZone: FC<{
     },
   });
   const setDroppedItemsState = useSetAtom(droppedItemsStateAtom);
+  const posthog = usePostHog();
 
   const { active } = useDndContext();
   const draggedItem = active?.data.current as OtomItem | null;
@@ -831,8 +862,13 @@ const RequiredDropZone: FC<{
           [index]: droppedItem,
         },
       }));
+      posthog?.capture('click', {
+        event: 'add_component',
+        itemId,
+        componentType: component.componentType,
+      });
     }
-  }, [isOwned, droppedItem, setDroppedItemsState, id, index, isDropped]);
+  }, [isOwned, droppedItem, setDroppedItemsState, id, index, isDropped, posthog, component]);
 
   const handleRemove = useCallback(() => {
     const parts = id.split('-');
@@ -844,7 +880,12 @@ const RequiredDropZone: FC<{
         [index]: null,
       } as Record<number, OtomItem>,
     }));
-  }, [setDroppedItemsState, id, index]);
+    posthog?.capture('click', {
+      event: 'remove_component',
+      itemId,
+      componentType: component.componentType,
+    });
+  }, [setDroppedItemsState, id, index, posthog, component]);
 
   return (
     <div ref={setNodeRef}>
@@ -872,7 +913,9 @@ const RequiredDropZone: FC<{
               onClick={handleRemove}
               title="Remove component"
             >
-              <TrashIcon className="absolute top-1 right-1 size-4 text-white" />
+              <span className="absolute top-1 right-1 rounded bg-white/90 p-[3px]">
+                <TrashIcon className="text-primary size-4" />
+              </span>
             </button>
           )}
           {component.componentType === 'otom' && molecule ? (
@@ -979,10 +1022,10 @@ const WildcardDropZone: FC<{
   );
 };
 
-export const HorizontallScrollWrapper: FC<{ children: React.ReactNode }> = ({ children }) => {
+export const VerticalScrollWrapper: FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <ScrollArea className="w-full" orientation="horizontal">
-      <ul className="flex flex-nowrap gap-2 pb-4">{children}</ul>
+    <ScrollArea className="w-full" orientation="vertical">
+      <ul className="grid grid-cols-1 gap-4 pb-4 sm:grid-cols-2 lg:grid-cols-3">{children}</ul>
     </ScrollArea>
   );
 };
@@ -999,13 +1042,13 @@ export const InventorySkeleton: FC = () => {
 
 export const ItemsToCraftSkeleton: FC = () => {
   return (
-    <HorizontallScrollWrapper>
+    <VerticalScrollWrapper>
       {Array.from({ length: 4 }).map((_, index) => (
-        <li key={index} className="w-xs flex-shrink-0 sm:w-[380px]">
+        <li key={index} className="w-full">
           <Skeleton className="h-[578px] w-full" />
         </li>
       ))}
-    </HorizontallScrollWrapper>
+    </VerticalScrollWrapper>
   );
 };
 
