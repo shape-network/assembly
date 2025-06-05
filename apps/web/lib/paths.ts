@@ -39,6 +39,6 @@ export const paths = {
       `https://opensea.io/item/shape/${assemblyItems[config.chain.id]}/${tokenId}`,
     collection: `https://opensea.io/contract/shape/${assemblyItems[config.chain.id]}`,
     item: (itemId: bigint) =>
-      `https://opensea.io/collection/otom-items?traits=[{"traitType":"Item+ID","values":["${String(itemId)}"]}]`,
+      `https://opensea.io/collection/assembly-items?traits=[{"traitType":"Item+ID","values":["${String(itemId)}"]}]`,
   },
 } as const;
