@@ -1,4 +1,4 @@
-import { assemblyItems } from '@/lib/addresses';
+import { otomItems } from '@/lib/addresses';
 import { config } from '@/lib/config';
 
 const explorerUrl = config.chain.testnet
@@ -32,12 +32,12 @@ export const paths = {
     transaction: (hash: string) => `${explorerUrl}/tx/${hash}`,
     address: (address: string) => `${explorerUrl}/address/${address}`,
     token: (tokenId: string) =>
-      `${explorerUrl}/token/${assemblyItems[config.chain.id]}/instance/${tokenId}`,
+      `${explorerUrl}/token/${otomItems[config.chain.id]}/instance/${tokenId}`,
   },
   openSea: {
     token: (tokenId: string) =>
-      `https://opensea.io/item/shape/${assemblyItems[config.chain.id]}/${tokenId}`,
-    collection: `https://opensea.io/contract/shape/${assemblyItems[config.chain.id]}`,
+      `https://opensea.io/item/shape/${otomItems[config.chain.id]}/${tokenId}`,
+    collection: `https://opensea.io/contract/shape/${otomItems[config.chain.id]}`,
     item: (itemId: bigint) =>
       `https://opensea.io/collection/assembly-items?traits=[{"traitType":"Item+ID","values":["${String(itemId)}"]}]`,
   },

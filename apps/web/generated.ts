@@ -6,10 +6,10 @@ import {
 } from 'wagmi/codegen';
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// AssemblyItemsContract
+// OtomItemsContract
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const assemblyItemsContractAbi = [
+export const otomItemsContractAbi = [
   { type: 'constructor', inputs: [], stateMutability: 'nonpayable' },
   {
     type: 'error',
@@ -350,280 +350,6 @@ export const assemblyItemsContractAbi = [
     name: 'uri',
     outputs: [{ name: '', internalType: 'string', type: 'string' }],
     stateMutability: 'view',
-  },
-] as const;
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// AssemblyTrackingContract
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-export const assemblyTrackingContractAbi = [
-  { type: 'error', inputs: [], name: 'InvalidInitialization' },
-  { type: 'error', inputs: [], name: 'InvalidInput' },
-  { type: 'error', inputs: [], name: 'InvalidItem' },
-  { type: 'error', inputs: [], name: 'NotInitializing' },
-  { type: 'error', inputs: [], name: 'NotOtomItems' },
-  {
-    type: 'error',
-    inputs: [{ name: 'owner', internalType: 'address', type: 'address' }],
-    name: 'OwnableInvalidOwner',
-  },
-  {
-    type: 'error',
-    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
-    name: 'OwnableUnauthorizedAccount',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [{ name: 'coreAddress', internalType: 'address', type: 'address', indexed: true }],
-    name: 'CoreSet',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [{ name: 'version', internalType: 'uint64', type: 'uint64', indexed: false }],
-    name: 'Initialized',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [{ name: 'otomItemsAddress', internalType: 'address', type: 'address', indexed: true }],
-    name: 'OtomItemsSet',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      { name: 'previousOwner', internalType: 'address', type: 'address', indexed: true },
-      { name: 'newOwner', internalType: 'address', type: 'address', indexed: true },
-    ],
-    name: 'OwnershipTransferStarted',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      { name: 'previousOwner', internalType: 'address', type: 'address', indexed: true },
-      { name: 'newOwner', internalType: 'address', type: 'address', indexed: true },
-    ],
-    name: 'OwnershipTransferred',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'acceptOwnership',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [
-      { name: '_tokenIds', internalType: 'uint256[]', type: 'uint256[]' },
-      { name: '_currentOwners', internalType: 'address[]', type: 'address[]' },
-    ],
-    name: 'batchReconcileTokens',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'core',
-    outputs: [{ name: '', internalType: 'contract IOtomItemsCore', type: 'address' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [
-      { name: '_offset', internalType: 'uint256', type: 'uint256' },
-      { name: '_limit', internalType: 'uint256', type: 'uint256' },
-    ],
-    name: 'getAllItemsPaginated',
-    outputs: [
-      {
-        name: '',
-        internalType: 'struct Item[]',
-        type: 'tuple[]',
-        components: [
-          { name: 'id', internalType: 'uint256', type: 'uint256' },
-          { name: 'name', internalType: 'string', type: 'string' },
-          { name: 'description', internalType: 'string', type: 'string' },
-          { name: 'creator', internalType: 'address', type: 'address' },
-          { name: 'admin', internalType: 'address', type: 'address' },
-          { name: 'defaultImageUri', internalType: 'string', type: 'string' },
-          { name: 'itemType', internalType: 'enum ItemType', type: 'uint8' },
-          {
-            name: 'blueprint',
-            internalType: 'struct BlueprintComponent[]',
-            type: 'tuple[]',
-            components: [
-              { name: 'componentType', internalType: 'enum ComponentType', type: 'uint8' },
-              { name: 'itemIdOrOtomTokenId', internalType: 'uint256', type: 'uint256' },
-              { name: 'amount', internalType: 'uint256', type: 'uint256' },
-              {
-                name: 'criteria',
-                internalType: 'struct PropertyCriterion[]',
-                type: 'tuple[]',
-                components: [
-                  { name: 'propertyType', internalType: 'enum PropertyType', type: 'uint8' },
-                  { name: 'minValue', internalType: 'uint256', type: 'uint256' },
-                  { name: 'maxValue', internalType: 'uint256', type: 'uint256' },
-                  { name: 'boolValue', internalType: 'bool', type: 'bool' },
-                  { name: 'checkBoolValue', internalType: 'bool', type: 'bool' },
-                  { name: 'stringValue', internalType: 'string', type: 'string' },
-                  { name: 'checkStringValue', internalType: 'bool', type: 'bool' },
-                  { name: 'bytes32Value', internalType: 'bytes32', type: 'bytes32' },
-                  { name: 'checkBytes32Value', internalType: 'bool', type: 'bool' },
-                ],
-              },
-            ],
-          },
-          { name: 'mutatorContract', internalType: 'address', type: 'address' },
-          { name: 'ethCostInWei', internalType: 'uint256', type: 'uint256' },
-          { name: 'feeRecipient', internalType: 'address', type: 'address' },
-          { name: 'defaultTierImageUris', internalType: 'string[7]', type: 'string[7]' },
-          { name: 'defaultCraftAmount', internalType: 'uint256', type: 'uint256' },
-        ],
-      },
-    ],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [{ name: '_itemId', internalType: 'uint256', type: 'uint256' }],
-    name: 'getItemSupply',
-    outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [
-      { name: '_owner', internalType: 'address', type: 'address' },
-      { name: '_itemId', internalType: 'uint256', type: 'uint256' },
-      { name: '_offset', internalType: 'uint256', type: 'uint256' },
-      { name: '_limit', internalType: 'uint256', type: 'uint256' },
-    ],
-    name: 'getNonFungibleItemOwnerTokenIdsPaginated',
-    outputs: [{ name: '', internalType: 'uint256[]', type: 'uint256[]' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [
-      { name: '_itemId', internalType: 'uint256', type: 'uint256' },
-      { name: '_offset', internalType: 'uint256', type: 'uint256' },
-      { name: '_limit', internalType: 'uint256', type: 'uint256' },
-    ],
-    name: 'getNonFungibleItemTokenIdsPaginated',
-    outputs: [{ name: '', internalType: 'uint256[]', type: 'uint256[]' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [{ name: '_tokenId', internalType: 'uint256', type: 'uint256' }],
-    name: 'getNonFungibleTokenOwner',
-    outputs: [{ name: '', internalType: 'address', type: 'address' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [{ name: '_coreAddress', internalType: 'address', type: 'address' }],
-    name: 'initialize',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [
-      { name: 'from', internalType: 'address', type: 'address' },
-      { name: 'to', internalType: 'address', type: 'address' },
-      { name: 'ids', internalType: 'uint256[]', type: 'uint256[]' },
-      { name: 'values', internalType: 'uint256[]', type: 'uint256[]' },
-    ],
-    name: 'onUpdate',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'otomItems',
-    outputs: [{ name: '', internalType: 'contract IOtomItems', type: 'address' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'owner',
-    outputs: [{ name: '', internalType: 'address', type: 'address' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'pendingOwner',
-    outputs: [{ name: '', internalType: 'address', type: 'address' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    inputs: [
-      { name: '_tokenId', internalType: 'uint256', type: 'uint256' },
-      { name: '_currentOwner', internalType: 'address', type: 'address' },
-    ],
-    name: 'reconcileToken',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [],
-    name: 'renounceOwnership',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [{ name: '_coreAddress', internalType: 'address', type: 'address' }],
-    name: 'setCore',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [{ name: '_otomItemsAddress', internalType: 'address', type: 'address' }],
-    name: 'setOtomItems',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [{ name: 'newOwner', internalType: 'address', type: 'address' }],
-    name: 'transferOwnership',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [
-      { name: '_itemId', internalType: 'uint256', type: 'uint256' },
-      { name: '_tokenIds', internalType: 'uint256[]', type: 'uint256[]' },
-    ],
-    name: 'updateGlobalTokenList',
-    outputs: [],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    inputs: [
-      { name: '_itemId', internalType: 'uint256', type: 'uint256' },
-      { name: '_owners', internalType: 'address[]', type: 'address[]' },
-      { name: '_ownerTokenIds', internalType: 'uint256[][]', type: 'uint256[][]' },
-    ],
-    name: 'updateOwnerTokenLists',
-    outputs: [],
-    stateMutability: 'nonpayable',
   },
 ] as const;
 
@@ -1451,6 +1177,280 @@ export const otomItemsCoreContractAbi = [
       { name: '_data', internalType: 'bytes', type: 'bytes' },
     ],
     name: 'useItem',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+] as const;
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// OtomItemsTrackingContract
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const otomItemsTrackingContractAbi = [
+  { type: 'error', inputs: [], name: 'InvalidInitialization' },
+  { type: 'error', inputs: [], name: 'InvalidInput' },
+  { type: 'error', inputs: [], name: 'InvalidItem' },
+  { type: 'error', inputs: [], name: 'NotInitializing' },
+  { type: 'error', inputs: [], name: 'NotOtomItems' },
+  {
+    type: 'error',
+    inputs: [{ name: 'owner', internalType: 'address', type: 'address' }],
+    name: 'OwnableInvalidOwner',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'account', internalType: 'address', type: 'address' }],
+    name: 'OwnableUnauthorizedAccount',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [{ name: 'coreAddress', internalType: 'address', type: 'address', indexed: true }],
+    name: 'CoreSet',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [{ name: 'version', internalType: 'uint64', type: 'uint64', indexed: false }],
+    name: 'Initialized',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [{ name: 'otomItemsAddress', internalType: 'address', type: 'address', indexed: true }],
+    name: 'OtomItemsSet',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      { name: 'previousOwner', internalType: 'address', type: 'address', indexed: true },
+      { name: 'newOwner', internalType: 'address', type: 'address', indexed: true },
+    ],
+    name: 'OwnershipTransferStarted',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      { name: 'previousOwner', internalType: 'address', type: 'address', indexed: true },
+      { name: 'newOwner', internalType: 'address', type: 'address', indexed: true },
+    ],
+    name: 'OwnershipTransferred',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'acceptOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: '_tokenIds', internalType: 'uint256[]', type: 'uint256[]' },
+      { name: '_currentOwners', internalType: 'address[]', type: 'address[]' },
+    ],
+    name: 'batchReconcileTokens',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'core',
+    outputs: [{ name: '', internalType: 'contract IOtomItemsCore', type: 'address' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: '_offset', internalType: 'uint256', type: 'uint256' },
+      { name: '_limit', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'getAllItemsPaginated',
+    outputs: [
+      {
+        name: '',
+        internalType: 'struct Item[]',
+        type: 'tuple[]',
+        components: [
+          { name: 'id', internalType: 'uint256', type: 'uint256' },
+          { name: 'name', internalType: 'string', type: 'string' },
+          { name: 'description', internalType: 'string', type: 'string' },
+          { name: 'creator', internalType: 'address', type: 'address' },
+          { name: 'admin', internalType: 'address', type: 'address' },
+          { name: 'defaultImageUri', internalType: 'string', type: 'string' },
+          { name: 'itemType', internalType: 'enum ItemType', type: 'uint8' },
+          {
+            name: 'blueprint',
+            internalType: 'struct BlueprintComponent[]',
+            type: 'tuple[]',
+            components: [
+              { name: 'componentType', internalType: 'enum ComponentType', type: 'uint8' },
+              { name: 'itemIdOrOtomTokenId', internalType: 'uint256', type: 'uint256' },
+              { name: 'amount', internalType: 'uint256', type: 'uint256' },
+              {
+                name: 'criteria',
+                internalType: 'struct PropertyCriterion[]',
+                type: 'tuple[]',
+                components: [
+                  { name: 'propertyType', internalType: 'enum PropertyType', type: 'uint8' },
+                  { name: 'minValue', internalType: 'uint256', type: 'uint256' },
+                  { name: 'maxValue', internalType: 'uint256', type: 'uint256' },
+                  { name: 'boolValue', internalType: 'bool', type: 'bool' },
+                  { name: 'checkBoolValue', internalType: 'bool', type: 'bool' },
+                  { name: 'stringValue', internalType: 'string', type: 'string' },
+                  { name: 'checkStringValue', internalType: 'bool', type: 'bool' },
+                  { name: 'bytes32Value', internalType: 'bytes32', type: 'bytes32' },
+                  { name: 'checkBytes32Value', internalType: 'bool', type: 'bool' },
+                ],
+              },
+            ],
+          },
+          { name: 'mutatorContract', internalType: 'address', type: 'address' },
+          { name: 'ethCostInWei', internalType: 'uint256', type: 'uint256' },
+          { name: 'feeRecipient', internalType: 'address', type: 'address' },
+          { name: 'defaultTierImageUris', internalType: 'string[7]', type: 'string[7]' },
+          { name: 'defaultCraftAmount', internalType: 'uint256', type: 'uint256' },
+        ],
+      },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: '_itemId', internalType: 'uint256', type: 'uint256' }],
+    name: 'getItemSupply',
+    outputs: [{ name: '', internalType: 'uint256', type: 'uint256' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: '_owner', internalType: 'address', type: 'address' },
+      { name: '_itemId', internalType: 'uint256', type: 'uint256' },
+      { name: '_offset', internalType: 'uint256', type: 'uint256' },
+      { name: '_limit', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'getNonFungibleItemOwnerTokenIdsPaginated',
+    outputs: [{ name: '', internalType: 'uint256[]', type: 'uint256[]' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: '_itemId', internalType: 'uint256', type: 'uint256' },
+      { name: '_offset', internalType: 'uint256', type: 'uint256' },
+      { name: '_limit', internalType: 'uint256', type: 'uint256' },
+    ],
+    name: 'getNonFungibleItemTokenIdsPaginated',
+    outputs: [{ name: '', internalType: 'uint256[]', type: 'uint256[]' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: '_tokenId', internalType: 'uint256', type: 'uint256' }],
+    name: 'getNonFungibleTokenOwner',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: '_coreAddress', internalType: 'address', type: 'address' }],
+    name: 'initialize',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'from', internalType: 'address', type: 'address' },
+      { name: 'to', internalType: 'address', type: 'address' },
+      { name: 'ids', internalType: 'uint256[]', type: 'uint256[]' },
+      { name: 'values', internalType: 'uint256[]', type: 'uint256[]' },
+    ],
+    name: 'onUpdate',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'otomItems',
+    outputs: [{ name: '', internalType: 'contract IOtomItems', type: 'address' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'owner',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'pendingOwner',
+    outputs: [{ name: '', internalType: 'address', type: 'address' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: '_tokenId', internalType: 'uint256', type: 'uint256' },
+      { name: '_currentOwner', internalType: 'address', type: 'address' },
+    ],
+    name: 'reconcileToken',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [],
+    name: 'renounceOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: '_coreAddress', internalType: 'address', type: 'address' }],
+    name: 'setCore',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: '_otomItemsAddress', internalType: 'address', type: 'address' }],
+    name: 'setOtomItems',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: 'newOwner', internalType: 'address', type: 'address' }],
+    name: 'transferOwnership',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: '_itemId', internalType: 'uint256', type: 'uint256' },
+      { name: '_tokenIds', internalType: 'uint256[]', type: 'uint256[]' },
+    ],
+    name: 'updateGlobalTokenList',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: '_itemId', internalType: 'uint256', type: 'uint256' },
+      { name: '_owners', internalType: 'address[]', type: 'address[]' },
+      { name: '_ownerTokenIds', internalType: 'uint256[][]', type: 'uint256[][]' },
+    ],
+    name: 'updateOwnerTokenLists',
     outputs: [],
     stateMutability: 'nonpayable',
   },
@@ -3361,720 +3361,378 @@ export const otomsDatabaseContractAbi = [
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__
+ * Wraps __{@link useReadContract}__ with `abi` set to __{@link otomItemsContractAbi}__
  */
-export const useReadAssemblyItemsContract = /*#__PURE__*/ createUseReadContract({
-  abi: assemblyItemsContractAbi,
+export const useReadOtomItemsContract = /*#__PURE__*/ createUseReadContract({
+  abi: otomItemsContractAbi,
 });
 
 /**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `functionName` set to `"balanceOf"`
+ * Wraps __{@link useReadContract}__ with `abi` set to __{@link otomItemsContractAbi}__ and `functionName` set to `"balanceOf"`
  */
-export const useReadAssemblyItemsContractBalanceOf = /*#__PURE__*/ createUseReadContract({
-  abi: assemblyItemsContractAbi,
+export const useReadOtomItemsContractBalanceOf = /*#__PURE__*/ createUseReadContract({
+  abi: otomItemsContractAbi,
   functionName: 'balanceOf',
 });
 
 /**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `functionName` set to `"balanceOfBatch"`
+ * Wraps __{@link useReadContract}__ with `abi` set to __{@link otomItemsContractAbi}__ and `functionName` set to `"balanceOfBatch"`
  */
-export const useReadAssemblyItemsContractBalanceOfBatch = /*#__PURE__*/ createUseReadContract({
-  abi: assemblyItemsContractAbi,
+export const useReadOtomItemsContractBalanceOfBatch = /*#__PURE__*/ createUseReadContract({
+  abi: otomItemsContractAbi,
   functionName: 'balanceOfBatch',
 });
 
 /**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `functionName` set to `"core"`
+ * Wraps __{@link useReadContract}__ with `abi` set to __{@link otomItemsContractAbi}__ and `functionName` set to `"core"`
  */
-export const useReadAssemblyItemsContractCore = /*#__PURE__*/ createUseReadContract({
-  abi: assemblyItemsContractAbi,
+export const useReadOtomItemsContractCore = /*#__PURE__*/ createUseReadContract({
+  abi: otomItemsContractAbi,
   functionName: 'core',
 });
 
 /**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `functionName` set to `"exists"`
+ * Wraps __{@link useReadContract}__ with `abi` set to __{@link otomItemsContractAbi}__ and `functionName` set to `"exists"`
  */
-export const useReadAssemblyItemsContractExists = /*#__PURE__*/ createUseReadContract({
-  abi: assemblyItemsContractAbi,
+export const useReadOtomItemsContractExists = /*#__PURE__*/ createUseReadContract({
+  abi: otomItemsContractAbi,
   functionName: 'exists',
 });
 
 /**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `functionName` set to `"isApprovedForAll"`
+ * Wraps __{@link useReadContract}__ with `abi` set to __{@link otomItemsContractAbi}__ and `functionName` set to `"isApprovedForAll"`
  */
-export const useReadAssemblyItemsContractIsApprovedForAll = /*#__PURE__*/ createUseReadContract({
-  abi: assemblyItemsContractAbi,
+export const useReadOtomItemsContractIsApprovedForAll = /*#__PURE__*/ createUseReadContract({
+  abi: otomItemsContractAbi,
   functionName: 'isApprovedForAll',
 });
 
 /**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `functionName` set to `"name"`
+ * Wraps __{@link useReadContract}__ with `abi` set to __{@link otomItemsContractAbi}__ and `functionName` set to `"name"`
  */
-export const useReadAssemblyItemsContractName = /*#__PURE__*/ createUseReadContract({
-  abi: assemblyItemsContractAbi,
+export const useReadOtomItemsContractName = /*#__PURE__*/ createUseReadContract({
+  abi: otomItemsContractAbi,
   functionName: 'name',
 });
 
 /**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `functionName` set to `"owner"`
+ * Wraps __{@link useReadContract}__ with `abi` set to __{@link otomItemsContractAbi}__ and `functionName` set to `"owner"`
  */
-export const useReadAssemblyItemsContractOwner = /*#__PURE__*/ createUseReadContract({
-  abi: assemblyItemsContractAbi,
+export const useReadOtomItemsContractOwner = /*#__PURE__*/ createUseReadContract({
+  abi: otomItemsContractAbi,
   functionName: 'owner',
 });
 
 /**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `functionName` set to `"pendingOwner"`
+ * Wraps __{@link useReadContract}__ with `abi` set to __{@link otomItemsContractAbi}__ and `functionName` set to `"pendingOwner"`
  */
-export const useReadAssemblyItemsContractPendingOwner = /*#__PURE__*/ createUseReadContract({
-  abi: assemblyItemsContractAbi,
+export const useReadOtomItemsContractPendingOwner = /*#__PURE__*/ createUseReadContract({
+  abi: otomItemsContractAbi,
   functionName: 'pendingOwner',
 });
 
 /**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `functionName` set to `"supportsInterface"`
+ * Wraps __{@link useReadContract}__ with `abi` set to __{@link otomItemsContractAbi}__ and `functionName` set to `"supportsInterface"`
  */
-export const useReadAssemblyItemsContractSupportsInterface = /*#__PURE__*/ createUseReadContract({
-  abi: assemblyItemsContractAbi,
+export const useReadOtomItemsContractSupportsInterface = /*#__PURE__*/ createUseReadContract({
+  abi: otomItemsContractAbi,
   functionName: 'supportsInterface',
 });
 
 /**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `functionName` set to `"totalSupply"`
+ * Wraps __{@link useReadContract}__ with `abi` set to __{@link otomItemsContractAbi}__ and `functionName` set to `"totalSupply"`
  */
-export const useReadAssemblyItemsContractTotalSupply = /*#__PURE__*/ createUseReadContract({
-  abi: assemblyItemsContractAbi,
+export const useReadOtomItemsContractTotalSupply = /*#__PURE__*/ createUseReadContract({
+  abi: otomItemsContractAbi,
   functionName: 'totalSupply',
 });
 
 /**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `functionName` set to `"tracking"`
+ * Wraps __{@link useReadContract}__ with `abi` set to __{@link otomItemsContractAbi}__ and `functionName` set to `"tracking"`
  */
-export const useReadAssemblyItemsContractTracking = /*#__PURE__*/ createUseReadContract({
-  abi: assemblyItemsContractAbi,
+export const useReadOtomItemsContractTracking = /*#__PURE__*/ createUseReadContract({
+  abi: otomItemsContractAbi,
   functionName: 'tracking',
 });
 
 /**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `functionName` set to `"uri"`
+ * Wraps __{@link useReadContract}__ with `abi` set to __{@link otomItemsContractAbi}__ and `functionName` set to `"uri"`
  */
-export const useReadAssemblyItemsContractUri = /*#__PURE__*/ createUseReadContract({
-  abi: assemblyItemsContractAbi,
+export const useReadOtomItemsContractUri = /*#__PURE__*/ createUseReadContract({
+  abi: otomItemsContractAbi,
   functionName: 'uri',
 });
 
 /**
- * Wraps __{@link useWriteContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link otomItemsContractAbi}__
  */
-export const useWriteAssemblyItemsContract = /*#__PURE__*/ createUseWriteContract({
-  abi: assemblyItemsContractAbi,
+export const useWriteOtomItemsContract = /*#__PURE__*/ createUseWriteContract({
+  abi: otomItemsContractAbi,
 });
 
 /**
- * Wraps __{@link useWriteContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `functionName` set to `"acceptOwnership"`
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link otomItemsContractAbi}__ and `functionName` set to `"acceptOwnership"`
  */
-export const useWriteAssemblyItemsContractAcceptOwnership = /*#__PURE__*/ createUseWriteContract({
-  abi: assemblyItemsContractAbi,
+export const useWriteOtomItemsContractAcceptOwnership = /*#__PURE__*/ createUseWriteContract({
+  abi: otomItemsContractAbi,
   functionName: 'acceptOwnership',
 });
 
 /**
- * Wraps __{@link useWriteContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `functionName` set to `"burn"`
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link otomItemsContractAbi}__ and `functionName` set to `"burn"`
  */
-export const useWriteAssemblyItemsContractBurn = /*#__PURE__*/ createUseWriteContract({
-  abi: assemblyItemsContractAbi,
+export const useWriteOtomItemsContractBurn = /*#__PURE__*/ createUseWriteContract({
+  abi: otomItemsContractAbi,
   functionName: 'burn',
 });
 
 /**
- * Wraps __{@link useWriteContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `functionName` set to `"burnBatch"`
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link otomItemsContractAbi}__ and `functionName` set to `"burnBatch"`
  */
-export const useWriteAssemblyItemsContractBurnBatch = /*#__PURE__*/ createUseWriteContract({
-  abi: assemblyItemsContractAbi,
+export const useWriteOtomItemsContractBurnBatch = /*#__PURE__*/ createUseWriteContract({
+  abi: otomItemsContractAbi,
   functionName: 'burnBatch',
 });
 
 /**
- * Wraps __{@link useWriteContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `functionName` set to `"emitMetadataUpdate"`
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link otomItemsContractAbi}__ and `functionName` set to `"emitMetadataUpdate"`
  */
-export const useWriteAssemblyItemsContractEmitMetadataUpdate = /*#__PURE__*/ createUseWriteContract(
-  { abi: assemblyItemsContractAbi, functionName: 'emitMetadataUpdate' }
-);
+export const useWriteOtomItemsContractEmitMetadataUpdate = /*#__PURE__*/ createUseWriteContract({
+  abi: otomItemsContractAbi,
+  functionName: 'emitMetadataUpdate',
+});
 
 /**
- * Wraps __{@link useWriteContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `functionName` set to `"initialize"`
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link otomItemsContractAbi}__ and `functionName` set to `"initialize"`
  */
-export const useWriteAssemblyItemsContractInitialize = /*#__PURE__*/ createUseWriteContract({
-  abi: assemblyItemsContractAbi,
+export const useWriteOtomItemsContractInitialize = /*#__PURE__*/ createUseWriteContract({
+  abi: otomItemsContractAbi,
   functionName: 'initialize',
 });
 
 /**
- * Wraps __{@link useWriteContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `functionName` set to `"mint"`
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link otomItemsContractAbi}__ and `functionName` set to `"mint"`
  */
-export const useWriteAssemblyItemsContractMint = /*#__PURE__*/ createUseWriteContract({
-  abi: assemblyItemsContractAbi,
+export const useWriteOtomItemsContractMint = /*#__PURE__*/ createUseWriteContract({
+  abi: otomItemsContractAbi,
   functionName: 'mint',
 });
 
 /**
- * Wraps __{@link useWriteContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `functionName` set to `"renounceOwnership"`
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link otomItemsContractAbi}__ and `functionName` set to `"renounceOwnership"`
  */
-export const useWriteAssemblyItemsContractRenounceOwnership = /*#__PURE__*/ createUseWriteContract({
-  abi: assemblyItemsContractAbi,
+export const useWriteOtomItemsContractRenounceOwnership = /*#__PURE__*/ createUseWriteContract({
+  abi: otomItemsContractAbi,
   functionName: 'renounceOwnership',
 });
 
 /**
- * Wraps __{@link useWriteContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `functionName` set to `"safeBatchTransferFrom"`
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link otomItemsContractAbi}__ and `functionName` set to `"safeBatchTransferFrom"`
  */
-export const useWriteAssemblyItemsContractSafeBatchTransferFrom =
-  /*#__PURE__*/ createUseWriteContract({
-    abi: assemblyItemsContractAbi,
-    functionName: 'safeBatchTransferFrom',
-  });
+export const useWriteOtomItemsContractSafeBatchTransferFrom = /*#__PURE__*/ createUseWriteContract({
+  abi: otomItemsContractAbi,
+  functionName: 'safeBatchTransferFrom',
+});
 
 /**
- * Wraps __{@link useWriteContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `functionName` set to `"safeTransferFrom"`
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link otomItemsContractAbi}__ and `functionName` set to `"safeTransferFrom"`
  */
-export const useWriteAssemblyItemsContractSafeTransferFrom = /*#__PURE__*/ createUseWriteContract({
-  abi: assemblyItemsContractAbi,
+export const useWriteOtomItemsContractSafeTransferFrom = /*#__PURE__*/ createUseWriteContract({
+  abi: otomItemsContractAbi,
   functionName: 'safeTransferFrom',
 });
 
 /**
- * Wraps __{@link useWriteContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `functionName` set to `"setApprovalForAll"`
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link otomItemsContractAbi}__ and `functionName` set to `"setApprovalForAll"`
  */
-export const useWriteAssemblyItemsContractSetApprovalForAll = /*#__PURE__*/ createUseWriteContract({
-  abi: assemblyItemsContractAbi,
+export const useWriteOtomItemsContractSetApprovalForAll = /*#__PURE__*/ createUseWriteContract({
+  abi: otomItemsContractAbi,
   functionName: 'setApprovalForAll',
 });
 
 /**
- * Wraps __{@link useWriteContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `functionName` set to `"transferOwnership"`
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link otomItemsContractAbi}__ and `functionName` set to `"transferOwnership"`
  */
-export const useWriteAssemblyItemsContractTransferOwnership = /*#__PURE__*/ createUseWriteContract({
-  abi: assemblyItemsContractAbi,
+export const useWriteOtomItemsContractTransferOwnership = /*#__PURE__*/ createUseWriteContract({
+  abi: otomItemsContractAbi,
   functionName: 'transferOwnership',
 });
 
 /**
- * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link otomItemsContractAbi}__
  */
-export const useSimulateAssemblyItemsContract = /*#__PURE__*/ createUseSimulateContract({
-  abi: assemblyItemsContractAbi,
+export const useSimulateOtomItemsContract = /*#__PURE__*/ createUseSimulateContract({
+  abi: otomItemsContractAbi,
 });
 
 /**
- * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `functionName` set to `"acceptOwnership"`
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link otomItemsContractAbi}__ and `functionName` set to `"acceptOwnership"`
  */
-export const useSimulateAssemblyItemsContractAcceptOwnership =
-  /*#__PURE__*/ createUseSimulateContract({
-    abi: assemblyItemsContractAbi,
-    functionName: 'acceptOwnership',
-  });
+export const useSimulateOtomItemsContractAcceptOwnership = /*#__PURE__*/ createUseSimulateContract({
+  abi: otomItemsContractAbi,
+  functionName: 'acceptOwnership',
+});
 
 /**
- * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `functionName` set to `"burn"`
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link otomItemsContractAbi}__ and `functionName` set to `"burn"`
  */
-export const useSimulateAssemblyItemsContractBurn = /*#__PURE__*/ createUseSimulateContract({
-  abi: assemblyItemsContractAbi,
+export const useSimulateOtomItemsContractBurn = /*#__PURE__*/ createUseSimulateContract({
+  abi: otomItemsContractAbi,
   functionName: 'burn',
 });
 
 /**
- * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `functionName` set to `"burnBatch"`
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link otomItemsContractAbi}__ and `functionName` set to `"burnBatch"`
  */
-export const useSimulateAssemblyItemsContractBurnBatch = /*#__PURE__*/ createUseSimulateContract({
-  abi: assemblyItemsContractAbi,
+export const useSimulateOtomItemsContractBurnBatch = /*#__PURE__*/ createUseSimulateContract({
+  abi: otomItemsContractAbi,
   functionName: 'burnBatch',
 });
 
 /**
- * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `functionName` set to `"emitMetadataUpdate"`
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link otomItemsContractAbi}__ and `functionName` set to `"emitMetadataUpdate"`
  */
-export const useSimulateAssemblyItemsContractEmitMetadataUpdate =
+export const useSimulateOtomItemsContractEmitMetadataUpdate =
   /*#__PURE__*/ createUseSimulateContract({
-    abi: assemblyItemsContractAbi,
+    abi: otomItemsContractAbi,
     functionName: 'emitMetadataUpdate',
   });
 
 /**
- * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `functionName` set to `"initialize"`
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link otomItemsContractAbi}__ and `functionName` set to `"initialize"`
  */
-export const useSimulateAssemblyItemsContractInitialize = /*#__PURE__*/ createUseSimulateContract({
-  abi: assemblyItemsContractAbi,
+export const useSimulateOtomItemsContractInitialize = /*#__PURE__*/ createUseSimulateContract({
+  abi: otomItemsContractAbi,
   functionName: 'initialize',
 });
 
 /**
- * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `functionName` set to `"mint"`
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link otomItemsContractAbi}__ and `functionName` set to `"mint"`
  */
-export const useSimulateAssemblyItemsContractMint = /*#__PURE__*/ createUseSimulateContract({
-  abi: assemblyItemsContractAbi,
+export const useSimulateOtomItemsContractMint = /*#__PURE__*/ createUseSimulateContract({
+  abi: otomItemsContractAbi,
   functionName: 'mint',
 });
 
 /**
- * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `functionName` set to `"renounceOwnership"`
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link otomItemsContractAbi}__ and `functionName` set to `"renounceOwnership"`
  */
-export const useSimulateAssemblyItemsContractRenounceOwnership =
+export const useSimulateOtomItemsContractRenounceOwnership =
   /*#__PURE__*/ createUseSimulateContract({
-    abi: assemblyItemsContractAbi,
+    abi: otomItemsContractAbi,
     functionName: 'renounceOwnership',
   });
 
 /**
- * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `functionName` set to `"safeBatchTransferFrom"`
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link otomItemsContractAbi}__ and `functionName` set to `"safeBatchTransferFrom"`
  */
-export const useSimulateAssemblyItemsContractSafeBatchTransferFrom =
+export const useSimulateOtomItemsContractSafeBatchTransferFrom =
   /*#__PURE__*/ createUseSimulateContract({
-    abi: assemblyItemsContractAbi,
+    abi: otomItemsContractAbi,
     functionName: 'safeBatchTransferFrom',
   });
 
 /**
- * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `functionName` set to `"safeTransferFrom"`
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link otomItemsContractAbi}__ and `functionName` set to `"safeTransferFrom"`
  */
-export const useSimulateAssemblyItemsContractSafeTransferFrom =
-  /*#__PURE__*/ createUseSimulateContract({
-    abi: assemblyItemsContractAbi,
-    functionName: 'safeTransferFrom',
-  });
+export const useSimulateOtomItemsContractSafeTransferFrom = /*#__PURE__*/ createUseSimulateContract(
+  { abi: otomItemsContractAbi, functionName: 'safeTransferFrom' }
+);
 
 /**
- * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `functionName` set to `"setApprovalForAll"`
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link otomItemsContractAbi}__ and `functionName` set to `"setApprovalForAll"`
  */
-export const useSimulateAssemblyItemsContractSetApprovalForAll =
+export const useSimulateOtomItemsContractSetApprovalForAll =
   /*#__PURE__*/ createUseSimulateContract({
-    abi: assemblyItemsContractAbi,
+    abi: otomItemsContractAbi,
     functionName: 'setApprovalForAll',
   });
 
 /**
- * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `functionName` set to `"transferOwnership"`
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link otomItemsContractAbi}__ and `functionName` set to `"transferOwnership"`
  */
-export const useSimulateAssemblyItemsContractTransferOwnership =
+export const useSimulateOtomItemsContractTransferOwnership =
   /*#__PURE__*/ createUseSimulateContract({
-    abi: assemblyItemsContractAbi,
+    abi: otomItemsContractAbi,
     functionName: 'transferOwnership',
   });
 
 /**
- * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link assemblyItemsContractAbi}__
+ * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link otomItemsContractAbi}__
  */
-export const useWatchAssemblyItemsContractEvent = /*#__PURE__*/ createUseWatchContractEvent({
-  abi: assemblyItemsContractAbi,
+export const useWatchOtomItemsContractEvent = /*#__PURE__*/ createUseWatchContractEvent({
+  abi: otomItemsContractAbi,
 });
 
 /**
- * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `eventName` set to `"ApprovalForAll"`
+ * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link otomItemsContractAbi}__ and `eventName` set to `"ApprovalForAll"`
  */
-export const useWatchAssemblyItemsContractApprovalForAllEvent =
+export const useWatchOtomItemsContractApprovalForAllEvent =
   /*#__PURE__*/ createUseWatchContractEvent({
-    abi: assemblyItemsContractAbi,
+    abi: otomItemsContractAbi,
     eventName: 'ApprovalForAll',
   });
 
 /**
- * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `eventName` set to `"Initialized"`
+ * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link otomItemsContractAbi}__ and `eventName` set to `"Initialized"`
  */
-export const useWatchAssemblyItemsContractInitializedEvent =
-  /*#__PURE__*/ createUseWatchContractEvent({
-    abi: assemblyItemsContractAbi,
-    eventName: 'Initialized',
-  });
+export const useWatchOtomItemsContractInitializedEvent = /*#__PURE__*/ createUseWatchContractEvent({
+  abi: otomItemsContractAbi,
+  eventName: 'Initialized',
+});
 
 /**
- * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `eventName` set to `"MetadataUpdate"`
+ * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link otomItemsContractAbi}__ and `eventName` set to `"MetadataUpdate"`
  */
-export const useWatchAssemblyItemsContractMetadataUpdateEvent =
+export const useWatchOtomItemsContractMetadataUpdateEvent =
   /*#__PURE__*/ createUseWatchContractEvent({
-    abi: assemblyItemsContractAbi,
+    abi: otomItemsContractAbi,
     eventName: 'MetadataUpdate',
   });
 
 /**
- * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `eventName` set to `"OwnershipTransferStarted"`
+ * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link otomItemsContractAbi}__ and `eventName` set to `"OwnershipTransferStarted"`
  */
-export const useWatchAssemblyItemsContractOwnershipTransferStartedEvent =
+export const useWatchOtomItemsContractOwnershipTransferStartedEvent =
   /*#__PURE__*/ createUseWatchContractEvent({
-    abi: assemblyItemsContractAbi,
+    abi: otomItemsContractAbi,
     eventName: 'OwnershipTransferStarted',
   });
 
 /**
- * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `eventName` set to `"OwnershipTransferred"`
+ * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link otomItemsContractAbi}__ and `eventName` set to `"OwnershipTransferred"`
  */
-export const useWatchAssemblyItemsContractOwnershipTransferredEvent =
+export const useWatchOtomItemsContractOwnershipTransferredEvent =
   /*#__PURE__*/ createUseWatchContractEvent({
-    abi: assemblyItemsContractAbi,
+    abi: otomItemsContractAbi,
     eventName: 'OwnershipTransferred',
   });
 
 /**
- * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `eventName` set to `"TransferBatch"`
+ * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link otomItemsContractAbi}__ and `eventName` set to `"TransferBatch"`
  */
-export const useWatchAssemblyItemsContractTransferBatchEvent =
+export const useWatchOtomItemsContractTransferBatchEvent =
   /*#__PURE__*/ createUseWatchContractEvent({
-    abi: assemblyItemsContractAbi,
+    abi: otomItemsContractAbi,
     eventName: 'TransferBatch',
   });
 
 /**
- * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `eventName` set to `"TransferSingle"`
+ * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link otomItemsContractAbi}__ and `eventName` set to `"TransferSingle"`
  */
-export const useWatchAssemblyItemsContractTransferSingleEvent =
+export const useWatchOtomItemsContractTransferSingleEvent =
   /*#__PURE__*/ createUseWatchContractEvent({
-    abi: assemblyItemsContractAbi,
+    abi: otomItemsContractAbi,
     eventName: 'TransferSingle',
   });
 
 /**
- * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link assemblyItemsContractAbi}__ and `eventName` set to `"URI"`
+ * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link otomItemsContractAbi}__ and `eventName` set to `"URI"`
  */
-export const useWatchAssemblyItemsContractUriEvent = /*#__PURE__*/ createUseWatchContractEvent({
-  abi: assemblyItemsContractAbi,
+export const useWatchOtomItemsContractUriEvent = /*#__PURE__*/ createUseWatchContractEvent({
+  abi: otomItemsContractAbi,
   eventName: 'URI',
 });
-
-/**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link assemblyTrackingContractAbi}__
- */
-export const useReadAssemblyTrackingContract = /*#__PURE__*/ createUseReadContract({
-  abi: assemblyTrackingContractAbi,
-});
-
-/**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `functionName` set to `"core"`
- */
-export const useReadAssemblyTrackingContractCore = /*#__PURE__*/ createUseReadContract({
-  abi: assemblyTrackingContractAbi,
-  functionName: 'core',
-});
-
-/**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `functionName` set to `"getAllItemsPaginated"`
- */
-export const useReadAssemblyTrackingContractGetAllItemsPaginated =
-  /*#__PURE__*/ createUseReadContract({
-    abi: assemblyTrackingContractAbi,
-    functionName: 'getAllItemsPaginated',
-  });
-
-/**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `functionName` set to `"getItemSupply"`
- */
-export const useReadAssemblyTrackingContractGetItemSupply = /*#__PURE__*/ createUseReadContract({
-  abi: assemblyTrackingContractAbi,
-  functionName: 'getItemSupply',
-});
-
-/**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `functionName` set to `"getNonFungibleItemOwnerTokenIdsPaginated"`
- */
-export const useReadAssemblyTrackingContractGetNonFungibleItemOwnerTokenIdsPaginated =
-  /*#__PURE__*/ createUseReadContract({
-    abi: assemblyTrackingContractAbi,
-    functionName: 'getNonFungibleItemOwnerTokenIdsPaginated',
-  });
-
-/**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `functionName` set to `"getNonFungibleItemTokenIdsPaginated"`
- */
-export const useReadAssemblyTrackingContractGetNonFungibleItemTokenIdsPaginated =
-  /*#__PURE__*/ createUseReadContract({
-    abi: assemblyTrackingContractAbi,
-    functionName: 'getNonFungibleItemTokenIdsPaginated',
-  });
-
-/**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `functionName` set to `"getNonFungibleTokenOwner"`
- */
-export const useReadAssemblyTrackingContractGetNonFungibleTokenOwner =
-  /*#__PURE__*/ createUseReadContract({
-    abi: assemblyTrackingContractAbi,
-    functionName: 'getNonFungibleTokenOwner',
-  });
-
-/**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `functionName` set to `"otomItems"`
- */
-export const useReadAssemblyTrackingContractOtomItems = /*#__PURE__*/ createUseReadContract({
-  abi: assemblyTrackingContractAbi,
-  functionName: 'otomItems',
-});
-
-/**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `functionName` set to `"owner"`
- */
-export const useReadAssemblyTrackingContractOwner = /*#__PURE__*/ createUseReadContract({
-  abi: assemblyTrackingContractAbi,
-  functionName: 'owner',
-});
-
-/**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `functionName` set to `"pendingOwner"`
- */
-export const useReadAssemblyTrackingContractPendingOwner = /*#__PURE__*/ createUseReadContract({
-  abi: assemblyTrackingContractAbi,
-  functionName: 'pendingOwner',
-});
-
-/**
- * Wraps __{@link useWriteContract}__ with `abi` set to __{@link assemblyTrackingContractAbi}__
- */
-export const useWriteAssemblyTrackingContract = /*#__PURE__*/ createUseWriteContract({
-  abi: assemblyTrackingContractAbi,
-});
-
-/**
- * Wraps __{@link useWriteContract}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `functionName` set to `"acceptOwnership"`
- */
-export const useWriteAssemblyTrackingContractAcceptOwnership = /*#__PURE__*/ createUseWriteContract(
-  { abi: assemblyTrackingContractAbi, functionName: 'acceptOwnership' }
-);
-
-/**
- * Wraps __{@link useWriteContract}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `functionName` set to `"batchReconcileTokens"`
- */
-export const useWriteAssemblyTrackingContractBatchReconcileTokens =
-  /*#__PURE__*/ createUseWriteContract({
-    abi: assemblyTrackingContractAbi,
-    functionName: 'batchReconcileTokens',
-  });
-
-/**
- * Wraps __{@link useWriteContract}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `functionName` set to `"initialize"`
- */
-export const useWriteAssemblyTrackingContractInitialize = /*#__PURE__*/ createUseWriteContract({
-  abi: assemblyTrackingContractAbi,
-  functionName: 'initialize',
-});
-
-/**
- * Wraps __{@link useWriteContract}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `functionName` set to `"onUpdate"`
- */
-export const useWriteAssemblyTrackingContractOnUpdate = /*#__PURE__*/ createUseWriteContract({
-  abi: assemblyTrackingContractAbi,
-  functionName: 'onUpdate',
-});
-
-/**
- * Wraps __{@link useWriteContract}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `functionName` set to `"reconcileToken"`
- */
-export const useWriteAssemblyTrackingContractReconcileToken = /*#__PURE__*/ createUseWriteContract({
-  abi: assemblyTrackingContractAbi,
-  functionName: 'reconcileToken',
-});
-
-/**
- * Wraps __{@link useWriteContract}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `functionName` set to `"renounceOwnership"`
- */
-export const useWriteAssemblyTrackingContractRenounceOwnership =
-  /*#__PURE__*/ createUseWriteContract({
-    abi: assemblyTrackingContractAbi,
-    functionName: 'renounceOwnership',
-  });
-
-/**
- * Wraps __{@link useWriteContract}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `functionName` set to `"setCore"`
- */
-export const useWriteAssemblyTrackingContractSetCore = /*#__PURE__*/ createUseWriteContract({
-  abi: assemblyTrackingContractAbi,
-  functionName: 'setCore',
-});
-
-/**
- * Wraps __{@link useWriteContract}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `functionName` set to `"setOtomItems"`
- */
-export const useWriteAssemblyTrackingContractSetOtomItems = /*#__PURE__*/ createUseWriteContract({
-  abi: assemblyTrackingContractAbi,
-  functionName: 'setOtomItems',
-});
-
-/**
- * Wraps __{@link useWriteContract}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `functionName` set to `"transferOwnership"`
- */
-export const useWriteAssemblyTrackingContractTransferOwnership =
-  /*#__PURE__*/ createUseWriteContract({
-    abi: assemblyTrackingContractAbi,
-    functionName: 'transferOwnership',
-  });
-
-/**
- * Wraps __{@link useWriteContract}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `functionName` set to `"updateGlobalTokenList"`
- */
-export const useWriteAssemblyTrackingContractUpdateGlobalTokenList =
-  /*#__PURE__*/ createUseWriteContract({
-    abi: assemblyTrackingContractAbi,
-    functionName: 'updateGlobalTokenList',
-  });
-
-/**
- * Wraps __{@link useWriteContract}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `functionName` set to `"updateOwnerTokenLists"`
- */
-export const useWriteAssemblyTrackingContractUpdateOwnerTokenLists =
-  /*#__PURE__*/ createUseWriteContract({
-    abi: assemblyTrackingContractAbi,
-    functionName: 'updateOwnerTokenLists',
-  });
-
-/**
- * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link assemblyTrackingContractAbi}__
- */
-export const useSimulateAssemblyTrackingContract = /*#__PURE__*/ createUseSimulateContract({
-  abi: assemblyTrackingContractAbi,
-});
-
-/**
- * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `functionName` set to `"acceptOwnership"`
- */
-export const useSimulateAssemblyTrackingContractAcceptOwnership =
-  /*#__PURE__*/ createUseSimulateContract({
-    abi: assemblyTrackingContractAbi,
-    functionName: 'acceptOwnership',
-  });
-
-/**
- * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `functionName` set to `"batchReconcileTokens"`
- */
-export const useSimulateAssemblyTrackingContractBatchReconcileTokens =
-  /*#__PURE__*/ createUseSimulateContract({
-    abi: assemblyTrackingContractAbi,
-    functionName: 'batchReconcileTokens',
-  });
-
-/**
- * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `functionName` set to `"initialize"`
- */
-export const useSimulateAssemblyTrackingContractInitialize =
-  /*#__PURE__*/ createUseSimulateContract({
-    abi: assemblyTrackingContractAbi,
-    functionName: 'initialize',
-  });
-
-/**
- * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `functionName` set to `"onUpdate"`
- */
-export const useSimulateAssemblyTrackingContractOnUpdate = /*#__PURE__*/ createUseSimulateContract({
-  abi: assemblyTrackingContractAbi,
-  functionName: 'onUpdate',
-});
-
-/**
- * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `functionName` set to `"reconcileToken"`
- */
-export const useSimulateAssemblyTrackingContractReconcileToken =
-  /*#__PURE__*/ createUseSimulateContract({
-    abi: assemblyTrackingContractAbi,
-    functionName: 'reconcileToken',
-  });
-
-/**
- * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `functionName` set to `"renounceOwnership"`
- */
-export const useSimulateAssemblyTrackingContractRenounceOwnership =
-  /*#__PURE__*/ createUseSimulateContract({
-    abi: assemblyTrackingContractAbi,
-    functionName: 'renounceOwnership',
-  });
-
-/**
- * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `functionName` set to `"setCore"`
- */
-export const useSimulateAssemblyTrackingContractSetCore = /*#__PURE__*/ createUseSimulateContract({
-  abi: assemblyTrackingContractAbi,
-  functionName: 'setCore',
-});
-
-/**
- * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `functionName` set to `"setOtomItems"`
- */
-export const useSimulateAssemblyTrackingContractSetOtomItems =
-  /*#__PURE__*/ createUseSimulateContract({
-    abi: assemblyTrackingContractAbi,
-    functionName: 'setOtomItems',
-  });
-
-/**
- * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `functionName` set to `"transferOwnership"`
- */
-export const useSimulateAssemblyTrackingContractTransferOwnership =
-  /*#__PURE__*/ createUseSimulateContract({
-    abi: assemblyTrackingContractAbi,
-    functionName: 'transferOwnership',
-  });
-
-/**
- * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `functionName` set to `"updateGlobalTokenList"`
- */
-export const useSimulateAssemblyTrackingContractUpdateGlobalTokenList =
-  /*#__PURE__*/ createUseSimulateContract({
-    abi: assemblyTrackingContractAbi,
-    functionName: 'updateGlobalTokenList',
-  });
-
-/**
- * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `functionName` set to `"updateOwnerTokenLists"`
- */
-export const useSimulateAssemblyTrackingContractUpdateOwnerTokenLists =
-  /*#__PURE__*/ createUseSimulateContract({
-    abi: assemblyTrackingContractAbi,
-    functionName: 'updateOwnerTokenLists',
-  });
-
-/**
- * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link assemblyTrackingContractAbi}__
- */
-export const useWatchAssemblyTrackingContractEvent = /*#__PURE__*/ createUseWatchContractEvent({
-  abi: assemblyTrackingContractAbi,
-});
-
-/**
- * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `eventName` set to `"CoreSet"`
- */
-export const useWatchAssemblyTrackingContractCoreSetEvent =
-  /*#__PURE__*/ createUseWatchContractEvent({
-    abi: assemblyTrackingContractAbi,
-    eventName: 'CoreSet',
-  });
-
-/**
- * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `eventName` set to `"Initialized"`
- */
-export const useWatchAssemblyTrackingContractInitializedEvent =
-  /*#__PURE__*/ createUseWatchContractEvent({
-    abi: assemblyTrackingContractAbi,
-    eventName: 'Initialized',
-  });
-
-/**
- * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `eventName` set to `"OtomItemsSet"`
- */
-export const useWatchAssemblyTrackingContractOtomItemsSetEvent =
-  /*#__PURE__*/ createUseWatchContractEvent({
-    abi: assemblyTrackingContractAbi,
-    eventName: 'OtomItemsSet',
-  });
-
-/**
- * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `eventName` set to `"OwnershipTransferStarted"`
- */
-export const useWatchAssemblyTrackingContractOwnershipTransferStartedEvent =
-  /*#__PURE__*/ createUseWatchContractEvent({
-    abi: assemblyTrackingContractAbi,
-    eventName: 'OwnershipTransferStarted',
-  });
-
-/**
- * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link assemblyTrackingContractAbi}__ and `eventName` set to `"OwnershipTransferred"`
- */
-export const useWatchAssemblyTrackingContractOwnershipTransferredEvent =
-  /*#__PURE__*/ createUseWatchContractEvent({
-    abi: assemblyTrackingContractAbi,
-    eventName: 'OwnershipTransferred',
-  });
 
 /**
  * Wraps __{@link useReadContract}__ with `abi` set to __{@link otomItemsCoreContractAbi}__
@@ -4686,6 +4344,344 @@ export const useWatchOtomItemsCoreContractValidatorSetEvent =
   /*#__PURE__*/ createUseWatchContractEvent({
     abi: otomItemsCoreContractAbi,
     eventName: 'ValidatorSet',
+  });
+
+/**
+ * Wraps __{@link useReadContract}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__
+ */
+export const useReadOtomItemsTrackingContract = /*#__PURE__*/ createUseReadContract({
+  abi: otomItemsTrackingContractAbi,
+});
+
+/**
+ * Wraps __{@link useReadContract}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `functionName` set to `"core"`
+ */
+export const useReadOtomItemsTrackingContractCore = /*#__PURE__*/ createUseReadContract({
+  abi: otomItemsTrackingContractAbi,
+  functionName: 'core',
+});
+
+/**
+ * Wraps __{@link useReadContract}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `functionName` set to `"getAllItemsPaginated"`
+ */
+export const useReadOtomItemsTrackingContractGetAllItemsPaginated =
+  /*#__PURE__*/ createUseReadContract({
+    abi: otomItemsTrackingContractAbi,
+    functionName: 'getAllItemsPaginated',
+  });
+
+/**
+ * Wraps __{@link useReadContract}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `functionName` set to `"getItemSupply"`
+ */
+export const useReadOtomItemsTrackingContractGetItemSupply = /*#__PURE__*/ createUseReadContract({
+  abi: otomItemsTrackingContractAbi,
+  functionName: 'getItemSupply',
+});
+
+/**
+ * Wraps __{@link useReadContract}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `functionName` set to `"getNonFungibleItemOwnerTokenIdsPaginated"`
+ */
+export const useReadOtomItemsTrackingContractGetNonFungibleItemOwnerTokenIdsPaginated =
+  /*#__PURE__*/ createUseReadContract({
+    abi: otomItemsTrackingContractAbi,
+    functionName: 'getNonFungibleItemOwnerTokenIdsPaginated',
+  });
+
+/**
+ * Wraps __{@link useReadContract}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `functionName` set to `"getNonFungibleItemTokenIdsPaginated"`
+ */
+export const useReadOtomItemsTrackingContractGetNonFungibleItemTokenIdsPaginated =
+  /*#__PURE__*/ createUseReadContract({
+    abi: otomItemsTrackingContractAbi,
+    functionName: 'getNonFungibleItemTokenIdsPaginated',
+  });
+
+/**
+ * Wraps __{@link useReadContract}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `functionName` set to `"getNonFungibleTokenOwner"`
+ */
+export const useReadOtomItemsTrackingContractGetNonFungibleTokenOwner =
+  /*#__PURE__*/ createUseReadContract({
+    abi: otomItemsTrackingContractAbi,
+    functionName: 'getNonFungibleTokenOwner',
+  });
+
+/**
+ * Wraps __{@link useReadContract}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `functionName` set to `"otomItems"`
+ */
+export const useReadOtomItemsTrackingContractOtomItems = /*#__PURE__*/ createUseReadContract({
+  abi: otomItemsTrackingContractAbi,
+  functionName: 'otomItems',
+});
+
+/**
+ * Wraps __{@link useReadContract}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `functionName` set to `"owner"`
+ */
+export const useReadOtomItemsTrackingContractOwner = /*#__PURE__*/ createUseReadContract({
+  abi: otomItemsTrackingContractAbi,
+  functionName: 'owner',
+});
+
+/**
+ * Wraps __{@link useReadContract}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `functionName` set to `"pendingOwner"`
+ */
+export const useReadOtomItemsTrackingContractPendingOwner = /*#__PURE__*/ createUseReadContract({
+  abi: otomItemsTrackingContractAbi,
+  functionName: 'pendingOwner',
+});
+
+/**
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__
+ */
+export const useWriteOtomItemsTrackingContract = /*#__PURE__*/ createUseWriteContract({
+  abi: otomItemsTrackingContractAbi,
+});
+
+/**
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `functionName` set to `"acceptOwnership"`
+ */
+export const useWriteOtomItemsTrackingContractAcceptOwnership =
+  /*#__PURE__*/ createUseWriteContract({
+    abi: otomItemsTrackingContractAbi,
+    functionName: 'acceptOwnership',
+  });
+
+/**
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `functionName` set to `"batchReconcileTokens"`
+ */
+export const useWriteOtomItemsTrackingContractBatchReconcileTokens =
+  /*#__PURE__*/ createUseWriteContract({
+    abi: otomItemsTrackingContractAbi,
+    functionName: 'batchReconcileTokens',
+  });
+
+/**
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `functionName` set to `"initialize"`
+ */
+export const useWriteOtomItemsTrackingContractInitialize = /*#__PURE__*/ createUseWriteContract({
+  abi: otomItemsTrackingContractAbi,
+  functionName: 'initialize',
+});
+
+/**
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `functionName` set to `"onUpdate"`
+ */
+export const useWriteOtomItemsTrackingContractOnUpdate = /*#__PURE__*/ createUseWriteContract({
+  abi: otomItemsTrackingContractAbi,
+  functionName: 'onUpdate',
+});
+
+/**
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `functionName` set to `"reconcileToken"`
+ */
+export const useWriteOtomItemsTrackingContractReconcileToken = /*#__PURE__*/ createUseWriteContract(
+  { abi: otomItemsTrackingContractAbi, functionName: 'reconcileToken' }
+);
+
+/**
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `functionName` set to `"renounceOwnership"`
+ */
+export const useWriteOtomItemsTrackingContractRenounceOwnership =
+  /*#__PURE__*/ createUseWriteContract({
+    abi: otomItemsTrackingContractAbi,
+    functionName: 'renounceOwnership',
+  });
+
+/**
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `functionName` set to `"setCore"`
+ */
+export const useWriteOtomItemsTrackingContractSetCore = /*#__PURE__*/ createUseWriteContract({
+  abi: otomItemsTrackingContractAbi,
+  functionName: 'setCore',
+});
+
+/**
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `functionName` set to `"setOtomItems"`
+ */
+export const useWriteOtomItemsTrackingContractSetOtomItems = /*#__PURE__*/ createUseWriteContract({
+  abi: otomItemsTrackingContractAbi,
+  functionName: 'setOtomItems',
+});
+
+/**
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `functionName` set to `"transferOwnership"`
+ */
+export const useWriteOtomItemsTrackingContractTransferOwnership =
+  /*#__PURE__*/ createUseWriteContract({
+    abi: otomItemsTrackingContractAbi,
+    functionName: 'transferOwnership',
+  });
+
+/**
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `functionName` set to `"updateGlobalTokenList"`
+ */
+export const useWriteOtomItemsTrackingContractUpdateGlobalTokenList =
+  /*#__PURE__*/ createUseWriteContract({
+    abi: otomItemsTrackingContractAbi,
+    functionName: 'updateGlobalTokenList',
+  });
+
+/**
+ * Wraps __{@link useWriteContract}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `functionName` set to `"updateOwnerTokenLists"`
+ */
+export const useWriteOtomItemsTrackingContractUpdateOwnerTokenLists =
+  /*#__PURE__*/ createUseWriteContract({
+    abi: otomItemsTrackingContractAbi,
+    functionName: 'updateOwnerTokenLists',
+  });
+
+/**
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__
+ */
+export const useSimulateOtomItemsTrackingContract = /*#__PURE__*/ createUseSimulateContract({
+  abi: otomItemsTrackingContractAbi,
+});
+
+/**
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `functionName` set to `"acceptOwnership"`
+ */
+export const useSimulateOtomItemsTrackingContractAcceptOwnership =
+  /*#__PURE__*/ createUseSimulateContract({
+    abi: otomItemsTrackingContractAbi,
+    functionName: 'acceptOwnership',
+  });
+
+/**
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `functionName` set to `"batchReconcileTokens"`
+ */
+export const useSimulateOtomItemsTrackingContractBatchReconcileTokens =
+  /*#__PURE__*/ createUseSimulateContract({
+    abi: otomItemsTrackingContractAbi,
+    functionName: 'batchReconcileTokens',
+  });
+
+/**
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `functionName` set to `"initialize"`
+ */
+export const useSimulateOtomItemsTrackingContractInitialize =
+  /*#__PURE__*/ createUseSimulateContract({
+    abi: otomItemsTrackingContractAbi,
+    functionName: 'initialize',
+  });
+
+/**
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `functionName` set to `"onUpdate"`
+ */
+export const useSimulateOtomItemsTrackingContractOnUpdate = /*#__PURE__*/ createUseSimulateContract(
+  { abi: otomItemsTrackingContractAbi, functionName: 'onUpdate' }
+);
+
+/**
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `functionName` set to `"reconcileToken"`
+ */
+export const useSimulateOtomItemsTrackingContractReconcileToken =
+  /*#__PURE__*/ createUseSimulateContract({
+    abi: otomItemsTrackingContractAbi,
+    functionName: 'reconcileToken',
+  });
+
+/**
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `functionName` set to `"renounceOwnership"`
+ */
+export const useSimulateOtomItemsTrackingContractRenounceOwnership =
+  /*#__PURE__*/ createUseSimulateContract({
+    abi: otomItemsTrackingContractAbi,
+    functionName: 'renounceOwnership',
+  });
+
+/**
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `functionName` set to `"setCore"`
+ */
+export const useSimulateOtomItemsTrackingContractSetCore = /*#__PURE__*/ createUseSimulateContract({
+  abi: otomItemsTrackingContractAbi,
+  functionName: 'setCore',
+});
+
+/**
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `functionName` set to `"setOtomItems"`
+ */
+export const useSimulateOtomItemsTrackingContractSetOtomItems =
+  /*#__PURE__*/ createUseSimulateContract({
+    abi: otomItemsTrackingContractAbi,
+    functionName: 'setOtomItems',
+  });
+
+/**
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `functionName` set to `"transferOwnership"`
+ */
+export const useSimulateOtomItemsTrackingContractTransferOwnership =
+  /*#__PURE__*/ createUseSimulateContract({
+    abi: otomItemsTrackingContractAbi,
+    functionName: 'transferOwnership',
+  });
+
+/**
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `functionName` set to `"updateGlobalTokenList"`
+ */
+export const useSimulateOtomItemsTrackingContractUpdateGlobalTokenList =
+  /*#__PURE__*/ createUseSimulateContract({
+    abi: otomItemsTrackingContractAbi,
+    functionName: 'updateGlobalTokenList',
+  });
+
+/**
+ * Wraps __{@link useSimulateContract}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `functionName` set to `"updateOwnerTokenLists"`
+ */
+export const useSimulateOtomItemsTrackingContractUpdateOwnerTokenLists =
+  /*#__PURE__*/ createUseSimulateContract({
+    abi: otomItemsTrackingContractAbi,
+    functionName: 'updateOwnerTokenLists',
+  });
+
+/**
+ * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__
+ */
+export const useWatchOtomItemsTrackingContractEvent = /*#__PURE__*/ createUseWatchContractEvent({
+  abi: otomItemsTrackingContractAbi,
+});
+
+/**
+ * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `eventName` set to `"CoreSet"`
+ */
+export const useWatchOtomItemsTrackingContractCoreSetEvent =
+  /*#__PURE__*/ createUseWatchContractEvent({
+    abi: otomItemsTrackingContractAbi,
+    eventName: 'CoreSet',
+  });
+
+/**
+ * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `eventName` set to `"Initialized"`
+ */
+export const useWatchOtomItemsTrackingContractInitializedEvent =
+  /*#__PURE__*/ createUseWatchContractEvent({
+    abi: otomItemsTrackingContractAbi,
+    eventName: 'Initialized',
+  });
+
+/**
+ * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `eventName` set to `"OtomItemsSet"`
+ */
+export const useWatchOtomItemsTrackingContractOtomItemsSetEvent =
+  /*#__PURE__*/ createUseWatchContractEvent({
+    abi: otomItemsTrackingContractAbi,
+    eventName: 'OtomItemsSet',
+  });
+
+/**
+ * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `eventName` set to `"OwnershipTransferStarted"`
+ */
+export const useWatchOtomItemsTrackingContractOwnershipTransferStartedEvent =
+  /*#__PURE__*/ createUseWatchContractEvent({
+    abi: otomItemsTrackingContractAbi,
+    eventName: 'OwnershipTransferStarted',
+  });
+
+/**
+ * Wraps __{@link useWatchContractEvent}__ with `abi` set to __{@link otomItemsTrackingContractAbi}__ and `eventName` set to `"OwnershipTransferred"`
+ */
+export const useWatchOtomItemsTrackingContractOwnershipTransferredEvent =
+  /*#__PURE__*/ createUseWatchContractEvent({
+    abi: otomItemsTrackingContractAbi,
+    eventName: 'OwnershipTransferred',
   });
 
 /**

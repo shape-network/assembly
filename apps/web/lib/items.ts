@@ -1,5 +1,5 @@
 import { getMoleculesByIds } from '@/app/api/fetchers';
-import { assemblyItems } from '@/lib/addresses';
+import { otomItems } from '@/lib/addresses';
 import { alchemy } from '@/lib/clients';
 import { config } from '@/lib/config';
 import { BlueprintComponent, ComponentType, RawBlueprintComponent } from '@/lib/types';
@@ -41,7 +41,7 @@ export async function getBlueprintForItem(
     if (!!blueprint.itemIdOrOtomTokenId) {
       try {
         const nft = await alchemy.nft.getNftMetadata(
-          assemblyItems[config.chain.id],
+          otomItems[config.chain.id],
           blueprint.itemIdOrOtomTokenId.toString()
         );
         name = nft.name ?? '?';

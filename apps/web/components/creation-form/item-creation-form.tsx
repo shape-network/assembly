@@ -22,8 +22,8 @@ import {
 import { ItemTrait } from '@/components/creation-form/traits-editor';
 import { Card, CardContent } from '@/components/ui/card';
 import {
-  useWriteAssemblyCoreContractCreateFungibleItem,
-  useWriteAssemblyCoreContractCreateNonFungibleItem,
+  useWriteOtomItemsCoreContractCreateFungibleItem,
+  useWriteOtomItemsCoreContractCreateNonFungibleItem,
 } from '@/generated';
 import { otomItemsCore } from '@/lib/addresses';
 import { itemCreationBannerDismissedAtom } from '@/lib/atoms';
@@ -88,12 +88,12 @@ export const ItemCreationForm: FC = () => {
     writeContract: writeFungible,
     isPending: isPendingFungible,
     data: dataFungible,
-  } = useWriteAssemblyCoreContractCreateFungibleItem();
+  } = useWriteOtomItemsCoreContractCreateFungibleItem();
   const {
     writeContract: writeNonFungible,
     isPending: isPendingNonFungible,
     data: dataNonFungible,
-  } = useWriteAssemblyCoreContractCreateNonFungibleItem();
+  } = useWriteOtomItemsCoreContractCreateNonFungibleItem();
 
   const isPending = isPendingFungible || isPendingNonFungible;
   const data = dataFungible || dataNonFungible;
