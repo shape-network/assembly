@@ -1,5 +1,5 @@
 import { assemblyCoreContractAbi, assemblyTrackingContractAbi } from '@/generated';
-import { assemblyCore, assemblyItems, assemblyTracking } from '@/lib/addresses';
+import { assemblyItems, assemblyTracking, otomItemsCore } from '@/lib/addresses';
 import { alchemy, rpcClient } from '@/lib/clients';
 import { config } from '@/lib/config';
 import { ItemType, OwnedItem } from '@/lib/types';
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
         const rpc = rpcClient();
         const itemId = await rpc.readContract({
           abi: assemblyCoreContractAbi,
-          address: assemblyCore[config.chain.id],
+          address: otomItemsCore[config.chain.id],
           functionName: 'getItemIdForToken',
           args: [nftTokenId],
         });
@@ -49,19 +49,19 @@ export async function POST(request: Request) {
           contracts: [
             {
               abi: assemblyCoreContractAbi,
-              address: assemblyCore[config.chain.id],
+              address: otomItemsCore[config.chain.id],
               functionName: 'getItemByItemId',
               args: [itemId],
             },
             {
               abi: assemblyCoreContractAbi,
-              address: assemblyCore[config.chain.id],
+              address: otomItemsCore[config.chain.id],
               functionName: 'nonFungibleTokenToTier',
               args: [nftTokenId],
             },
             {
               abi: assemblyCoreContractAbi,
-              address: assemblyCore[config.chain.id],
+              address: otomItemsCore[config.chain.id],
               functionName: 'getTokenTraits',
               args: [nftTokenId],
             },

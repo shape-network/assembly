@@ -1,6 +1,6 @@
-import assemblyCoreAbi from '@/abi/AssemblyCore.json';
 import assemblyItemsAbi from '@/abi/AssemblyItems.json';
 import assemblyTrackingAbi from '@/abi/AssemblyTracking.json';
+import otomItemsCoreAbi from '@/abi/OtomItemsCore.json';
 import otomsCoreAbi from '@/abi/OtomsCore.json';
 import otomsDatabaseAbi from '@/abi/OtomsDatabase.json';
 import { defineConfig } from '@wagmi/cli';
@@ -19,8 +19,8 @@ export default defineConfig({
       abi: otomsDatabaseAbi.abi as Abi,
     },
     {
-      name: 'AssemblyCoreContract',
-      abi: assemblyCoreAbi.abi.filter(
+      name: 'OtomItemsCoreContract',
+      abi: otomItemsCoreAbi.abi.filter(
         (item) => !(item.type === 'function' && item.name?.startsWith('_'))
       ) as Abi,
     },

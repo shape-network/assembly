@@ -25,7 +25,7 @@ import {
   useWriteAssemblyCoreContractCreateFungibleItem,
   useWriteAssemblyCoreContractCreateNonFungibleItem,
 } from '@/generated';
-import { assemblyCore } from '@/lib/addresses';
+import { otomItemsCore } from '@/lib/addresses';
 import { itemCreationBannerDismissedAtom } from '@/lib/atoms';
 import { config } from '@/lib/config';
 import { paths } from '@/lib/paths';
@@ -402,7 +402,7 @@ export const ItemCreationForm: FC = () => {
         }));
 
         writeFungible({
-          address: assemblyCore[config.chain.id],
+          address: otomItemsCore[config.chain.id],
           args: [
             fungibleFormData.name,
             fungibleFormData.description,
@@ -485,7 +485,7 @@ export const ItemCreationForm: FC = () => {
         ];
 
         writeNonFungible({
-          address: assemblyCore[config.chain.id],
+          address: otomItemsCore[config.chain.id],
           args: [
             nonFungibleFormData.name,
             nonFungibleFormData.description,

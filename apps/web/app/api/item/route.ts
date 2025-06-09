@@ -1,5 +1,5 @@
 import { assemblyCoreContractAbi, assemblyTrackingContractAbi } from '@/generated';
-import { assemblyCore, assemblyTracking } from '@/lib/addresses';
+import { assemblyTracking, otomItemsCore } from '@/lib/addresses';
 import { rpcClient } from '@/lib/clients';
 import { config } from '@/lib/config';
 import { ItemType, OwnedItem } from '@/lib/types';
@@ -21,19 +21,19 @@ async function getItem(itemTokenId: bigint, itemId: bigint): Promise<string> {
     contracts: [
       {
         abi: assemblyCoreContractAbi,
-        address: assemblyCore[config.chain.id],
+        address: otomItemsCore[config.chain.id],
         functionName: 'getItemByItemId',
         args: [itemId],
       },
       {
         abi: assemblyCoreContractAbi,
-        address: assemblyCore[config.chain.id],
+        address: otomItemsCore[config.chain.id],
         functionName: 'nonFungibleTokenToTier',
         args: [itemTokenId],
       },
       {
         abi: assemblyCoreContractAbi,
-        address: assemblyCore[config.chain.id],
+        address: otomItemsCore[config.chain.id],
         functionName: 'getTokenTraits',
         args: [itemTokenId],
       },

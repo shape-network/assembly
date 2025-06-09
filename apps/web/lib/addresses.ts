@@ -10,7 +10,7 @@ export const otomsDatabase = {
   [shapeSepolia.id]: '0xC6E01938846D3d62EafD7FF485afeE416f6D8A40',
 } as const;
 
-export const assemblyCore = {
+export const otomItemsCore = {
   [shapeSepolia.id]: '0x488B5bAEA1Eb28F48c279C9Ac4e3312790813C2e',
   [shape.id]: '0xe8af571878D33CfecA4eA11caEf124E5ef105a30',
 } as const;
