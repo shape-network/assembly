@@ -1,5 +1,5 @@
-import { assemblyCoreContractAbi, assemblyTrackingContractAbi } from '@/generated';
-import { assemblyCore, assemblyItems, assemblyTracking } from '@/lib/addresses';
+import { otomItemsCoreContractAbi, otomItemsTrackingContractAbi } from '@/generated';
+import { otomItems, otomItemsCore, otomItemsTracking } from '@/lib/addresses';
 import { alchemy, rpcClient } from '@/lib/clients';
 import { config } from '@/lib/config';
 import { ItemType, OwnedItem } from '@/lib/types';
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
   const { address } = result.data;
 
   const nfts = await alchemy.nft.getNftsForOwner(address, {
-    contractAddresses: [assemblyItems[config.chain.id]],
+    contractAddresses: [otomItems[config.chain.id]],
   });
 
   const items: (OwnedItem | null)[] = await Promise.all(
@@ -34,8 +34,8 @@ export async function POST(request: Request) {
 
         const rpc = rpcClient();
         const itemId = await rpc.readContract({
-          abi: assemblyCoreContractAbi,
-          address: assemblyCore[config.chain.id],
+          abi: otomItemsCoreContractAbi,
+          address: otomItemsCore[config.chain.id],
           functionName: 'getItemIdForToken',
           args: [nftTokenId],
         });
@@ -48,26 +48,26 @@ export async function POST(request: Request) {
         const [itemResponse, tierResponse, traitsResponse, supplyResponse] = await rpc.multicall({
           contracts: [
             {
-              abi: assemblyCoreContractAbi,
-              address: assemblyCore[config.chain.id],
+              abi: otomItemsCoreContractAbi,
+              address: otomItemsCore[config.chain.id],
               functionName: 'getItemByItemId',
               args: [itemId],
             },
             {
-              abi: assemblyCoreContractAbi,
-              address: assemblyCore[config.chain.id],
+              abi: otomItemsCoreContractAbi,
+              address: otomItemsCore[config.chain.id],
               functionName: 'nonFungibleTokenToTier',
               args: [nftTokenId],
             },
             {
-              abi: assemblyCoreContractAbi,
-              address: assemblyCore[config.chain.id],
+              abi: otomItemsCoreContractAbi,
+              address: otomItemsCore[config.chain.id],
               functionName: 'getTokenTraits',
               args: [nftTokenId],
             },
             {
-              abi: assemblyTrackingContractAbi,
-              address: assemblyTracking[config.chain.id],
+              abi: otomItemsTrackingContractAbi,
+              address: otomItemsTracking[config.chain.id],
               functionName: 'getItemSupply',
               args: [itemId],
             },

@@ -22,10 +22,10 @@ import {
 import { ItemTrait } from '@/components/creation-form/traits-editor';
 import { Card, CardContent } from '@/components/ui/card';
 import {
-  useWriteAssemblyCoreContractCreateFungibleItem,
-  useWriteAssemblyCoreContractCreateNonFungibleItem,
+  useWriteOtomItemsCoreContractCreateFungibleItem,
+  useWriteOtomItemsCoreContractCreateNonFungibleItem,
 } from '@/generated';
-import { assemblyCore } from '@/lib/addresses';
+import { otomItemsCore } from '@/lib/addresses';
 import { itemCreationBannerDismissedAtom } from '@/lib/atoms';
 import { config } from '@/lib/config';
 import { paths } from '@/lib/paths';
@@ -88,12 +88,12 @@ export const ItemCreationForm: FC = () => {
     writeContract: writeFungible,
     isPending: isPendingFungible,
     data: dataFungible,
-  } = useWriteAssemblyCoreContractCreateFungibleItem();
+  } = useWriteOtomItemsCoreContractCreateFungibleItem();
   const {
     writeContract: writeNonFungible,
     isPending: isPendingNonFungible,
     data: dataNonFungible,
-  } = useWriteAssemblyCoreContractCreateNonFungibleItem();
+  } = useWriteOtomItemsCoreContractCreateNonFungibleItem();
 
   const isPending = isPendingFungible || isPendingNonFungible;
   const data = dataFungible || dataNonFungible;
@@ -402,7 +402,7 @@ export const ItemCreationForm: FC = () => {
         }));
 
         writeFungible({
-          address: assemblyCore[config.chain.id],
+          address: otomItemsCore[config.chain.id],
           args: [
             fungibleFormData.name,
             fungibleFormData.description,
@@ -485,7 +485,7 @@ export const ItemCreationForm: FC = () => {
         ];
 
         writeNonFungible({
-          address: assemblyCore[config.chain.id],
+          address: otomItemsCore[config.chain.id],
           args: [
             nonFungibleFormData.name,
             nonFungibleFormData.description,

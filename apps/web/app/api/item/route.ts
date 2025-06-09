@@ -1,5 +1,5 @@
-import { assemblyCoreContractAbi, assemblyTrackingContractAbi } from '@/generated';
-import { assemblyCore, assemblyTracking } from '@/lib/addresses';
+import { otomItemsCoreContractAbi, otomItemsTrackingContractAbi } from '@/generated';
+import { otomItemsCore, otomItemsTracking } from '@/lib/addresses';
 import { rpcClient } from '@/lib/clients';
 import { config } from '@/lib/config';
 import { ItemType, OwnedItem } from '@/lib/types';
@@ -20,26 +20,26 @@ async function getItem(itemTokenId: bigint, itemId: bigint): Promise<string> {
   const [itemResponse, tierResponse, traitsResponse, supplyResponse] = await rpc.multicall({
     contracts: [
       {
-        abi: assemblyCoreContractAbi,
-        address: assemblyCore[config.chain.id],
+        abi: otomItemsCoreContractAbi,
+        address: otomItemsCore[config.chain.id],
         functionName: 'getItemByItemId',
         args: [itemId],
       },
       {
-        abi: assemblyCoreContractAbi,
-        address: assemblyCore[config.chain.id],
+        abi: otomItemsCoreContractAbi,
+        address: otomItemsCore[config.chain.id],
         functionName: 'nonFungibleTokenToTier',
         args: [itemTokenId],
       },
       {
-        abi: assemblyCoreContractAbi,
-        address: assemblyCore[config.chain.id],
+        abi: otomItemsCoreContractAbi,
+        address: otomItemsCore[config.chain.id],
         functionName: 'getTokenTraits',
         args: [itemTokenId],
       },
       {
-        abi: assemblyTrackingContractAbi,
-        address: assemblyTracking[config.chain.id],
+        abi: otomItemsTrackingContractAbi,
+        address: otomItemsTracking[config.chain.id],
         functionName: 'getItemSupply',
         args: [itemId],
       },

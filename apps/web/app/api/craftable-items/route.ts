@@ -1,6 +1,6 @@
 import { getTraitsForItem } from '@/app/api/fetchers';
-import { assemblyTrackingContractAbi } from '@/generated';
-import { assemblyTracking } from '@/lib/addresses';
+import { otomItemsTrackingContractAbi } from '@/generated';
+import { otomItemsTracking } from '@/lib/addresses';
 import { rpcClient } from '@/lib/clients';
 import { config } from '@/lib/config';
 import { getBlueprintForItem, HIDDEN_ITEMS } from '@/lib/items';
@@ -12,8 +12,8 @@ import superjson from 'superjson';
 async function getCraftItems(): Promise<string> {
   const rpc = rpcClient();
   const results = await rpc.readContract({
-    abi: assemblyTrackingContractAbi,
-    address: assemblyTracking[config.chain.id],
+    abi: otomItemsTrackingContractAbi,
+    address: otomItemsTracking[config.chain.id],
     functionName: 'getAllItemsPaginated',
     args: [BigInt(0), BigInt(100)], // TODO: add proper pagination
   });
@@ -24,8 +24,8 @@ async function getCraftItems(): Promise<string> {
 
   const supplyResponses = await rpc.multicall({
     contracts: filteredResults.map((r) => ({
-      abi: assemblyTrackingContractAbi,
-      address: assemblyTracking[config.chain.id],
+      abi: otomItemsTrackingContractAbi,
+      address: otomItemsTracking[config.chain.id],
       functionName: 'getItemSupply',
       args: [r.id],
     })),

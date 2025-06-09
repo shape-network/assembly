@@ -13,8 +13,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { assemblyCoreContractAbi, useWriteAssemblyCoreContractCraftItem } from '@/generated';
-import { assemblyCore } from '@/lib/addresses';
+import { otomItemsCoreContractAbi, useWriteOtomItemsCoreContractCraftItem } from '@/generated';
+import { otomItemsCore } from '@/lib/addresses';
 import { droppedItemsStateAtom, hoveredOtomItemAtom } from '@/lib/atoms';
 import { config } from '@/lib/config';
 import { useCopyToClipboard } from '@/lib/hooks';
@@ -479,7 +479,7 @@ const CraftItemButton: FC<{
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const posthog = usePostHog();
 
-  const { data: hash, writeContractAsync } = useWriteAssemblyCoreContractCraftItem();
+  const { data: hash, writeContractAsync } = useWriteOtomItemsCoreContractCraftItem();
   const {
     isLoading: isTxConfirming,
     isError: isTxError,
@@ -498,7 +498,7 @@ const CraftItemButton: FC<{
 
       const craftLog = txReceipt.logs.find(
         (log) =>
-          isSameAddress(log.address, assemblyCore[config.chain.id]) &&
+          isSameAddress(log.address, otomItemsCore[config.chain.id]) &&
           log.topics &&
           log.topics[0] === itemCraftedSelector
       );
@@ -506,7 +506,7 @@ const CraftItemButton: FC<{
       if (craftLog) {
         try {
           const decodedLog = decodeEventLog({
-            abi: assemblyCoreContractAbi,
+            abi: otomItemsCoreContractAbi,
             eventName: 'ItemCrafted',
             data: craftLog.data,
             topics: craftLog.topics,
@@ -577,7 +577,7 @@ const CraftItemButton: FC<{
     try {
       toast.info('Please confirm the transaction in your wallet.');
       await writeContractAsync({
-        address: assemblyCore[config.chain.id],
+        address: otomItemsCore[config.chain.id],
         args: [item.id, BigInt(1), variableOtomTokenIds, [], '0x'],
         value: item.ethCostInWei,
       });
