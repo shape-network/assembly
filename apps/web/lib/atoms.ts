@@ -24,3 +24,7 @@ export const inventoryWindowFloatingAtom = atom<boolean>(false);
 export const droppedItemsStateAtom = atom<Record<string, Record<number, OtomItem>>>({});
 
 export const onboardingCompletedAtom = atomWithStorage<boolean>('onboarding-completed', false);
+
+export const isSelectingWildcardIdAtom = atom<null | (BlueprintComponent & { posId: string })>(
+  null
+);
