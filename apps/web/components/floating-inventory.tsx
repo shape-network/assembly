@@ -15,12 +15,10 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { Rnd } from 'react-rnd';
 import { useAccount } from 'wagmi';
 
-// Component manages its own state with no props needed
 export const FloatingInventory = () => {
   const { isConnected } = useAccount();
   const [droppedItemsState] = useAtom(droppedItemsStateAtom);
 
-  // Calculate which items are being used in crafting
   const usedCounts = useMemo(() => {
     const counts = new Map<string, number>();
     Object.values(droppedItemsState).forEach((itemDrops) => {
