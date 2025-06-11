@@ -15,13 +15,26 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { otomItemsCoreContractAbi, useWriteOtomItemsCoreContractCraftItem } from '@/generated';
 import { otomItemsCore } from '@/lib/addresses';
-import { droppedItemsStateAtom, hoveredOtomItemAtom } from '@/lib/atoms';
+import {
+  droppedItemsStateAtom,
+  hoveredOtomItemAtom,
+  inventoryWindowFloatingAtom,
+  isSelectingWildcardIdAtom,
+} from '@/lib/atoms';
 import { config } from '@/lib/config';
 import { useCopyToClipboard } from '@/lib/hooks';
 import { isOtomAtom } from '@/lib/otoms';
 import { paths } from '@/lib/paths';
 import { checkCriteria, formatPropertyName, isExactMatchCriteria } from '@/lib/property-utils';
-import { BlueprintComponent, Item, Molecule, OtomItem, OwnedItem, Trait } from '@/lib/types';
+import {
+  BlueprintComponent,
+  Criteria,
+  Item,
+  Molecule,
+  OtomItem,
+  OwnedItem,
+  Trait,
+} from '@/lib/types';
 import { abbreviateHash, cn, isNotNullish, isSameAddress } from '@/lib/utils';
 import { useDndContext, useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
@@ -35,6 +48,7 @@ import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { decodeEventLog, formatEther, toEventSelector } from 'viem';
 import { useAccount, useSwitchChain, useWaitForTransactionReceipt } from 'wagmi';
+import { useMediaQuery } from './hooks/useMediaQuery';
 
 export const ItemsToCraft: FC = () => {
   const { data, isLoading, isError } = useGetCraftableItems();
@@ -308,6 +322,10 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({ representativeItem, count,
   const { isCopied, copyToClipboard } = useCopyToClipboard();
   const { data: craftableItems } = useGetCraftableItems();
   const [hoveredState, setHoveredState] = useAtom(hoveredOtomItemAtom);
+  const [isSelectingWildcardId, setIsSelectingWildcardId] = useAtom(isSelectingWildcardIdAtom);
+  const setDroppedItemsState = useSetAtom(droppedItemsStateAtom);
+  const setIsFloating = useSetAtom(inventoryWindowFloatingAtom);
+  const isMobile = useMediaQuery('sm');
 
   const usedCount = usedCounts.get(representativeItem.tokenId) || 0;
   const availableCount = count - usedCount;
@@ -316,7 +334,7 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({ representativeItem, count,
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: representativeItem.tokenId,
     data: representativeItem,
-    disabled: areAllItemsUsed,
+    disabled: areAllItemsUsed || !!isSelectingWildcardId || isMobile,
   });
 
   const style = {
@@ -379,7 +397,7 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({ representativeItem, count,
           className={cn(
             'relative cursor-pointer touch-none py-0 font-semibold transition-colors',
             areAllItemsUsed
-              ? 'bg-primary text-primary-foreground'
+              ? 'bg-primary !text-primary-foreground'
               : isRequiredInBlueprint
                 ? 'border-primary text-primary border-dashed'
                 : 'border-border text-muted-foreground font-normal',
@@ -387,10 +405,37 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({ representativeItem, count,
             (hoveredState?.item?.tokenId === representativeItem.tokenId ||
               shouldHighlightFromBlueprintHover) &&
               !areAllItemsUsed &&
-              'bg-primary/15'
+              'bg-primary/15',
+            isSelectingWildcardId === null
+              ? ''
+              : checkCriteria(representativeItem, isSelectingWildcardId.criteria)
+                ? 'text-primary border-primary border-dashed'
+                : 'bg-primary/10 border-border !text-muted-foreground'
           )}
         >
-          <CardContent className="grid aspect-square w-full place-items-center px-0 sm:size-15">
+          <CardContent
+            className="grid aspect-square w-full place-items-center px-0 sm:size-15"
+            onClick={() => {
+              if (!isMobile) return;
+              if (
+                isSelectingWildcardId &&
+                checkCriteria(representativeItem, isSelectingWildcardId.criteria)
+              ) {
+                const parts = isSelectingWildcardId.posId.split('-');
+                const itemId = parts[1];
+                const index = parts[2];
+                setDroppedItemsState((prev) => ({
+                  ...prev,
+                  [itemId]: {
+                    ...prev[itemId],
+                    [index]: representativeItem,
+                  },
+                }));
+                setIsSelectingWildcardId(null);
+                setIsFloating(false);
+              }
+            }}
+          >
             <ElementName otom={representativeItem} />
             {availableCount > 1 && (
               <span className="text-muted-foreground bg-background absolute -top-2 -right-2 grid h-5 min-w-[20px] place-items-center rounded-full px-0.5 text-[10px] font-bold">
@@ -909,7 +954,7 @@ const RequiredDropZone: FC<{
           {isDropped && (
             <button
               type="button"
-              className="absolute inset-0 z-10 hidden cursor-pointer items-center justify-center bg-white/25 group-hover:flex"
+              className="absolute inset-0 z-10 cursor-pointer items-center justify-center bg-white/25 group-hover:flex md:hidden"
               onClick={handleRemove}
               title="Remove component"
             >
@@ -950,9 +995,37 @@ const WildcardDropZone: FC<{
     id: id,
     data: { index, type: 'variable', component },
   });
+  const setIsSelectingWildcardIdAtom = useSetAtom(isSelectingWildcardIdAtom);
+  const setDroppedItemsState = useSetAtom(droppedItemsStateAtom);
+  const posthog = usePostHog();
 
   const draggedItem = active?.data.current as OtomItem | undefined;
   const canDrop = active ? checkCriteria(draggedItem!, component.criteria) : false;
+
+  const isMobile = useMediaQuery('sm');
+
+  const handleClick = useCallback(() => {
+    if (!isMobile || droppedItem) return;
+
+    setIsSelectingWildcardIdAtom({ ...component, posId: id });
+  }, [isMobile, droppedItem, setIsSelectingWildcardIdAtom, component, id]);
+
+  const handleRemove = useCallback(() => {
+    const parts = id.split('-');
+    const itemId = parts[1];
+    setDroppedItemsState((prev) => ({
+      ...prev,
+      [itemId]: {
+        ...prev[itemId],
+        [index]: null,
+      } as Record<number, OtomItem>,
+    }));
+    posthog?.capture('click', {
+      event: 'remove_component',
+      itemId,
+      componentType: component.componentType,
+    });
+  }, [setDroppedItemsState, id, index, posthog, component]);
 
   return (
     <Tooltip delayDuration={0}>
@@ -968,7 +1041,22 @@ const WildcardDropZone: FC<{
               isOver && !canDrop && 'ring-destructive ring-2 ring-offset-2'
             )}
           >
-            <CardContent className="grid size-15 place-items-center px-0">
+            <CardContent
+              className="group relative grid size-15 place-items-center px-0"
+              onClick={handleClick}
+            >
+              {droppedItem !== null && (
+                <button
+                  type="button"
+                  className="absolute inset-0 z-10 cursor-pointer items-center justify-center bg-white/25 group-hover:flex md:hidden"
+                  onClick={handleRemove}
+                  title="Remove component"
+                >
+                  <span className="absolute top-1 right-1 rounded bg-white/90 p-[3px]">
+                    <TrashIcon className="text-primary size-4" />
+                  </span>
+                </button>
+              )}
               {droppedItem ? (
                 droppedItem.name
               ) : (
@@ -988,37 +1076,49 @@ const WildcardDropZone: FC<{
       </TooltipTrigger>
 
       <TooltipContent>
-        <div className="flex flex-col gap-1">
-          {component.criteria.map((c) => (
-            <span key={c.propertyType}>
-              <p className="font-semibold">{formatPropertyName(c.propertyType)}</p>
-              <p className="flex gap-1">
-                {c.checkBoolValue ? (
-                  `Required: ${c.boolValue}`
-                ) : c.checkStringValue ? (
-                  `Required: ${c.stringValue}`
-                ) : (
-                  <>
-                    Range:{' '}
-                    {typeof c.minValue === 'number' && c.minValue > 10000
-                      ? `${c.minValue.toExponential(2)}`
-                      : String(c.minValue)}{' '}
-                    -{' '}
-                    {typeof c.maxValue === 'number' && c.maxValue > 1000000000 ? (
-                      <span className="text-sm">∞</span>
-                    ) : typeof c.maxValue === 'number' && c.maxValue > 10000 ? (
-                      `${c.maxValue.toExponential(2)}`
-                    ) : (
-                      String(c.maxValue)
-                    )}
-                  </>
-                )}
-              </p>
-            </span>
-          ))}
-        </div>
+        <ComponentCriteriaDescription criteria={component.criteria} />
       </TooltipContent>
     </Tooltip>
+  );
+};
+
+export const ComponentCriteriaDescription = ({
+  criteria,
+  className,
+}: {
+  criteria: Criteria[];
+  className?: string;
+}) => {
+  return (
+    <div className={cn('flex flex-col gap-1', className)}>
+      {criteria.map((c) => (
+        <span key={c.propertyType}>
+          <p className="font-semibold">{formatPropertyName(c.propertyType)}</p>
+          <p className="flex gap-1">
+            {c.checkBoolValue ? (
+              `Required: ${c.boolValue}`
+            ) : c.checkStringValue ? (
+              `Required: ${c.stringValue}`
+            ) : (
+              <>
+                Range:{' '}
+                {typeof c.minValue === 'number' && c.minValue > 10000
+                  ? `${c.minValue.toExponential(2)}`
+                  : String(c.minValue)}{' '}
+                -{' '}
+                {typeof c.maxValue === 'number' && c.maxValue > 1000000000 ? (
+                  <span className="text-sm">∞</span>
+                ) : typeof c.maxValue === 'number' && c.maxValue > 10000 ? (
+                  `${c.maxValue.toExponential(2)}`
+                ) : (
+                  String(c.maxValue)
+                )}
+              </>
+            )}
+          </p>
+        </span>
+      ))}
+    </div>
   );
 };
 

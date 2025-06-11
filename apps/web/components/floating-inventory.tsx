@@ -1,11 +1,21 @@
 'use client';
 
+import { useMediaQuery } from '@/components/hooks/useMediaQuery';
 import { OtomsInventory } from '@/components/inventories';
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer';
 import {
   droppedItemsStateAtom,
   inventoryWindowFloatingAtom,
   inventoryWindowPositionAtom,
   inventoryWindowSizeAtom,
+  isSelectingWildcardIdAtom,
 } from '@/lib/atoms';
 import { cn } from '@/lib/utils';
 import { Cross2Icon } from '@radix-ui/react-icons';
@@ -14,10 +24,13 @@ import { usePostHog } from 'posthog-js/react';
 import { useCallback, useEffect, useMemo } from 'react';
 import { Rnd } from 'react-rnd';
 import { useAccount } from 'wagmi';
+import { ComponentCriteriaDescription } from './items';
 
 export const FloatingInventory = () => {
   const { isConnected } = useAccount();
   const [droppedItemsState] = useAtom(droppedItemsStateAtom);
+  const isMobile = useMediaQuery('sm');
+  const [isSelectingWildcardId, setIsSelectingWildcardId] = useAtom(isSelectingWildcardIdAtom);
 
   const usedCounts = useMemo(() => {
     const counts = new Map<string, number>();
@@ -38,8 +51,8 @@ export const FloatingInventory = () => {
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
 
-    const newX = Math.min(Math.max(0, rndPosition.x), windowWidth - rndSize.width);
-    const newY = Math.min(Math.max(0, rndPosition.y), windowHeight - rndSize.height);
+    const newX = Math.min(Math.max(0, rndPosition.x), windowWidth - rndSize.width - 150);
+    const newY = Math.min(Math.max(0, rndPosition.y), windowHeight - rndSize.height - 100);
 
     if (newX !== rndPosition.x || newY !== rndPosition.y) {
       setRndPosition({ x: newX, y: newY });
@@ -55,6 +68,22 @@ export const FloatingInventory = () => {
 
     setRndPosition({ x: Math.max(0, xPos), y: Math.max(0, yPos) });
   }, [rndSize, setRndPosition]);
+
+  const handleCloseFloating = useCallback(() => {
+    setIsSelectingWildcardId(null);
+    setIsFloating(false);
+  }, [setIsFloating, setIsSelectingWildcardId]);
+
+  const handleOpenChange = useCallback(
+    (open: boolean) => {
+      if (open) {
+        setIsFloating(false);
+      } else {
+        handleCloseFloating();
+      }
+    },
+    [handleCloseFloating, setIsFloating]
+  );
 
   useEffect(() => {
     if (isFloating) {
@@ -72,13 +101,57 @@ export const FloatingInventory = () => {
   }, [ensureWindowInBounds]);
 
   useEffect(() => {
-    if (isConnected) {
+    if (isConnected && isFloating === null && !isMobile) {
       setIsFloating(true);
       handleOpeningPosition();
+      return;
     }
-  }, [isConnected, setIsFloating, handleOpeningPosition]);
+  }, [isConnected, setIsFloating, handleOpeningPosition, isMobile, isFloating]);
+
+  useEffect(() => {
+    if (isSelectingWildcardId && !isFloating) {
+      setIsFloating(true);
+    }
+  }, [isSelectingWildcardId, isFloating, setIsFloating]);
 
   if (!isConnected) return null;
+
+  if (isMobile) {
+    return (
+      <Drawer open={!!isFloating} onOpenChange={handleOpenChange} direction="bottom">
+        <DrawerContent className="max-h-[80vh]">
+          <DrawerHeader className="py-0 pb-4">
+            <div className="flex items-center justify-between">
+              <DrawerTitle className="text-primary font-bold tracking-wide uppercase">
+                Your Inventory
+              </DrawerTitle>
+              <DrawerClose
+                className="text-muted-foreground/70 hover:text-primary hover:bg-muted/50 z-10 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full"
+                onClick={handleCloseFloating}
+              >
+                <Cross2Icon className="size-4" />
+              </DrawerClose>
+            </div>
+            {isSelectingWildcardId && (
+              <DrawerDescription className="text-left text-sm" asChild>
+                <div>
+                  Select the component you want to use for this wildcard. It must match the
+                  following criterias:
+                  <ComponentCriteriaDescription
+                    className="text-primary grid grid-cols-2 gap-2 py-4 text-sm"
+                    criteria={isSelectingWildcardId.criteria}
+                  />
+                </div>
+              </DrawerDescription>
+            )}
+          </DrawerHeader>
+          <div className="h-full overflow-y-auto p-4 pt-0 -webkit-overflow-scrolling-touch">
+            <OtomsInventory usedCounts={usedCounts} />
+          </div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
 
   return (
     <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
@@ -118,7 +191,7 @@ export const FloatingInventory = () => {
                 </div>
                 <div className="absolute top-3 right-3 z-10">
                   <button
-                    onClick={() => setIsFloating(false)}
+                    onClick={handleCloseFloating}
                     className="text-muted-foreground/70 hover:text-primary hover:bg-muted/50 z-10 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full"
                     aria-label="Close window"
                   >
