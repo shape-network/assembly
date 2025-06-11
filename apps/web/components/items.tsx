@@ -334,7 +334,7 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({ representativeItem, count,
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: representativeItem.tokenId,
     data: representativeItem,
-    disabled: areAllItemsUsed || !!isSelectingWildcardId,
+    disabled: areAllItemsUsed || !!isSelectingWildcardId || isMobile,
   });
 
   const style = {
