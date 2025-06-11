@@ -145,7 +145,7 @@ export const FloatingInventory = () => {
               </DrawerDescription>
             )}
           </DrawerHeader>
-          <div className="h-full overflow-auto p-4 pt-0">
+          <div className="h-full overflow-y-auto p-4 pt-0 -webkit-overflow-scrolling-touch">
             <OtomsInventory usedCounts={usedCounts} />
           </div>
         </DrawerContent>
