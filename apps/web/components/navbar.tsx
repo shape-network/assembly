@@ -57,7 +57,7 @@ export const Navbar: FC<GameMenuProps> = ({ className }) => {
           <MenuButton
             icon={<BackpackIcon className="size-5" />}
             tooltip={isFloating ? 'Close Inventory' : 'Open Inventory'}
-            isActive={isFloating === true}
+            isActive={isFloating}
             onClick={toggleInventory}
           />
           {config.chain.testnet && (
@@ -91,10 +91,10 @@ interface MenuButtonProps {
   icon: React.ReactNode;
   tooltip: string;
   onClick?: () => void;
-  isActive?: boolean;
+  isActive?: null | boolean;
 }
 
-const MenuButton: FC<MenuButtonProps> = ({ icon, tooltip, onClick, isActive = false }) => {
+const MenuButton: FC<MenuButtonProps> = ({ icon, tooltip, onClick, isActive = null }) => {
   return (
     <Tooltip>
       <TooltipTrigger asChild>

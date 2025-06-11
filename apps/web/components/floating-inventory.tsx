@@ -118,7 +118,7 @@ export const FloatingInventory = () => {
 
   if (isMobile) {
     return (
-      <Drawer open={isFloating === true} onOpenChange={handleOpenChange} direction="bottom">
+      <Drawer open={!!isFloating} onOpenChange={handleOpenChange} direction="bottom">
         <DrawerContent className="max-h-[80vh]">
           <DrawerHeader className="py-0 pb-4">
             <div className="flex items-center justify-between">
