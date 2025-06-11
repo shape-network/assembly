@@ -1,42 +1,41 @@
 import { getTraitsForItem } from '@/app/api/fetchers';
-import { assemblyCoreContractAbi, assemblyTrackingContractAbi } from '@/generated';
-import { assemblyCore, assemblyTracking } from '@/lib/addresses';
+import { otomItemsTrackingContractAbi } from '@/generated';
+import { otomItemsTracking } from '@/lib/addresses';
 import { rpcClient } from '@/lib/clients';
 import { config } from '@/lib/config';
-import { getBlueprintForItem } from '@/lib/items';
+import { getBlueprintForItem, HIDDEN_ITEMS } from '@/lib/items';
 import { Item, ItemType } from '@/lib/types';
 import { unstable_cache } from 'next/cache';
 import { NextResponse } from 'next/server';
 import superjson from 'superjson';
 
-async function getCraftItems(): Promise<Item[]> {
+async function getCraftItems(): Promise<string> {
   const rpc = rpcClient();
   const results = await rpc.readContract({
-    abi: assemblyTrackingContractAbi,
-    address: assemblyTracking[config.chain.id],
+    abi: otomItemsTrackingContractAbi,
+    address: otomItemsTracking[config.chain.id],
     functionName: 'getAllItemsPaginated',
     args: [BigInt(0), BigInt(100)], // TODO: add proper pagination
   });
 
   const filteredResults = config.chain.testnet
     ? results
-    : results.filter((r) => r.id === BigInt(2));
+    : results.filter((r) => !HIDDEN_ITEMS.includes(r.id));
 
-  const mintCountResponses = await rpc.multicall({
+  const supplyResponses = await rpc.multicall({
     contracts: filteredResults.map((r) => ({
-      abi: assemblyCoreContractAbi,
-      address: assemblyCore[config.chain.id],
-      functionName: 'itemMintCount' as const,
+      abi: otomItemsTrackingContractAbi,
+      address: otomItemsTracking[config.chain.id],
+      functionName: 'getItemSupply',
       args: [r.id],
     })),
     allowFailure: true,
   });
 
-  const items = await Promise.all(
+  const items: Item[] = await Promise.all(
     filteredResults.map(async (r, index) => {
-      const mintCountResponse = mintCountResponses[index];
-      const mintCount =
-        mintCountResponse.status === 'success' ? Number(mintCountResponse.result) : 0;
+      const supplyResponse = supplyResponses[index];
+      const supply = supplyResponse.status === 'success' ? Number(supplyResponse.result) : 0;
 
       return {
         id: r.id,
@@ -48,12 +47,12 @@ async function getCraftItems(): Promise<Item[]> {
         ethCostInWei: r.ethCostInWei,
         blueprint: await Promise.all(r.blueprint.map(getBlueprintForItem)),
         initialTraits: await getTraitsForItem(r.id),
-        mintCount,
+        supply,
       };
     })
   );
 
-  return items.sort((a, b) => b.mintCount - a.mintCount);
+  return superjson.stringify(items.sort((a, b) => b.supply - a.supply));
 }
 
 const getCachedCraftItems = unstable_cache(getCraftItems, ['craftable-items'], {
@@ -63,9 +62,8 @@ const getCachedCraftItems = unstable_cache(getCraftItems, ['craftable-items'], {
 
 export async function GET() {
   const items = await getCachedCraftItems();
-  const serialized = superjson.stringify(items);
 
-  return NextResponse.json(serialized, {
+  return NextResponse.json(items, {
     headers: {
       'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
     },

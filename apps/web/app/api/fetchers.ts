@@ -1,5 +1,5 @@
-import { assemblyCoreContractAbi, otomsDatabaseContractAbi } from '@/generated';
-import { assemblyCore, otomsDatabase } from '@/lib/addresses';
+import { otomItemsCoreContractAbi, otomsDatabaseContractAbi } from '@/generated';
+import { otomItemsCore, otomsDatabase } from '@/lib/addresses';
 import { alchemy, rpcClient } from '@/lib/clients';
 import { config } from '@/lib/config';
 import { moleculeIdToTokenId, solidityMoleculeToMolecule } from '@/lib/otoms';
@@ -123,8 +123,8 @@ export const getUniverses = unstable_cache(
 export async function getTraitsForItem(itemId: bigint): Promise<Trait[]> {
   const rpc = rpcClient();
   const traits = await rpc.readContract({
-    abi: assemblyCoreContractAbi,
-    address: assemblyCore[config.chain.id],
+    abi: otomItemsCoreContractAbi,
+    address: otomItemsCore[config.chain.id],
     functionName: 'getTokenTraits',
     args: [itemId],
   });

@@ -1,7 +1,6 @@
 {
   "abi": [
     { "inputs": [], "stateMutability": "nonpayable", "type": "constructor" },
-    { "inputs": [], "name": "CraftBlocked", "type": "error" },
     { "inputs": [], "name": "CreationDisabled", "type": "error" },
     { "inputs": [], "name": "CriteriaNotMet", "type": "error" },
     { "inputs": [], "name": "InsufficientItemBalance", "type": "error" },
@@ -50,7 +49,6 @@
       "name": "InvalidTier",
       "type": "error"
     },
-    { "inputs": [], "name": "InvalidTraitType", "type": "error" },
     { "inputs": [], "name": "InvalidTraits", "type": "error" },
     { "inputs": [], "name": "ItemAlreadyFrozen", "type": "error" },
     { "inputs": [], "name": "ItemDoesNotExist", "type": "error" },
@@ -60,10 +58,11 @@
       "type": "error"
     },
     { "inputs": [], "name": "MissingItemId", "type": "error" },
-    { "inputs": [], "name": "MutatorBlockedTransfer", "type": "error" },
+    { "inputs": [], "name": "MutatorBlocked", "type": "error" },
     { "inputs": [], "name": "MutatorFailed", "type": "error" },
     { "inputs": [], "name": "NotAdmin", "type": "error" },
     { "inputs": [], "name": "NotInitializing", "type": "error" },
+    { "inputs": [], "name": "NotOtomItems", "type": "error" },
     {
       "inputs": [
         { "internalType": "address", "name": "msgSender", "type": "address" },
@@ -86,7 +85,6 @@
     },
     { "inputs": [], "name": "PaymentFailed", "type": "error" },
     { "inputs": [], "name": "ReentrancyGuardReentrantCall", "type": "error" },
-    { "inputs": [], "name": "RefundFailed", "type": "error" },
     { "inputs": [], "name": "TraitNotFound", "type": "error" },
     {
       "anonymous": false,

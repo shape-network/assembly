@@ -1,5 +1,5 @@
-import { assemblyCoreContractAbi } from '@/generated';
-import { assemblyCore } from '@/lib/addresses';
+import { otomItemsCoreContractAbi, otomItemsTrackingContractAbi } from '@/generated';
+import { otomItemsCore, otomItemsTracking } from '@/lib/addresses';
 import { rpcClient } from '@/lib/clients';
 import { config } from '@/lib/config';
 import { ItemType, OwnedItem } from '@/lib/types';
@@ -14,33 +14,33 @@ const schema = z.object({
   itemId: z.coerce.bigint(),
 });
 
-async function getItem(itemTokenId: bigint, itemId: bigint): Promise<OwnedItem> {
+async function getItem(itemTokenId: bigint, itemId: bigint): Promise<string> {
   const rpc = rpcClient();
 
-  const [itemResponse, tierResponse, traitsResponse, mintCountResponse] = await rpc.multicall({
+  const [itemResponse, tierResponse, traitsResponse, supplyResponse] = await rpc.multicall({
     contracts: [
       {
-        abi: assemblyCoreContractAbi,
-        address: assemblyCore[config.chain.id],
+        abi: otomItemsCoreContractAbi,
+        address: otomItemsCore[config.chain.id],
         functionName: 'getItemByItemId',
         args: [itemId],
       },
       {
-        abi: assemblyCoreContractAbi,
-        address: assemblyCore[config.chain.id],
+        abi: otomItemsCoreContractAbi,
+        address: otomItemsCore[config.chain.id],
         functionName: 'nonFungibleTokenToTier',
         args: [itemTokenId],
       },
       {
-        abi: assemblyCoreContractAbi,
-        address: assemblyCore[config.chain.id],
+        abi: otomItemsCoreContractAbi,
+        address: otomItemsCore[config.chain.id],
         functionName: 'getTokenTraits',
         args: [itemTokenId],
       },
       {
-        abi: assemblyCoreContractAbi,
-        address: assemblyCore[config.chain.id],
-        functionName: 'itemMintCount',
+        abi: otomItemsTrackingContractAbi,
+        address: otomItemsTracking[config.chain.id],
+        functionName: 'getItemSupply',
         args: [itemId],
       },
     ],
@@ -50,7 +50,7 @@ async function getItem(itemTokenId: bigint, itemId: bigint): Promise<OwnedItem> 
   const itemResult = itemResponse.status === 'success' ? itemResponse.result : null;
   const tierResult = tierResponse.status === 'success' ? tierResponse.result : null;
   const traitsResult = traitsResponse.status === 'success' ? traitsResponse.result : null;
-  const mintCountResult = mintCountResponse.status === 'success' ? mintCountResponse.result : null;
+  const supplyResult = supplyResponse.status === 'success' ? supplyResponse.result : null;
 
   if (!itemResult) {
     throw new Error(`Item ${itemId} not found or could not be retrieved`);
@@ -59,7 +59,7 @@ async function getItem(itemTokenId: bigint, itemId: bigint): Promise<OwnedItem> 
   const tier = Number(tierResult);
   const usagesTrait = traitsResult?.find((trait) => trait.typeName === 'Usages Remaining');
   const usagesRemaining = usagesTrait ? Number(usagesTrait.valueNumber) : null;
-  const mintCount = mintCountResult ? Number(mintCountResult) : 0;
+  const supply = supplyResult ? Number(supplyResult) : 0;
 
   const item: OwnedItem = {
     ...itemResult,
@@ -74,10 +74,10 @@ async function getItem(itemTokenId: bigint, itemId: bigint): Promise<OwnedItem> 
           value: t.valueString ?? t.valueNumber.toString(),
         }))
       : [],
-    mintCount,
+    supply,
   };
 
-  return item;
+  return superjson.stringify(item);
 }
 
 function getCachedItem(itemTokenId: bigint, itemId: bigint) {
@@ -103,7 +103,7 @@ export async function POST(request: Request) {
 
   try {
     const item = await getCachedItem(itemTokenId, itemId);
-    return new NextResponse(superjson.stringify(item), {
+    return new NextResponse(item, {
       headers: {
         'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=1200',
       },

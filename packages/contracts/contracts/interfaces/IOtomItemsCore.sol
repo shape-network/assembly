@@ -72,6 +72,7 @@ struct Item {
     uint256 ethCostInWei;
     address feeRecipient;
     string[7] defaultTierImageUris; // Default URIs for tiers 1-7 (index 0 = tier 1)
+    uint256 defaultCraftAmount;
 }
 
 enum TraitType {
@@ -139,7 +140,6 @@ interface IOtomItemsCore {
     error ItemIsFrozen(uint256 itemId);
     error InsufficientPayment(uint256 required, uint256 provided);
     error PaymentFailed();
-    error RefundFailed();
     error InsufficientMatchingOtoms(uint256 required, uint256 available);
     error InsufficientMatchingItems(uint256 required, uint256 available);
     error InsufficientItemTier(uint256 tokenId, uint256 currentTier, uint256 requiredTier);
@@ -153,12 +153,10 @@ interface IOtomItemsCore {
     error OnlyFungible();
     error TraitNotFound();
     error InvalidTier(uint256 tier);
-    error MutatorBlockedTransfer();
+    error MutatorBlocked();
     error MissingItemId();
-    error MissmatchItemType();
-    error CraftBlocked();
     error ItemAlreadyFrozen();
-    error InvalidTraitType();
+    error NotOtomItems();
 
     function createFungibleItem(
         string memory _name,
@@ -167,7 +165,8 @@ interface IOtomItemsCore {
         BlueprintComponent[] memory _blueprint,
         Trait[] memory _traits,
         uint256 _ethCostInWei,
-        address _feeRecipient
+        address _feeRecipient,
+        uint256 _defaultCraftAmount
     ) external returns (uint256);
 
     function createNonFungibleItem(
@@ -189,7 +188,8 @@ interface IOtomItemsCore {
         BlueprintComponent[] memory _blueprint,
         Trait[] memory _traits,
         uint256 _ethCostInWei,
-        address _feeRecipient
+        address _feeRecipient,
+        uint256 _defaultCraftAmount
     ) external;
 
     function updateNonFungibleItem(

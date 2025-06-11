@@ -10,7 +10,7 @@ export const hoveredOtomItemAtom = atom<{
 export const itemCreationBannerDismissedAtom = atom(false);
 
 export const inventoryWindowPositionAtom = atomWithStorage<{ x: number; y: number }>(
-  'inventory-window-position',
+  'inventory-position',
   {
     x: 0,
     y: 0,
@@ -18,16 +18,22 @@ export const inventoryWindowPositionAtom = atomWithStorage<{ x: number; y: numbe
 );
 
 export const inventoryWindowSizeAtom = atomWithStorage<{ width: number; height: number }>(
-  'inventory-window-size',
+  'inventory-size',
   {
-    width: 378, // 5 columns of elements
+    width: 410, // 5 columns of elements
     height: 400,
   }
 );
 
-export const inventoryWindowFloatingAtom = atomWithStorage<boolean>(
-  'inventory-window-is-floating',
-  false
+export const inventoryWindowFloatingAtom = atomWithStorage<boolean | null>(
+  'inventory-floating',
+  null
 );
 
+export const droppedItemsStateAtom = atom<Record<string, Record<number, OtomItem>>>({});
+
 export const onboardingCompletedAtom = atomWithStorage<boolean>('onboarding-completed', false);
+
+export const isSelectingWildcardIdAtom = atom<null | (BlueprintComponent & { posId: string })>(
+  null
+);

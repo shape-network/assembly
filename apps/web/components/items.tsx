@@ -13,32 +13,44 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { assemblyCoreContractAbi, useWriteAssemblyCoreContractCraftItem } from '@/generated';
-import { assemblyCore } from '@/lib/addresses';
-import { hoveredOtomItemAtom } from '@/lib/atoms';
+import { otomItemsCoreContractAbi, useWriteOtomItemsCoreContractCraftItem } from '@/generated';
+import { otomItemsCore } from '@/lib/addresses';
+import {
+  droppedItemsStateAtom,
+  hoveredOtomItemAtom,
+  inventoryWindowFloatingAtom,
+  isSelectingWildcardIdAtom,
+} from '@/lib/atoms';
 import { config } from '@/lib/config';
+import { useCopyToClipboard } from '@/lib/hooks';
 import { isOtomAtom } from '@/lib/otoms';
 import { paths } from '@/lib/paths';
 import { checkCriteria, formatPropertyName, isExactMatchCriteria } from '@/lib/property-utils';
-import { BlueprintComponent, Item, Molecule, OtomItem, OwnedItem, Trait } from '@/lib/types';
-import { cn, isNotNullish, isSameAddress } from '@/lib/utils';
+import {
+  BlueprintComponent,
+  Criteria,
+  Item,
+  Molecule,
+  OtomItem,
+  OwnedItem,
+  Trait,
+} from '@/lib/types';
+import { abbreviateHash, cn, isNotNullish, isSameAddress } from '@/lib/utils';
 import { useDndContext, useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
-import { QuestionMarkCircledIcon } from '@radix-ui/react-icons';
-import { useAtom } from 'jotai';
-import { CoinsIcon, WrenchIcon } from 'lucide-react';
+import { QuestionMarkCircledIcon, TrashIcon } from '@radix-ui/react-icons';
+import { useAtom, useSetAtom } from 'jotai';
+import { ClipboardCopyIcon, CoinsIcon, WrenchIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePostHog } from 'posthog-js/react';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { decodeEventLog, formatEther, toEventSelector } from 'viem';
-import { shapeSepolia } from 'viem/chains';
 import { useAccount, useSwitchChain, useWaitForTransactionReceipt } from 'wagmi';
+import { useMediaQuery } from './hooks/useMediaQuery';
 
-export const ItemsToCraft: FC<{
-  droppedItemsState: DroppedItemsState;
-  onClearSlots: (itemId: string) => void;
-}> = ({ droppedItemsState, onClearSlots }) => {
+export const ItemsToCraft: FC = () => {
   const { data, isLoading, isError } = useGetCraftableItems();
 
   if (isLoading) {
@@ -50,16 +62,11 @@ export const ItemsToCraft: FC<{
   }
 
   return (
-    <HorizontallScrollWrapper>
+    <VerticalScrollWrapper>
       {data.map((item) => (
-        <ItemToCraftCard
-          key={item.id}
-          item={item}
-          droppedItemsState={droppedItemsState}
-          onClearSlots={onClearSlots}
-        />
+        <ItemToCraftCard key={item.id} item={item} />
       ))}
-    </HorizontallScrollWrapper>
+    </VerticalScrollWrapper>
   );
 };
 
@@ -67,13 +74,12 @@ export type DroppedItemsState = Record<string, Record<number, OtomItem | null>>;
 
 type ItemToCraftCardProps = {
   item: Item;
-  droppedItemsState: DroppedItemsState;
-  onClearSlots: (itemId: string) => void;
 };
 
-const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, onClearSlots }) => {
+const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item }) => {
   const { data } = useGetOtomItemsForUser();
   const inventory = data?.pages.flatMap((page) => page.items) || [];
+  const [droppedItemsState, setDroppedItemsState] = useAtom(droppedItemsStateAtom);
 
   const droppedItemsForThisCard = droppedItemsState[String(item.id)] || {};
 
@@ -105,8 +111,11 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, on
   });
 
   const handleClearAllClick = useCallback(() => {
-    onClearSlots(String(item.id));
-  }, [item.id, onClearSlots]);
+    setDroppedItemsState((prev) => ({
+      ...prev,
+      [String(item.id)]: {},
+    }));
+  }, [item.id, setDroppedItemsState]);
 
   const hasDroppedItems = Object.values(droppedItemsForThisCard).some((item) => item !== null);
 
@@ -124,13 +133,26 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, on
     return false;
   }
 
-  const isPickaxe = item.id === BigInt(2);
+  function getElementOwned(component: BlueprintComponent): OtomItem | undefined {
+    if (!inventory || inventory.length === 0) return undefined;
+
+    if (component.componentType !== 'variable_otom') {
+      return inventory.find((i) => i.tokenId === component.itemIdOrOtomTokenId.toString());
+    }
+
+    if (isExactMatchCriteria(component.criteria)) {
+      return inventory.find((item) => checkCriteria(item, component.criteria));
+    }
+
+    return undefined;
+  }
+
+  const isPickaxe = config.chain.testnet ? false : item.id === BigInt(2);
   const isFungible = item.itemType === 0;
-  const formattedMintCount =
-    item.mintCount > 0 ? Intl.NumberFormat('en-US').format(item.mintCount) : null;
+  const formattedSupply = item.supply > 0 ? Intl.NumberFormat('en-US').format(item.supply) : null;
 
   return (
-    <li className="relative mt-4 grid w-[300px] shrink-0 grid-rows-[1fr_auto] gap-1 sm:w-[380px]">
+    <li className="relative grid w-full shrink-0 grid-rows-[1fr_auto] gap-1">
       {isPickaxe && (
         <Badge
           className="bg-background absolute -bottom-1.5 left-1/2 z-10 -translate-x-1/2"
@@ -147,12 +169,12 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, on
           droppedItemsState={droppedItemsState}
           isCraftable={isCraftable}
           item={item}
-          className="absolute top-2 right-2 z-10 h-8 px-3"
+          className="absolute top-2 right-2 z-20 h-8 px-3"
           onCraftSuccess={handleClearAllClick}
         />
 
         <CardHeader className="relative">
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="z-10 flex items-center gap-2">
             {isFungible && <FungibleItemBadge />}
             {item.name}
           </CardTitle>
@@ -162,13 +184,23 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, on
           <div className="flex flex-col gap-6">
             <div className="relative h-40 w-full">
               {item.defaultImageUri ? (
-                <Image src={item.defaultImageUri} alt={item.name} fill className="object-contain" />
+                <Image
+                  src={item.defaultImageUri}
+                  alt={item.name}
+                  fill
+                  className={cn('object-contain', isPickaxe && 'scale-180')}
+                />
               ) : (
                 <Skeleton className="h-40 w-full" />
               )}
             </div>
 
-            <CardDescription className="text-center italic">{item.description}</CardDescription>
+            <CardDescription
+              className="z-10 line-clamp-2 min-h-10 text-center italic"
+              title={item.description}
+            >
+              {item.description}
+            </CardDescription>
 
             {isPickaxe ? (
               <ItemTraits
@@ -219,6 +251,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, on
                       isOwned={isElementOwned(component)}
                       isDropped={isDropped}
                       index={blueprintIndex}
+                      droppedItem={getElementOwned(component)}
                     />
                   );
                 })}
@@ -265,12 +298,14 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item, droppedItemsState, on
               <div className="h-[90px]" />
             )}
 
-            <MintCountBadge mintCount={formattedMintCount} />
+            <SupplyBadge supply={formattedSupply} itemId={item.id} />
           </div>
         </CardContent>
 
-        {config.chain.id === shapeSepolia.id && (
-          <p className="text-muted-foreground/50 absolute right-2 bottom-1 text-xs">{item.id}</p>
+        {process.env.NODE_ENV === 'development' && (
+          <p className="text-muted-foreground/50 absolute right-2 bottom-1 text-xs">
+            dev itemId: {item.id}
+          </p>
         )}
       </Card>
     </li>
@@ -284,8 +319,13 @@ type OtomItemCardProps = {
 };
 
 export const OtomItemCard: FC<OtomItemCardProps> = ({ representativeItem, count, usedCounts }) => {
+  const { isCopied, copyToClipboard } = useCopyToClipboard();
   const { data: craftableItems } = useGetCraftableItems();
   const [hoveredState, setHoveredState] = useAtom(hoveredOtomItemAtom);
+  const [isSelectingWildcardId, setIsSelectingWildcardId] = useAtom(isSelectingWildcardIdAtom);
+  const setDroppedItemsState = useSetAtom(droppedItemsStateAtom);
+  const setIsFloating = useSetAtom(inventoryWindowFloatingAtom);
+  const isMobile = useMediaQuery('sm');
 
   const usedCount = usedCounts.get(representativeItem.tokenId) || 0;
   const availableCount = count - usedCount;
@@ -294,7 +334,7 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({ representativeItem, count,
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: representativeItem.tokenId,
     data: representativeItem,
-    disabled: areAllItemsUsed,
+    disabled: areAllItemsUsed || !!isSelectingWildcardId || isMobile,
   });
 
   const style = {
@@ -357,7 +397,7 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({ representativeItem, count,
           className={cn(
             'relative cursor-pointer touch-none py-0 font-semibold transition-colors',
             areAllItemsUsed
-              ? 'bg-primary text-primary-foreground'
+              ? 'bg-primary !text-primary-foreground'
               : isRequiredInBlueprint
                 ? 'border-primary text-primary border-dashed'
                 : 'border-border text-muted-foreground font-normal',
@@ -365,10 +405,37 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({ representativeItem, count,
             (hoveredState?.item?.tokenId === representativeItem.tokenId ||
               shouldHighlightFromBlueprintHover) &&
               !areAllItemsUsed &&
-              'bg-primary/15'
+              'bg-primary/15',
+            isSelectingWildcardId === null
+              ? ''
+              : checkCriteria(representativeItem, isSelectingWildcardId.criteria)
+                ? 'text-primary border-primary border-dashed'
+                : 'bg-primary/10 border-border !text-muted-foreground'
           )}
         >
-          <CardContent className="grid aspect-square w-full place-items-center px-0 sm:size-15">
+          <CardContent
+            className="grid aspect-square w-full place-items-center px-0 sm:size-15"
+            onClick={() => {
+              if (!isMobile) return;
+              if (
+                isSelectingWildcardId &&
+                checkCriteria(representativeItem, isSelectingWildcardId.criteria)
+              ) {
+                const parts = isSelectingWildcardId.posId.split('-');
+                const itemId = parts[1];
+                const index = parts[2];
+                setDroppedItemsState((prev) => ({
+                  ...prev,
+                  [itemId]: {
+                    ...prev[itemId],
+                    [index]: representativeItem,
+                  },
+                }));
+                setIsSelectingWildcardId(null);
+                setIsFloating(false);
+              }
+            }}
+          >
             <ElementName otom={representativeItem} />
             {availableCount > 1 && (
               <span className="text-muted-foreground bg-background absolute -top-2 -right-2 grid h-5 min-w-[20px] place-items-center rounded-full px-0.5 text-[10px] font-bold">
@@ -397,6 +464,22 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({ representativeItem, count,
         <p>Toughness: {representativeItem.toughness.toFixed(3)}</p>
         <p>Ductility: {representativeItem.ductility.toFixed(3)}</p>
         <p>Mass: {mass}</p>
+        <div className="flex items-center gap-2">
+          <p>Token ID: {abbreviateHash(representativeItem.tokenId, 3, 4)}</p>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-5 w-5"
+            onClick={(e) => {
+              e.stopPropagation();
+              copyToClipboard(representativeItem.tokenId);
+              toast.success('Token ID copied to clipboard');
+            }}
+          >
+            <ClipboardCopyIcon className="h-3 w-3" />
+            {isCopied && <span className="sr-only">Copied</span>}
+          </Button>
+        </div>
       </TooltipContent>
     </Tooltip>
   );
@@ -439,8 +522,9 @@ const CraftItemButton: FC<{
     'idle'
   );
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const posthog = usePostHog();
 
-  const { data: hash, writeContractAsync } = useWriteAssemblyCoreContractCraftItem();
+  const { data: hash, writeContractAsync } = useWriteOtomItemsCoreContractCraftItem();
   const {
     isLoading: isTxConfirming,
     isError: isTxError,
@@ -459,7 +543,7 @@ const CraftItemButton: FC<{
 
       const craftLog = txReceipt.logs.find(
         (log) =>
-          isSameAddress(log.address, assemblyCore[config.chain.id]) &&
+          isSameAddress(log.address, otomItemsCore[config.chain.id]) &&
           log.topics &&
           log.topics[0] === itemCraftedSelector
       );
@@ -467,7 +551,7 @@ const CraftItemButton: FC<{
       if (craftLog) {
         try {
           const decodedLog = decodeEventLog({
-            abi: assemblyCoreContractAbi,
+            abi: otomItemsCoreContractAbi,
             eventName: 'ItemCrafted',
             data: craftLog.data,
             topics: craftLog.topics,
@@ -499,6 +583,12 @@ const CraftItemButton: FC<{
   });
 
   async function handleCraftItem() {
+    posthog?.capture('click', {
+      event: 'craft_item',
+      itemId: String(item.id),
+      itemName: item.name,
+    });
+
     if (!switchChainAsync) {
       toast.error(
         'Could not automatically switch to Shape network. Please ensure your wallet network is set to Shape.'
@@ -532,7 +622,7 @@ const CraftItemButton: FC<{
     try {
       toast.info('Please confirm the transaction in your wallet.');
       await writeContractAsync({
-        address: assemblyCore[config.chain.id],
+        address: otomItemsCore[config.chain.id],
         args: [item.id, BigInt(1), variableOtomTokenIds, [], '0x'],
         value: item.ethCostInWei,
       });
@@ -547,7 +637,7 @@ const CraftItemButton: FC<{
     if (hash && isTxConfirming && craftingStatus === 'pending') {
       toast.loading('Item is being crafted...', { id: 'loading' });
     }
-  }, [hash, isTxConfirming, craftingStatus]);
+  }, [hash, isTxConfirming, craftingStatus, posthog, item.id]);
 
   useEffect(() => {
     if (isTxConfirmed && craftingStatus === 'pending') {
@@ -556,6 +646,10 @@ const CraftItemButton: FC<{
       toast.dismiss('loading');
       setShowSuccessDialog(true);
       refetchOtomItems();
+      posthog?.capture('item_crafted', {
+        itemId: String(item.id),
+        itemName: item.name,
+      });
       if (onCraftSuccess) {
         onCraftSuccess(String(item.id));
       }
@@ -570,7 +664,7 @@ const CraftItemButton: FC<{
     }
   }, [isTxError, craftingStatus, item.name]);
 
-  const isPickaxe = item.id === BigInt(2);
+  const isPickaxe = config.chain.testnet ? false : item.id === BigInt(2);
 
   const disabled = !isCraftable || craftingStatus === 'pending' || isTxConfirming;
 
@@ -627,8 +721,10 @@ const CraftItemButton: FC<{
                     <ItemTraits
                       traits={[
                         craftedItem.tier ? { name: 'Tier', value: craftedItem.tier } : null,
-                        ...craftedItem?.initialTraits,
-                        { name: 'Usages', value: craftedItem.usagesRemaining ?? '?' },
+                        ...craftedItem?.initialTraits.filter((t) => t.name !== 'Usages Remaining'),
+                        craftedItem.usagesRemaining
+                          ? { name: 'Usages', value: craftedItem.usagesRemaining }
+                          : null,
                       ].filter(isNotNullish)}
                     />
                   )}
@@ -645,27 +741,26 @@ const CraftItemButton: FC<{
 export const OwnedItemCard: FC<{ item: OwnedItem }> = ({ item }) => {
   const traits = item.initialTraits.filter((t) => t.name !== 'Usages Remaining');
 
-  const isPickaxe = item.id === BigInt(2);
+  const isPickaxe = config.chain.testnet ? false : item.id === BigInt(2);
   const isFungible = item.itemType === 0;
 
-  const formattedMintCount =
-    item.mintCount > 0 ? Intl.NumberFormat('en-US').format(item.mintCount) : null;
+  const formattedSupply = item.supply > 0 ? Intl.NumberFormat('en-US').format(item.supply) : null;
 
   return (
-    <li className="relative w-xs shrink-0 sm:w-[300px]">
-      <Link href={paths.openSea.token(item.tokenId)} target="_blank" rel="noopener noreferrer">
-        {isPickaxe && (
-          <Badge
-            className="bg-background absolute -bottom-2.5 left-1/2 z-10 -translate-x-1/2"
-            variant="outline"
-          >
-            <Link href={paths.otom} target="_blank" rel="noopener noreferrer">
-              For otom.xyz
-            </Link>
-          </Badge>
-        )}
+    <li className="relative w-full">
+      {isPickaxe && (
+        <Badge
+          className="bg-background absolute -bottom-2.5 left-1/2 z-10 -translate-x-1/2"
+          variant="outline"
+        >
+          <Link href={paths.otom} target="_blank" rel="noopener noreferrer">
+            For otom.xyz
+          </Link>
+        </Badge>
+      )}
 
-        <Card className="h-full">
+      <Link href={paths.openSea.token(item.tokenId)} target="_blank" rel="noopener noreferrer">
+        <Card className="grid h-full grid-rows-[auto_1fr_auto]">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               {isFungible && <FungibleItemBadge />}
@@ -673,24 +768,31 @@ export const OwnedItemCard: FC<{ item: OwnedItem }> = ({ item }) => {
             </CardTitle>
           </CardHeader>
 
-          <div className="relative h-40 w-full">
-            {item.defaultImageUri ? (
-              <Image
-                src={
-                  isPickaxe
-                    ? paths.assemblyItemImage(item.id, item.tier ?? 1)
-                    : item.defaultImageUri
-                }
-                alt={item.name}
-                fill
-                className="object-contain py-2"
-              />
-            ) : (
-              <Skeleton className="h-40 w-full" />
-            )}
-          </div>
-
           <CardContent className="flex flex-col gap-6">
+            <div className="relative h-40 w-full">
+              {item.defaultImageUri ? (
+                <Image
+                  src={
+                    isPickaxe
+                      ? paths.assemblyItemImage(item.id, item.tier ?? 1)
+                      : item.defaultImageUri
+                  }
+                  alt={item.name}
+                  fill
+                  className="object-contain"
+                />
+              ) : (
+                <Skeleton className="h-40 w-full" />
+              )}
+            </div>
+
+            <CardDescription
+              className="line-clamp-2 min-h-10 text-center italic"
+              title={item.description}
+            >
+              {item.description}
+            </CardDescription>
+
             {isPickaxe ? (
               <ItemTraits
                 traits={[
@@ -704,13 +806,17 @@ export const OwnedItemCard: FC<{ item: OwnedItem }> = ({ item }) => {
                 traits={[
                   item.tier ? { name: 'Tier', value: item.tier } : null,
                   ...traits,
-                  { name: 'Remaining Usages', value: item.usagesRemaining ?? '?' },
+                  item.usagesRemaining
+                    ? { name: 'Remaining Usages', value: item.usagesRemaining }
+                    : null,
                 ].filter(isNotNullish)}
               />
             )}
-
-            <MintCountBadge mintCount={formattedMintCount} />
           </CardContent>
+
+          <div className="px-4">
+            <SupplyBadge supply={formattedSupply} itemId={item.id} />
+          </div>
         </Card>
       </Link>
     </li>
@@ -739,7 +845,8 @@ const RequiredDropZone: FC<{
   isOwned: boolean;
   isDropped: boolean;
   index: number;
-}> = ({ id, component, isOwned, isDropped, index }) => {
+  droppedItem?: OtomItem | null;
+}> = ({ id, component, isOwned, isDropped, index, droppedItem }) => {
   const { isOver, setNodeRef } = useDroppable({
     id: id,
     data: {
@@ -748,6 +855,8 @@ const RequiredDropZone: FC<{
       component: component,
     },
   });
+  const setDroppedItemsState = useSetAtom(droppedItemsStateAtom);
+  const posthog = usePostHog();
 
   const { active } = useDndContext();
   const draggedItem = active?.data.current as OtomItem | null;
@@ -785,24 +894,75 @@ const RequiredDropZone: FC<{
     setHoveredState(null);
   }
 
+  const handleClick = useCallback(() => {
+    if (isDropped) return;
+
+    if (isOwned && droppedItem) {
+      const parts = id.split('-');
+      const itemId = parts[1];
+      setDroppedItemsState((prev) => ({
+        ...prev,
+        [itemId]: {
+          ...prev[itemId],
+          [index]: droppedItem,
+        },
+      }));
+      posthog?.capture('click', {
+        event: 'add_component',
+        itemId,
+        componentType: component.componentType,
+      });
+    }
+  }, [isOwned, droppedItem, setDroppedItemsState, id, index, isDropped, posthog, component]);
+
+  const handleRemove = useCallback(() => {
+    const parts = id.split('-');
+    const itemId = parts[1];
+    setDroppedItemsState((prev) => ({
+      ...prev,
+      [itemId]: {
+        ...prev[itemId],
+        [index]: null,
+      } as Record<number, OtomItem>,
+    }));
+    posthog?.capture('click', {
+      event: 'remove_component',
+      itemId,
+      componentType: component.componentType,
+    });
+  }, [setDroppedItemsState, id, index, posthog, component]);
+
   return (
     <div ref={setNodeRef}>
       <Card
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         className={cn(
-          'relative py-0 transition-[colors,transform] select-none',
+          'py-0 transition-[colors,transform] select-none',
           isDropped
             ? 'bg-primary text-primary-foreground font-semibold'
             : isOwned
-              ? 'border-primary border-dashed font-semibold'
+              ? 'border-primary cursor-pointer border-dashed font-semibold'
               : 'text-muted-foreground/50 border-border font-normal',
           !isDropped && isOver && canDrop && 'ring-primary ring-2 ring-offset-2',
           !isDropped && isOver && !canDrop && 'ring-destructive ring-2 ring-offset-2',
           isHoveredTarget && !isDropped && 'bg-primary/15'
         )}
+        onClick={handleClick}
       >
-        <CardContent className="grid size-15 place-items-center px-0">
+        <CardContent className="group relative grid size-15 place-items-center px-0">
+          {isDropped && (
+            <button
+              type="button"
+              className="absolute inset-0 z-10 cursor-pointer items-center justify-center bg-white/25 group-hover:flex md:hidden"
+              onClick={handleRemove}
+              title="Remove component"
+            >
+              <span className="absolute top-1 right-1 rounded bg-white/90 p-[3px]">
+                <TrashIcon className="text-primary size-4" />
+              </span>
+            </button>
+          )}
           {component.componentType === 'otom' && molecule ? (
             <ElementName otom={molecule} />
           ) : (
@@ -835,9 +995,37 @@ const WildcardDropZone: FC<{
     id: id,
     data: { index, type: 'variable', component },
   });
+  const setIsSelectingWildcardIdAtom = useSetAtom(isSelectingWildcardIdAtom);
+  const setDroppedItemsState = useSetAtom(droppedItemsStateAtom);
+  const posthog = usePostHog();
 
   const draggedItem = active?.data.current as OtomItem | undefined;
   const canDrop = active ? checkCriteria(draggedItem!, component.criteria) : false;
+
+  const isMobile = useMediaQuery('sm');
+
+  const handleClick = useCallback(() => {
+    if (!isMobile || droppedItem) return;
+
+    setIsSelectingWildcardIdAtom({ ...component, posId: id });
+  }, [isMobile, droppedItem, setIsSelectingWildcardIdAtom, component, id]);
+
+  const handleRemove = useCallback(() => {
+    const parts = id.split('-');
+    const itemId = parts[1];
+    setDroppedItemsState((prev) => ({
+      ...prev,
+      [itemId]: {
+        ...prev[itemId],
+        [index]: null,
+      } as Record<number, OtomItem>,
+    }));
+    posthog?.capture('click', {
+      event: 'remove_component',
+      itemId,
+      componentType: component.componentType,
+    });
+  }, [setDroppedItemsState, id, index, posthog, component]);
 
   return (
     <Tooltip delayDuration={0}>
@@ -853,7 +1041,22 @@ const WildcardDropZone: FC<{
               isOver && !canDrop && 'ring-destructive ring-2 ring-offset-2'
             )}
           >
-            <CardContent className="grid size-15 place-items-center px-0">
+            <CardContent
+              className="group relative grid size-15 place-items-center px-0"
+              onClick={handleClick}
+            >
+              {droppedItem !== null && (
+                <button
+                  type="button"
+                  className="absolute inset-0 z-10 cursor-pointer items-center justify-center bg-white/25 group-hover:flex md:hidden"
+                  onClick={handleRemove}
+                  title="Remove component"
+                >
+                  <span className="absolute top-1 right-1 rounded bg-white/90 p-[3px]">
+                    <TrashIcon className="text-primary size-4" />
+                  </span>
+                </button>
+              )}
               {droppedItem ? (
                 droppedItem.name
               ) : (
@@ -873,44 +1076,56 @@ const WildcardDropZone: FC<{
       </TooltipTrigger>
 
       <TooltipContent>
-        <div className="flex flex-col gap-1">
-          {component.criteria.map((c) => (
-            <span key={c.propertyType}>
-              <p className="font-semibold">{formatPropertyName(c.propertyType)}</p>
-              <p className="flex gap-1">
-                {c.checkBoolValue ? (
-                  `Required: ${c.boolValue}`
-                ) : c.checkStringValue ? (
-                  `Required: ${c.stringValue}`
-                ) : (
-                  <>
-                    Range:{' '}
-                    {typeof c.minValue === 'number' && c.minValue > 10000
-                      ? `${c.minValue.toExponential(2)}`
-                      : String(c.minValue)}{' '}
-                    -{' '}
-                    {typeof c.maxValue === 'number' && c.maxValue > 1000000000 ? (
-                      <span className="text-sm">∞</span>
-                    ) : typeof c.maxValue === 'number' && c.maxValue > 10000 ? (
-                      `${c.maxValue.toExponential(2)}`
-                    ) : (
-                      String(c.maxValue)
-                    )}
-                  </>
-                )}
-              </p>
-            </span>
-          ))}
-        </div>
+        <ComponentCriteriaDescription criteria={component.criteria} />
       </TooltipContent>
     </Tooltip>
   );
 };
 
-export const HorizontallScrollWrapper: FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ComponentCriteriaDescription = ({
+  criteria,
+  className,
+}: {
+  criteria: Criteria[];
+  className?: string;
+}) => {
   return (
-    <ScrollArea className="w-full" orientation="horizontal">
-      <ul className="flex flex-nowrap gap-2 pb-4">{children}</ul>
+    <div className={cn('flex flex-col gap-1', className)}>
+      {criteria.map((c) => (
+        <span key={c.propertyType}>
+          <p className="font-semibold">{formatPropertyName(c.propertyType)}</p>
+          <p className="flex gap-1">
+            {c.checkBoolValue ? (
+              `Required: ${c.boolValue}`
+            ) : c.checkStringValue ? (
+              `Required: ${c.stringValue}`
+            ) : (
+              <>
+                Range:{' '}
+                {typeof c.minValue === 'number' && c.minValue > 10000
+                  ? `${c.minValue.toExponential(2)}`
+                  : String(c.minValue)}{' '}
+                -{' '}
+                {typeof c.maxValue === 'number' && c.maxValue > 1000000000 ? (
+                  <span className="text-sm">∞</span>
+                ) : typeof c.maxValue === 'number' && c.maxValue > 10000 ? (
+                  `${c.maxValue.toExponential(2)}`
+                ) : (
+                  String(c.maxValue)
+                )}
+              </>
+            )}
+          </p>
+        </span>
+      ))}
+    </div>
+  );
+};
+
+export const VerticalScrollWrapper: FC<{ children: React.ReactNode }> = ({ children }) => {
+  return (
+    <ScrollArea className="w-full" orientation="vertical">
+      <ul className="grid grid-cols-1 gap-4 pb-4 sm:grid-cols-2 lg:grid-cols-3">{children}</ul>
     </ScrollArea>
   );
 };
@@ -927,13 +1142,13 @@ export const InventorySkeleton: FC = () => {
 
 export const ItemsToCraftSkeleton: FC = () => {
   return (
-    <HorizontallScrollWrapper>
+    <VerticalScrollWrapper>
       {Array.from({ length: 4 }).map((_, index) => (
-        <li key={index} className="w-xs flex-shrink-0 sm:w-[300px]">
+        <li key={index} className="w-full">
           <Skeleton className="h-[578px] w-full" />
         </li>
       ))}
-    </HorizontallScrollWrapper>
+    </VerticalScrollWrapper>
   );
 };
 
@@ -951,15 +1166,21 @@ const FungibleItemBadge: FC = () => {
   );
 };
 
-const MintCountBadge: FC<{ mintCount: string | null }> = ({ mintCount }) => {
-  return mintCount ? (
+const SupplyBadge: FC<{ supply: string | null; itemId: bigint }> = ({ supply, itemId }) => {
+  return supply ? (
     <Tooltip>
-      <TooltipTrigger className="text-muted-foreground flex items-center gap-1 self-start text-xs">
-        <WrenchIcon className="text-muted-foreground size-3" /> {mintCount}x
+      <TooltipTrigger
+        className="text-muted-foreground flex items-center gap-1 self-start text-xs"
+        asChild
+      >
+        <Link href={paths.openSea.item(itemId)}>
+          <WrenchIcon className="text-muted-foreground size-3" /> {supply}x
+        </Link>
       </TooltipTrigger>
 
       <TooltipContent>
-        <p>Item crafted {mintCount === '1' ? 'once' : `${mintCount} times`}</p>
+        <p>Active items: </p>
+        <p className="italic">crafted amount - burned amount (used)</p>
       </TooltipContent>
     </Tooltip>
   ) : (
