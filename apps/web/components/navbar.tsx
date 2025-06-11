@@ -57,7 +57,7 @@ export const Navbar: FC<GameMenuProps> = ({ className }) => {
           <MenuButton
             icon={<BackpackIcon className="size-5" />}
             tooltip={isFloating ? 'Close Inventory' : 'Open Inventory'}
-            isActive={isFloating}
+            isActive={isFloating === true}
             onClick={toggleInventory}
           />
           {config.chain.testnet && (
