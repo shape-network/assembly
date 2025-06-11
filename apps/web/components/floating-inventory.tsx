@@ -51,8 +51,8 @@ export const FloatingInventory = () => {
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
 
-    const newX = Math.min(Math.max(0, rndPosition.x), windowWidth - rndSize.width);
-    const newY = Math.min(Math.max(0, rndPosition.y), windowHeight - rndSize.height);
+    const newX = Math.min(Math.max(0, rndPosition.x), windowWidth - rndSize.width - 150);
+    const newY = Math.min(Math.max(0, rndPosition.y), windowHeight - rndSize.height - 100);
 
     if (newX !== rndPosition.x || newY !== rndPosition.y) {
       setRndPosition({ x: newX, y: newY });
@@ -101,11 +101,12 @@ export const FloatingInventory = () => {
   }, [ensureWindowInBounds]);
 
   useEffect(() => {
-    if (isConnected) {
+    if (isConnected && isFloating === null && !isMobile) {
       setIsFloating(true);
       handleOpeningPosition();
+      return;
     }
-  }, [isConnected, setIsFloating, handleOpeningPosition]);
+  }, [isConnected, setIsFloating, handleOpeningPosition, isMobile, isFloating]);
 
   useEffect(() => {
     if (isSelectingWildcardId && !isFloating) {
@@ -117,7 +118,7 @@ export const FloatingInventory = () => {
 
   if (isMobile) {
     return (
-      <Drawer open={isFloating} onOpenChange={handleOpenChange} direction="bottom">
+      <Drawer open={isFloating === true} onOpenChange={handleOpenChange} direction="bottom">
         <DrawerContent className="max-h-[80vh]">
           <DrawerHeader className="py-0 pb-4">
             <div className="flex items-center justify-between">
