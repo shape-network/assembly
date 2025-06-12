@@ -106,12 +106,15 @@ export const HomeContent = () => {
                     </TabsTrigger>
                     {address && (
                       <TabsTrigger
-                        value="owned-otoms"
+                        value="crafted-items"
                         onClick={() =>
-                          posthog?.capture('click', { event: 'change_tab', action: 'owned_otoms' })
+                          posthog?.capture('click', {
+                            event: 'change_tab',
+                            action: 'crafted_items',
+                          })
                         }
                       >
-                        Owned Items
+                        My Crafted Items
                       </TabsTrigger>
                     )}
                   </TabsList>
@@ -121,7 +124,7 @@ export const HomeContent = () => {
                   <ItemsToCraft />
                 </TabsContent>
 
-                <TabsContent value="owned-otoms">
+                <TabsContent value="crafted-items">
                   <ItemsInventory />
                 </TabsContent>
               </Tabs>
