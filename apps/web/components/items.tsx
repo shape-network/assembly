@@ -174,7 +174,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item }) => {
         />
 
         <CardHeader className="relative">
-          <CardTitle className="z-10 flex items-center gap-2">
+          <CardTitle className="z-10 flex items-center gap-2 pr-16">
             {isFungible && <FungibleItemBadge />}
             {item.name}
             {!isFungible && !item.isFrozen && <NonFrozenItemWarningBadge />}
