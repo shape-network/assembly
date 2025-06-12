@@ -1,6 +1,6 @@
 import { getTraitsForItem } from '@/app/api/fetchers';
-import { otomItemsTrackingContractAbi } from '@/generated';
-import { otomItemsTracking } from '@/lib/addresses';
+import { otomItemsCoreContractAbi, otomItemsTrackingContractAbi } from '@/generated';
+import { otomItemsCore, otomItemsTracking } from '@/lib/addresses';
 import { rpcClient } from '@/lib/clients';
 import { config } from '@/lib/config';
 import { getBlueprintForItem, HIDDEN_ITEMS } from '@/lib/items';
@@ -32,10 +32,22 @@ async function getCraftItems(): Promise<string> {
     allowFailure: true,
   });
 
+  const frozenResponses = await rpc.multicall({
+    contracts: filteredResults.map((r) => ({
+      abi: otomItemsCoreContractAbi,
+      address: otomItemsCore[config.chain.id],
+      functionName: 'frozenItems',
+      args: [r.id],
+    })),
+    allowFailure: true,
+  });
+
   const items: Item[] = await Promise.all(
     filteredResults.map(async (r, index) => {
       const supplyResponse = supplyResponses[index];
+      const frozenResponse = frozenResponses[index];
       const supply = supplyResponse.status === 'success' ? Number(supplyResponse.result) : 0;
+      const isFrozen = frozenResponse.status === 'success' ? Boolean(frozenResponse.result) : false;
 
       return {
         id: r.id,
@@ -48,6 +60,7 @@ async function getCraftItems(): Promise<string> {
         blueprint: await Promise.all(r.blueprint.map(getBlueprintForItem)),
         initialTraits: await getTraitsForItem(r.id),
         supply,
+        isFrozen,
       };
     })
   );

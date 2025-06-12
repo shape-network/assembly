@@ -53,6 +53,7 @@ export type Item = {
   ethCostInWei: bigint;
   defaultImageUri: string;
   supply: number;
+  isFrozen?: boolean;
 };
 
 export type OwnedItem = Item & {
