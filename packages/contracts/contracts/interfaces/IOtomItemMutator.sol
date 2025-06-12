@@ -84,4 +84,12 @@ interface IOtomItemMutator {
         uint256[] calldata _nonFungibleTokenIds,
         bytes calldata _data
     ) external returns (bool allowed, bool requiresItemsOrOtoms);
+
+    /**
+     * @dev Image override for a given item
+     * @param tokenId The token ID of the item
+     * @param tier The tier of the item
+     * @return image The image for the item given the token ID and tier
+     */
+    function getItemImage(uint256 tokenId, uint256 tier) external view returns (string memory);
 }
