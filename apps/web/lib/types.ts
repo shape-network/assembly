@@ -53,7 +53,6 @@ export type Item = {
   ethCostInWei: bigint;
   defaultImageUri: string;
   supply: number;
-  mutatorContract?: Address;
   isFrozen?: boolean;
 };
 

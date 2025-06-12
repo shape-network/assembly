@@ -60,7 +60,6 @@ async function getCraftItems(): Promise<string> {
         blueprint: await Promise.all(r.blueprint.map(getBlueprintForItem)),
         initialTraits: await getTraitsForItem(r.id),
         supply,
-        mutatorContract: r.mutatorContract,
         isFrozen,
       };
     })
