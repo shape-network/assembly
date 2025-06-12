@@ -177,7 +177,6 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item }) => {
           <CardTitle className="z-10 flex items-center gap-2 pr-16">
             {isFungible && <FungibleItemBadge />}
             {item.name}
-            {!isFungible && !item.isFrozen && <NonFrozenItemWarningBadge />}
           </CardTitle>
         </CardHeader>
 
@@ -299,7 +298,10 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item }) => {
               <div className="h-[90px]" />
             )}
 
-            <SupplyBadge supply={formattedSupply} itemId={item.id} />
+            <div className="flex items-center justify-between gap-2">
+              <SupplyBadge supply={formattedSupply} itemId={item.id} />
+              {!isFungible && !item.isFrozen && <NonFrozenItemWarningBadge />}
+            </div>
           </div>
         </CardContent>
 
@@ -1218,8 +1220,8 @@ const NonFrozenItemWarningBadge: FC = () => {
 
       <TooltipContent className="max-w-xs">
         <p>
-          This item has not been frozen at creation. The item creator can still modify its
-          properties, including name, usage behavior, blueprint, and traits.
+          This item has not been frozen by item creator, they can still modify its properties,
+          including name, usage behavior, blueprint, and traits.
         </p>
       </TooltipContent>
     </Tooltip>
