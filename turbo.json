@@ -22,6 +22,12 @@
     "deploy": {
       "dependsOn": ["build", "test"],
       "outputs": []
+    },
+    "web#build": {
+      "env": ["ALCHEMY_KEY", "SUBGRAPH_QUERY_URL"]
+    },
+    "@repo/subgraph#build": {
+      "env": ["ALCHEMY_KEY", "SUBGRAPH_QUERY_URL"]
     }
   }
 }
