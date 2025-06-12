@@ -5,6 +5,8 @@ import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
 
 import {IOtomItemsCore, Item, ComponentType, BlueprintComponent, Trait, TraitType, ItemType, ActualBlueprintComponent} from "../interfaces/IOtomItemsCore.sol";
 import {IOtomsDatabase, Molecule} from "../interfaces/IOtomsDatabase.sol";
+
+import {IOtomItemMutator} from "../interfaces/IOtomItemMutator.sol";
 import {IOtomItemsRenderer} from "../interfaces/IOtomItemsRenderer.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {LibString} from "solady/src/utils/LibString.sol";
@@ -79,7 +81,7 @@ contract OtomItemsRenderer is IOtomItemsRenderer {
                         '", "image": "',
                         _render(item, tier, core.nonFungibleTokenToActualBlueprint(tokenId)),
                         '", "defaultImageUri": "',
-                        core.getTokenDefaultImageUri(tokenId),
+                        _getTokenDefaultImageUri(tokenId),
                         '", "attributes": [',
                         _convertTraitsToJsonString(allTraits),
                         "]}"
@@ -366,6 +368,48 @@ contract OtomItemsRenderer is IOtomItemsRenderer {
                 );
         } else {
             revert InvalidTraitType();
+        }
+    }
+
+    /**
+     * @dev Gets the appropriate image URI for a token based on its tier
+     * @param _tokenId The token ID
+     * @return The image URI
+     */
+    function _getTokenDefaultImageUri(uint256 _tokenId) internal view returns (string memory) {
+        if (core.isFungibleTokenId(_tokenId)) {
+            // For fungible tokens, return the default image URI
+            uint256 itemId = core.getItemIdForToken(_tokenId);
+            return core.getItemByItemId(itemId).defaultImageUri;
+        } else {
+            // For non-fungible tokens, get the tier and return the appropriate image URI
+            uint256 itemId = core.getItemIdForToken(_tokenId);
+            if (itemId == 0) revert InvalidItem();
+
+            Item memory item = core.getItemByItemId(itemId);
+
+            uint256 tier = core.nonFungibleTokenToTier(_tokenId);
+
+            // Try to get the image override from the mutator contract
+            if (item.mutatorContract != address(0)) {
+                (bool success, bytes memory result) = item.mutatorContract.staticcall(
+                    abi.encodeWithSelector(IOtomItemMutator.getItemImage.selector, _tokenId, tier)
+                );
+                if (success && result.length > 0) {
+                    string memory image = abi.decode(result, (string));
+                    if (bytes(image).length > 0) {
+                        return image;
+                    }
+                }
+            }
+
+            // If tier is 0 or the tier image URI is empty, return the default image URI
+            if (tier == 0 || bytes(item.defaultTierImageUris[tier - 1]).length == 0) {
+                return item.defaultImageUri;
+            }
+
+            // Otherwise, return the tier-specific default image URI
+            return item.defaultTierImageUris[tier - 1];
         }
     }
 
