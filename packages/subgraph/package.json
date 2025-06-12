@@ -6,10 +6,10 @@
   "scripts": {
     "codegen:mainnet": "graph codegen subgraph.mainnet.yaml",
     "codegen:sepolia": "graph codegen subgraph.sepolia.yaml",
-    "codegen": "yarn codegen:sepolia",
+    "codegen": "yarn codegen:mainnet",
     "build:mainnet": "graph build subgraph.mainnet.yaml",
     "build:sepolia": "graph build subgraph.sepolia.yaml",
-    "build": "yarn build:sepolia",
+    "build": "yarn build:mainnet",
     "deploy": "yarn deploy:sepolia",
     "deploy:mainnet": "graph deploy --node https://api.studio.thegraph.com/deploy/ otom-v2-mainnet",
     "deploy:sepolia": "graph deploy --node https://api.studio.thegraph.com/deploy/ otom-v2-sepolia",
