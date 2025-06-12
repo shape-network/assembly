@@ -126,4 +126,8 @@ contract SwordMutator is IOtomItemMutator {
     ) external pure override returns (bool, bool) {
         return (true, true);
     }
+
+    function getItemImage(uint256, uint256) external pure override returns (string memory) {
+        return "";
+    }
 }

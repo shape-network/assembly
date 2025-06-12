@@ -134,4 +134,8 @@ contract GenericMutator is IOtomItemMutator {
         // Only allow crafting 1 item at a time
         requiresItemsOrOtoms = _amount == 1;
     }
+
+    function getItemImage(uint256, uint256) external pure override returns (string memory) {
+        return "";
+    }
 }
