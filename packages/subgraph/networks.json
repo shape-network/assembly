@@ -1,0 +1,14 @@
+{
+  "shape-mainnet": {
+    "OtomsV2": {
+      "address": "0xe8af571878D33CfecA4eA11caEf124E5ef105a30",
+      "startBlock": 12751170
+    }
+  },
+  "shape-sepolia": {
+    "OtomsV2": {
+      "address": "0xc709F59f1356230025d4fdFDCeD92341A14FF2F8",
+      "startBlock": 15368091
+    }
+  }
+}

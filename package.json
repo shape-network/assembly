@@ -19,5 +19,8 @@
   },
   "devDependencies": {
     "turbo": "latest"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "^0.97.1"
   }
 }
