@@ -1220,7 +1220,7 @@ const NonFrozenItemWarningBadge: FC = () => {
 
       <TooltipContent className="max-w-xs">
         <p>
-          This item has not been frozen by item creator, they can still modify its properties,
+          This item has not been frozen by the item creator, they can still modify its properties,
           including name, usage behavior, blueprint, and traits.
         </p>
       </TooltipContent>
