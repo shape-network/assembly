@@ -54,7 +54,7 @@ export type Item = {
   defaultImageUri: string;
   supply: number;
   mutatorContract?: Address;
-  frozen?: boolean;
+  isFrozen?: boolean;
 };
 
 export type OwnedItem = Item & {
