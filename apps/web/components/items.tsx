@@ -40,7 +40,7 @@ import { useDndContext, useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { QuestionMarkCircledIcon, TrashIcon } from '@radix-ui/react-icons';
 import { useAtom, useSetAtom } from 'jotai';
-import { ClipboardCopyIcon, CoinsIcon, WrenchIcon } from 'lucide-react';
+import { ClipboardCopyIcon, CoinsIcon, SnowflakeIcon, WrenchIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePostHog } from 'posthog-js/react';
@@ -177,6 +177,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item }) => {
           <CardTitle className="z-10 flex items-center gap-2">
             {isFungible && <FungibleItemBadge />}
             {item.name}
+            {!isFungible && !item.isFrozen && <NonFrozenItemWarningBadge />}
           </CardTitle>
         </CardHeader>
 
@@ -1204,3 +1205,23 @@ function getPickaxeMiningPower(tier: number): string {
       return '6';
   }
 }
+
+const NonFrozenItemWarningBadge: FC = () => {
+  return (
+    <Tooltip>
+      <TooltipTrigger>
+        <span className="relative grid h-full w-full place-items-center">
+          <SnowflakeIcon className="text-muted-foreground/60 size-4" />
+          <span className="bg-muted-foreground absolute top-1/2 left-1/2 h-px w-[120%] origin-center -translate-x-1/2 -translate-y-1/2 rotate-[40deg]" />
+        </span>
+      </TooltipTrigger>
+
+      <TooltipContent className="max-w-xs">
+        <p>
+          This item has not been frozen at creation. The item creator can still modify its
+          properties, including name, usage behavior, blueprint, and traits.
+        </p>
+      </TooltipContent>
+    </Tooltip>
+  );
+};
