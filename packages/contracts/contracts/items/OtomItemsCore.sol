@@ -1229,33 +1229,6 @@ contract OtomItemsCore is
     }
 
     /**
-     * @dev Gets the appropriate image URI for a token based on its tier
-     * @param _tokenId The token ID
-     * @return The image URI
-     */
-    function getTokenDefaultImageUri(uint256 _tokenId) external view returns (string memory) {
-        if (isFungibleTokenId(_tokenId)) {
-            // For fungible tokens, return the default image URI
-            uint256 itemId = getItemIdForToken(_tokenId);
-            return _items[itemId].defaultImageUri;
-        } else {
-            // For non-fungible tokens, get the tier and return the appropriate image URI
-            uint256 itemId = _nonFungibleTokenToItemId[_tokenId];
-            if (itemId == 0) revert InvalidItem();
-
-            uint256 tier = nonFungibleTokenToTier[_tokenId];
-
-            // If tier is 0 or the tier image URI is empty, return the default image URI
-            if (tier == 0 || bytes(_items[itemId].defaultTierImageUris[tier - 1]).length == 0) {
-                return _items[itemId].defaultImageUri;
-            }
-
-            // Otherwise, return the tier-specific default image URI
-            return _items[itemId].defaultTierImageUris[tier - 1];
-        }
-    }
-
-    /**
      * @dev Checks if an address is approved for a specific item ID
      * @param _owner The token owner
      * @param _operator The potential operator address
