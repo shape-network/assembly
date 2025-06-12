@@ -1,0 +1,68 @@
+specVersion: 0.0.7
+indexerHints:
+  prune: auto
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: OtomsV2Testnet
+    network: mainnet
+    source:
+      address: '0xc709F59f1356230025d4fdFDCeD92341A14FF2F8'
+      abi: OtomItemsCore
+      startBlock: 15368091
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - CreationEnabledSet
+        - Initialized
+        - ItemCrafted
+        - ItemCreated
+        - ItemDestroyed
+        - ItemFrozen
+        - ItemUpdated
+        - ItemUsed
+        - ItemsApprovalForAll
+        - OtomItemsSet
+        - OwnershipTransferred
+        - RendererSet
+        - TokensApprovalForAll
+        - TraitsUpdated
+        - ValidatorSet
+      abis:
+        - name: OtomItemsCore
+          file: ./abis/OtomItemsCore.json
+      eventHandlers:
+        - event: CreationEnabledSet(indexed bool)
+          handler: handleCreationEnabledSet
+        - event: Initialized(uint64)
+          handler: handleInitialized
+        - event: ItemCrafted(indexed address,indexed uint256,uint256,uint256,(uint8,uint256,uint256,(uint8,uint256,uint256,bool,bool,string,bool,bytes32,bool)[])[])
+          handler: handleItemCrafted
+        - event: ItemCreated(indexed address,indexed uint256,string)
+          handler: handleItemCreated
+        - event: ItemDestroyed(indexed address,indexed uint256,indexed uint256)
+          handler: handleItemDestroyed
+        - event: ItemFrozen(indexed uint256)
+          handler: handleItemFrozen
+        - event: ItemUpdated(indexed uint256)
+          handler: handleItemUpdated
+        - event: ItemUsed(indexed address,indexed uint256,indexed uint256)
+          handler: handleItemUsed
+        - event: ItemsApprovalForAll(indexed address,indexed uint256[],indexed address,bool)
+          handler: handleItemsApprovalForAll
+        - event: OtomItemsSet(indexed address)
+          handler: handleOtomItemsSet
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+        - event: RendererSet(indexed address)
+          handler: handleRendererSet
+        - event: TokensApprovalForAll(indexed address,indexed uint256[],indexed address,bool)
+          handler: handleTokensApprovalForAll
+        - event: TraitsUpdated(indexed uint256,(string,string,uint256,uint8)[])
+          handler: handleTraitsUpdated
+        - event: ValidatorSet(indexed address)
+          handler: handleValidatorSet
+      file: ./src/otoms-v2.ts

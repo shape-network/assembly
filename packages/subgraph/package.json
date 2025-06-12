@@ -1,0 +1,31 @@
+{
+  "name": "@repo/subgraph",
+  "version": "1.0.0",
+  "author": "arod.eth",
+  "license": "MIT",
+  "scripts": {
+    "codegen:mainnet": "graph codegen subgraph.mainnet.yaml",
+    "codegen:sepolia": "graph codegen subgraph.sepolia.yaml",
+    "codegen": "yarn codegen:mainnet",
+    "build:mainnet": "yarn codegen:mainnet && graph build subgraph.mainnet.yaml",
+    "build:sepolia": "yarn codegen:sepolia && graph build subgraph.sepolia.yaml",
+    "build": "yarn build:mainnet",
+    "deploy": "yarn deploy:sepolia",
+    "deploy:mainnet": "graph deploy --node https://api.studio.thegraph.com/deploy/ otom-v2-mainnet",
+    "deploy:sepolia": "graph deploy --node https://api.studio.thegraph.com/deploy/ otom-v2-sepolia",
+    "create-local": "graph create --node http://localhost:8020/ otom-v2",
+    "remove-local": "graph remove --node http://localhost:8020/ otom-v2",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 otom-v2",
+    "test": "./scripts/test-setup.sh",
+    "test:mainnet": "graph test subgraph.mainnet.yaml",
+    "test:sepolia": "graph test subgraph.sepolia.yaml"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "0.97.1",
+    "@graphprotocol/graph-ts": "0.37.0"
+  },
+  "devDependencies": {
+    "assemblyscript": "0.19.23",
+    "matchstick-as": "0.6.0"
+  }
+}

@@ -28,6 +28,7 @@
     "@rainbow-me/rainbowkit": "^2.2.4",
     "@tanstack/react-query": "^5.72.2",
     "alchemy-sdk": "^3.5.6",
+    "@repo/subgraph": "^1.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "jotai": "^2.12.4",
