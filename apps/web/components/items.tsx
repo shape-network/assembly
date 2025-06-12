@@ -299,7 +299,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item }) => {
             )}
 
             <div className="flex items-center justify-between gap-2">
-              <SupplyBadge supply={formattedSupply} itemId={item.id} />
+              <TotalCraftedBadge total={formattedSupply} itemId={item.id} />
               {!isFungible && !item.isFrozen && <NonFrozenItemWarningBadge />}
             </div>
           </div>
@@ -818,7 +818,7 @@ export const OwnedItemCard: FC<{ item: OwnedItem }> = ({ item }) => {
           </CardContent>
 
           <div className="px-4">
-            <SupplyBadge supply={formattedSupply} itemId={item.id} />
+            <TotalCraftedBadge total={formattedSupply} itemId={item.id} />
           </div>
         </Card>
       </Link>
@@ -1169,21 +1169,20 @@ const FungibleItemBadge: FC = () => {
   );
 };
 
-const SupplyBadge: FC<{ supply: string | null; itemId: bigint }> = ({ supply, itemId }) => {
-  return supply ? (
+const TotalCraftedBadge: FC<{ total: string | null; itemId: bigint }> = ({ total, itemId }) => {
+  return total ? (
     <Tooltip>
       <TooltipTrigger
         className="text-muted-foreground flex items-center gap-1 self-start text-xs"
         asChild
       >
         <Link href={paths.openSea.item(itemId)}>
-          <WrenchIcon className="text-muted-foreground size-3" /> {supply}x
+          <WrenchIcon className="text-muted-foreground size-3" /> {total}x
         </Link>
       </TooltipTrigger>
 
       <TooltipContent>
-        <p>Active items: </p>
-        <p className="italic">crafted amount - burned amount (used)</p>
+        <p>Nº times this item was crafted</p>
       </TooltipContent>
     </Tooltip>
   ) : (
