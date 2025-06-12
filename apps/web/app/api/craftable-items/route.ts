@@ -4,6 +4,7 @@ import { otomItemsCore, otomItemsTracking } from '@/lib/addresses';
 import { rpcClient } from '@/lib/clients';
 import { config } from '@/lib/config';
 import { getBlueprintForItem, HIDDEN_ITEMS } from '@/lib/items';
+import { fetchItemCraftCount } from '@/lib/subgraph';
 import { Item, ItemType } from '@/lib/types';
 import { unstable_cache } from 'next/cache';
 import { NextResponse } from 'next/server';
@@ -22,16 +23,6 @@ async function getCraftItems(): Promise<string> {
     ? results
     : results.filter((r) => !HIDDEN_ITEMS.includes(r.id));
 
-  const supplyResponses = await rpc.multicall({
-    contracts: filteredResults.map((r) => ({
-      abi: otomItemsTrackingContractAbi,
-      address: otomItemsTracking[config.chain.id],
-      functionName: 'getItemSupply',
-      args: [r.id],
-    })),
-    allowFailure: true,
-  });
-
   const frozenResponses = await rpc.multicall({
     contracts: filteredResults.map((r) => ({
       abi: otomItemsCoreContractAbi,
@@ -44,9 +35,7 @@ async function getCraftItems(): Promise<string> {
 
   const items: Item[] = await Promise.all(
     filteredResults.map(async (r, index) => {
-      const supplyResponse = supplyResponses[index];
       const frozenResponse = frozenResponses[index];
-      const supply = supplyResponse.status === 'success' ? Number(supplyResponse.result) : 0;
       const isFrozen = frozenResponse.status === 'success' ? Boolean(frozenResponse.result) : false;
 
       return {
@@ -59,7 +48,7 @@ async function getCraftItems(): Promise<string> {
         ethCostInWei: r.ethCostInWei,
         blueprint: await Promise.all(r.blueprint.map(getBlueprintForItem)),
         initialTraits: await getTraitsForItem(r.id),
-        supply,
+        supply: await fetchItemCraftCount(r.id),
         isFrozen,
       };
     })

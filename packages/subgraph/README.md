@@ -42,20 +42,13 @@ The Assembly subgraph indexes the following key entities:
 
 ### Installation
 
-1. Clone the repository:
-
-```bash
-git clone https://github.com/your-org/assembly.git
-cd assembly
-```
-
-2. Install dependencies:
+1. Install dependencies:
 
 ```bash
 yarn install
 ```
 
-3. Navigate to the subgraph package:
+2. Navigate to the subgraph package:
 
 ```bash
 cd packages/subgraph

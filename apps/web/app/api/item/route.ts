@@ -1,7 +1,8 @@
-import { otomItemsCoreContractAbi, otomItemsTrackingContractAbi } from '@/generated';
-import { otomItemsCore, otomItemsTracking } from '@/lib/addresses';
+import { otomItemsCoreContractAbi } from '@/generated';
+import { otomItemsCore } from '@/lib/addresses';
 import { rpcClient } from '@/lib/clients';
 import { config } from '@/lib/config';
+import { fetchItemCraftCount } from '@/lib/subgraph';
 import { ItemType, OwnedItem } from '@/lib/types';
 import { unstable_cache } from 'next/cache';
 import { NextResponse } from 'next/server';
@@ -17,7 +18,8 @@ const schema = z.object({
 async function getItem(itemTokenId: bigint, itemId: bigint): Promise<string> {
   const rpc = rpcClient();
 
-  const [itemResponse, tierResponse, traitsResponse, supplyResponse] = await rpc.multicall({
+  // Fetch data from blockchain
+  const [itemResponse, tierResponse, traitsResponse] = await rpc.multicall({
     contracts: [
       {
         abi: otomItemsCoreContractAbi,
@@ -37,20 +39,15 @@ async function getItem(itemTokenId: bigint, itemId: bigint): Promise<string> {
         functionName: 'getTokenTraits',
         args: [itemTokenId],
       },
-      {
-        abi: otomItemsTrackingContractAbi,
-        address: otomItemsTracking[config.chain.id],
-        functionName: 'getItemSupply',
-        args: [itemId],
-      },
     ],
     allowFailure: true,
   });
 
+  const craftCount = await fetchItemCraftCount(itemId);
+
   const itemResult = itemResponse.status === 'success' ? itemResponse.result : null;
   const tierResult = tierResponse.status === 'success' ? tierResponse.result : null;
   const traitsResult = traitsResponse.status === 'success' ? traitsResponse.result : null;
-  const supplyResult = supplyResponse.status === 'success' ? supplyResponse.result : null;
 
   if (!itemResult) {
     throw new Error(`Item ${itemId} not found or could not be retrieved`);
@@ -59,7 +56,6 @@ async function getItem(itemTokenId: bigint, itemId: bigint): Promise<string> {
   const tier = Number(tierResult);
   const usagesTrait = traitsResult?.find((trait) => trait.typeName === 'Usages Remaining');
   const usagesRemaining = usagesTrait ? Number(usagesTrait.valueNumber) : null;
-  const supply = supplyResult ? Number(supplyResult) : 0;
 
   const item: OwnedItem = {
     ...itemResult,
@@ -74,7 +70,7 @@ async function getItem(itemTokenId: bigint, itemId: bigint): Promise<string> {
           value: t.valueString ?? t.valueNumber.toString(),
         }))
       : [],
-    supply,
+    supply: craftCount,
   };
 
   return superjson.stringify(item);
@@ -85,7 +81,7 @@ function getCachedItem(itemTokenId: bigint, itemId: bigint) {
     () => getItem(itemTokenId, itemId),
     ['item', `item-${itemId}`, `token-${itemTokenId}`],
     {
-      revalidate: 5 * 60,
+      revalidate: 1,
       tags: ['item', `item-${itemId}`, `token-${itemTokenId}`],
     }
   )();

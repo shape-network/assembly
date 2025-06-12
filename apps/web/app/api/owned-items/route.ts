@@ -1,7 +1,8 @@
-import { otomItemsCoreContractAbi, otomItemsTrackingContractAbi } from '@/generated';
-import { otomItems, otomItemsCore, otomItemsTracking } from '@/lib/addresses';
+import { otomItemsCoreContractAbi } from '@/generated';
+import { otomItems, otomItemsCore } from '@/lib/addresses';
 import { alchemy, rpcClient } from '@/lib/clients';
 import { config } from '@/lib/config';
+import { fetchItemCraftCount } from '@/lib/subgraph';
 import { ItemType, OwnedItem } from '@/lib/types';
 import { isNotNullish } from '@/lib/utils';
 import { NextResponse } from 'next/server';
@@ -45,7 +46,7 @@ export async function POST(request: Request) {
           return null;
         }
 
-        const [itemResponse, tierResponse, traitsResponse, supplyResponse] = await rpc.multicall({
+        const [itemResponse, tierResponse, traitsResponse] = await rpc.multicall({
           contracts: [
             {
               abi: otomItemsCoreContractAbi,
@@ -65,20 +66,16 @@ export async function POST(request: Request) {
               functionName: 'getTokenTraits',
               args: [nftTokenId],
             },
-            {
-              abi: otomItemsTrackingContractAbi,
-              address: otomItemsTracking[config.chain.id],
-              functionName: 'getItemSupply',
-              args: [itemId],
-            },
           ],
           allowFailure: true,
         });
 
+        // Fetch craft count from subgraph
+        const craftCount = await fetchItemCraftCount(itemId);
+
         const itemResult = itemResponse.status === 'success' ? itemResponse.result : null;
         const tierResult = tierResponse.status === 'success' ? tierResponse.result : null;
         const traitsResult = traitsResponse.status === 'success' ? traitsResponse.result : null;
-        const supplyResult = supplyResponse.status === 'success' ? supplyResponse.result : null;
 
         if (itemResult === null) {
           console.error(
@@ -91,7 +88,6 @@ export async function POST(request: Request) {
         const tier = Number(tierResult);
         const usagesTrait = traitsResult?.find((trait) => trait.typeName === 'Usages Remaining');
         const usagesRemaining = usagesTrait ? Number(usagesTrait.valueNumber) : null;
-        const supply = supplyResult ? Number(supplyResult) : 0;
 
         return {
           ...itemResult,
@@ -106,7 +102,7 @@ export async function POST(request: Request) {
                 value: t.valueString ?? t.valueNumber.toString(),
               }))
             : [],
-          supply,
+          supply: craftCount,
         };
       } catch (e) {
         console.error(e);
