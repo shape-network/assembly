@@ -230,23 +230,37 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item }) => {
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-2" align="start">
                   <div className="flex flex-col gap-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="justify-start"
-                      onClick={() => setFreezeItemDialogOpen(true)}
-                    >
-                      Freeze Item
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="justify-start"
-                      disabled
-                      title="Coming Soon"
-                    >
-                      Edit
-                    </Button>
+                    {item.isFrozen ? (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="ghost" size="sm" className="justify-start" disabled>
+                            Freeze Item
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Item is frozen</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="justify-start"
+                        onClick={() => setFreezeItemDialogOpen(true)}
+                      >
+                        Freeze Item
+                      </Button>
+                    )}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="sm" className="justify-start" disabled>
+                          Edit
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Coming Soon</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </div>
                 </PopoverContent>
               </Popover>
