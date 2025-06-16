@@ -825,13 +825,6 @@ export const otomItemsCoreContractAbi = [
   },
   {
     type: 'function',
-    inputs: [{ name: '_tokenId', internalType: 'uint256', type: 'uint256' }],
-    name: 'getTokenDefaultImageUri',
-    outputs: [{ name: '', internalType: 'string', type: 'string' }],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
     inputs: [
       { name: '_tokenId', internalType: 'uint256', type: 'uint256' },
       { name: '_traitName', internalType: 'string', type: 'string' },
@@ -3780,15 +3773,6 @@ export const useReadOtomItemsCoreContractGetNonFungibleTokenId =
   /*#__PURE__*/ createUseReadContract({
     abi: otomItemsCoreContractAbi,
     functionName: 'getNonFungibleTokenId',
-  });
-
-/**
- * Wraps __{@link useReadContract}__ with `abi` set to __{@link otomItemsCoreContractAbi}__ and `functionName` set to `"getTokenDefaultImageUri"`
- */
-export const useReadOtomItemsCoreContractGetTokenDefaultImageUri =
-  /*#__PURE__*/ createUseReadContract({
-    abi: otomItemsCoreContractAbi,
-    functionName: 'getTokenDefaultImageUri',
   });
 
 /**

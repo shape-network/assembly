@@ -239,8 +239,6 @@ interface IOtomItemsCore {
 
     function getTokenUri(uint256 _tokenId) external view returns (string memory);
 
-    function getTokenDefaultImageUri(uint256 _tokenId) external view returns (string memory);
-
     function isFungibleTokenId(uint256 _tokenId) external view returns (bool);
 
     function nonFungibleTokenToTier(uint256 _tokenId) external view returns (uint256);
