@@ -182,7 +182,7 @@ export const ItemCreationForm: FC = () => {
         description: nonFungibleFormData.description,
         imageUri: nonFungibleFormData.imageUri,
         tieredImageUris: validTierImageUris.length > 0 ? validTierImageUris : undefined,
-        mutatorContract: nonFungibleFormData.mutatorContract || undefined,
+        mutatorContract: nonFungibleFormData.mutatorContract,
         costInEth: nonFungibleFormData.costInEth,
         feeRecipient: nonFungibleFormData.feeRecipient,
       });
@@ -329,8 +329,7 @@ export const ItemCreationForm: FC = () => {
       return (
         !!nonFungibleFormData.name &&
         !!nonFungibleFormData.description &&
-        !!nonFungibleFormData.imageUri &&
-        !!nonFungibleFormData.mutatorContract
+        !!nonFungibleFormData.imageUri
       );
     }
     if (step === 3) {
