@@ -243,7 +243,9 @@ export const NonFungibleItemDetailsForm: FC<NonFungibleItemDetailsFormProps> = (
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="mutatorContract">Mutator Contract Address (Required)</Label>
+          <Label htmlFor="mutatorContract">
+            Mutator Contract Address (Optional, if you want tiered items)
+          </Label>
           <Input
             id="mutatorContract"
             placeholder="0x0000000000000000000000000000000000000000"
@@ -251,8 +253,9 @@ export const NonFungibleItemDetailsForm: FC<NonFungibleItemDetailsFormProps> = (
             onChange={(e) => onChange('mutatorContract', e.target.value)}
           />
           <p className="text-muted-foreground text-xs">
-            Required for tiered items. Your mutator contract must implement tier calculation logic
-            (calculateTier function) to determine item tiers based on crafting components and cost.
+            Only required if you want tiered items (up to 7 tiers). Your mutator contract must
+            implement tier calculation logic (calculateTier function) to determine item tiers based
+            on crafting components and cost. Leave empty for non-tiered items.
           </p>
 
           <Accordion type="single" collapsible>
