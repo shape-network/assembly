@@ -1,3 +1,4 @@
+import { CreateItemButton } from '@/components/create-item-button';
 import { Navbar } from '@/components/navbar';
 import { Providers } from '@/components/providers';
 import { InlineLink } from '@/components/ui/link';
@@ -56,6 +57,8 @@ export default function RootLayout({
                 >
                   otom.xyz
                 </InlineLink>
+
+                <CreateItemButton />
 
                 <WalletConnect />
               </div>
