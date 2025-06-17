@@ -21,10 +21,7 @@ contract PickaxeMutator is IOtomItemMutator, Ownable2Step {
 
     IOtomsDatabase public immutable OTOMS_DATABASE;
 
-    constructor(
-        address _otomsDatabase,
-        uint256[] memory _tierToUsesRemaining
-    ) Ownable(msg.sender) {
+    constructor(address _otomsDatabase, uint256[] memory _tierToUsesRemaining) Ownable(msg.sender) {
         if (_tierToUsesRemaining.length != 5) revert MissingTiers();
 
         OTOMS_DATABASE = IOtomsDatabase(_otomsDatabase);
@@ -34,9 +31,7 @@ contract PickaxeMutator is IOtomItemMutator, Ownable2Step {
         }
     }
 
-    function setTierToUsesRemaining(
-        uint256[] memory _tierToUsesRemaining
-    ) external onlyOwner {
+    function setTierToUsesRemaining(uint256[] memory _tierToUsesRemaining) external onlyOwner {
         if (_tierToUsesRemaining.length != 5) revert MissingTiers();
 
         for (uint256 i = 0; i < _tierToUsesRemaining.length; i++) {
@@ -50,12 +45,7 @@ contract PickaxeMutator is IOtomItemMutator, Ownable2Step {
         uint256[] memory,
         Trait[] memory baseTraits,
         uint256 paymentAmount
-    )
-        external
-        view
-        override
-        returns (uint256 tierLevel, Trait[] memory modifiedTraits)
-    {
+    ) external view override returns (uint256 tierLevel, Trait[] memory modifiedTraits) {
         if (paymentAmount == 0 && variableOtomIds.length == 0) {
             return (0, baseTraits);
         }
@@ -66,9 +56,7 @@ contract PickaxeMutator is IOtomItemMutator, Ownable2Step {
         // Example: Sum the hardness values of all variable otoms
         for (uint256 i = 0; i < variableOtomIds.length; i++) {
             uint256 totalMassOfMolecule = 0;
-            Molecule memory molecule = OTOMS_DATABASE.getMoleculeByTokenId(
-                variableOtomIds[i]
-            );
+            Molecule memory molecule = OTOMS_DATABASE.getMoleculeByTokenId(variableOtomIds[i]);
 
             for (uint256 j = 0; j < molecule.givingAtoms.length; j++) {
                 totalMassOfMolecule += molecule.givingAtoms[j].mass;
@@ -137,9 +125,7 @@ contract PickaxeMutator is IOtomItemMutator, Ownable2Step {
                 }
 
                 updatedTraits[i].valueNumber--;
-                updatedTraits[i].valueString = updatedTraits[i]
-                    .valueNumber
-                    .toString();
+                updatedTraits[i].valueString = updatedTraits[i].valueNumber.toString();
 
                 if (updatedTraits[i].valueNumber == 0) {
                     shouldDestroy = true;
@@ -171,5 +157,9 @@ contract PickaxeMutator is IOtomItemMutator, Ownable2Step {
         bytes calldata
     ) external pure override returns (bool, bool) {
         return (true, true);
+    }
+
+    function getItemImage(uint256, uint256) external pure override returns (string memory) {
+        return "";
     }
 }

@@ -244,7 +244,7 @@ export const NonFungibleItemDetailsForm: FC<NonFungibleItemDetailsFormProps> = (
 
         <div className="grid gap-2">
           <Label htmlFor="mutatorContract">
-            Mutator Contract Address (Optional, if you want tiered items)
+            Mutator Contract Address (optional, if you want tiered items)
           </Label>
           <Input
             id="mutatorContract"

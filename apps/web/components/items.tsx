@@ -9,11 +9,22 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { otomItemsCoreContractAbi, useWriteOtomItemsCoreContractCraftItem } from '@/generated';
+import {
+  otomItemsCoreContractAbi,
+  useWriteOtomItemsCoreContractCraftItem,
+  useWriteOtomItemsCoreContractFreezeItem,
+} from '@/generated';
 import { otomItemsCore } from '@/lib/addresses';
 import {
   droppedItemsStateAtom,
@@ -40,7 +51,7 @@ import { useDndContext, useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { QuestionMarkCircledIcon, TrashIcon } from '@radix-ui/react-icons';
 import { useAtom, useSetAtom } from 'jotai';
-import { ClipboardCopyIcon, CoinsIcon, SnowflakeIcon, WrenchIcon } from 'lucide-react';
+import { ClipboardCopyIcon, CoinsIcon, Settings, SnowflakeIcon, WrenchIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePostHog } from 'posthog-js/react';
@@ -78,8 +89,15 @@ type ItemToCraftCardProps = {
 
 const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item }) => {
   const { data } = useGetOtomItemsForUser();
+  const { address } = useAccount();
   const inventory = data?.pages.flatMap((page) => page.items) || [];
   const [droppedItemsState, setDroppedItemsState] = useAtom(droppedItemsStateAtom);
+  const [freezeItemDialogOpen, setFreezeItemDialogOpen] = useState(false);
+
+  const freezeItemMutation = useWriteOtomItemsCoreContractFreezeItem();
+  const freezeReceipt = useWaitForTransactionReceipt({
+    hash: freezeItemMutation.data,
+  });
 
   const droppedItemsForThisCard = droppedItemsState[String(item.id)] || {};
 
@@ -147,9 +165,35 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item }) => {
     return undefined;
   }
 
+  async function handleFreezeItem() {
+    if (!address) return;
+
+    await freezeItemMutation.writeContractAsync({
+      address: otomItemsCore[config.chain.id],
+      args: [item.id],
+    });
+  }
+
+  useEffect(() => {
+    if (freezeReceipt.isSuccess) {
+      toast.success('Item frozen successfully');
+      setFreezeItemDialogOpen(false);
+      return;
+    }
+    if (freezeReceipt.isError) {
+      toast.error('Failed to freeze item, please try again');
+      return;
+    }
+    if (freezeReceipt.isLoading) {
+      toast.info('Freezing item...');
+      return;
+    }
+  }, [freezeReceipt.isSuccess, freezeReceipt.isError, freezeReceipt.isLoading]);
+
   const isPickaxe = config.chain.testnet ? false : item.id === BigInt(2);
   const isFungible = item.itemType === 0;
   const formattedSupply = item.supply > 0 ? Intl.NumberFormat('en-US').format(item.supply) : null;
+  const isCreator = item.creator.toLowerCase() === address?.toLowerCase();
 
   return (
     <li className="relative grid w-full shrink-0 grid-rows-[1fr_auto] gap-1">
@@ -177,6 +221,50 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item }) => {
           <CardTitle className="z-10 flex items-center gap-2 pr-16">
             {isFungible && <FungibleItemBadge />}
             {item.name}
+            {!isFungible && isCreator && (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="sm" className="-my-2">
+                    <Settings className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-2" align="start">
+                  <div className="flex flex-col gap-1">
+                    {item.isFrozen ? (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="ghost" size="sm" className="justify-start" disabled>
+                            Freeze Item
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Item is frozen already</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="justify-start"
+                        onClick={() => setFreezeItemDialogOpen(true)}
+                      >
+                        Freeze Item
+                      </Button>
+                    )}
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="sm" className="justify-start" disabled>
+                          Edit
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Coming Soon</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            )}
           </CardTitle>
         </CardHeader>
 
@@ -238,11 +326,12 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item }) => {
                 )}
               </div>
 
-              <div className="flex flex-wrap gap-1">
+              <div className="flex flex-wrap gap-2">
                 {requiredIndices.map((blueprintIndex) => {
                   const component = item.blueprint[blueprintIndex];
                   const dropId = `required-${item.id}-${blueprintIndex}`;
                   const isDropped = !!droppedItemsForThisCard[blueprintIndex];
+
                   return (
                     <RequiredDropZone
                       key={dropId}
@@ -300,7 +389,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item }) => {
 
             <div className="flex items-center justify-between gap-2">
               <TotalCraftedBadge total={formattedSupply} itemId={item.id} />
-              {!isFungible && !item.isFrozen && <NonFrozenItemWarningBadge />}
+              {!isFungible && <NonFrozenItemWarningBadge isFrozen={item.isFrozen} />}
             </div>
           </div>
         </CardContent>
@@ -311,6 +400,46 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item }) => {
           </p>
         )}
       </Card>
+
+      <Dialog open={freezeItemDialogOpen} onOpenChange={setFreezeItemDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Freeze Item</DialogTitle>
+          </DialogHeader>
+          <DialogDescription asChild>
+            <div>
+              {item.isFrozen ? (
+                <p>This item is already frozen.</p>
+              ) : (
+                <>
+                  <p>
+                    This action cannot be undone. The item will properties will be immutable and
+                    cannot be changed.
+                  </p>
+                  <br />
+                  <br />
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      variant="ghost"
+                      onClick={() => setFreezeItemDialogOpen(false)}
+                      disabled={freezeItemMutation.isPending || freezeReceipt.isLoading}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={handleFreezeItem}
+                      disabled={freezeItemMutation.isPending || freezeReceipt.isLoading}
+                    >
+                      Freeze
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          </DialogDescription>
+        </DialogContent>
+      </Dialog>
     </li>
   );
 };
@@ -982,6 +1111,11 @@ const RequiredDropZone: FC<{
               M
             </span>
           )}
+          {component.amount > 1 && (
+            <span className="text-muted-foreground bg-background absolute -top-2 -right-1.5 grid h-5 min-w-[18px] place-items-center rounded-full px-0.5 text-[9px] font-bold">
+              x{component.amount}
+            </span>
+          )}
         </CardContent>
       </Card>
     </div>
@@ -1207,20 +1341,25 @@ function getPickaxeMiningPower(tier: number): string {
   }
 }
 
-const NonFrozenItemWarningBadge: FC = () => {
+const NonFrozenItemWarningBadge: FC<{ isFrozen?: boolean }> = ({ isFrozen = false }) => {
   return (
     <Tooltip>
       <TooltipTrigger>
         <span className="relative grid h-full w-full place-items-center">
-          <SnowflakeIcon className="text-muted-foreground/60 size-4" />
-          <span className="bg-muted-foreground absolute top-1/2 left-1/2 h-px w-[120%] origin-center -translate-x-1/2 -translate-y-1/2 rotate-[40deg]" />
+          <SnowflakeIcon
+            className={cn('size-4', isFrozen ? 'text-primary' : 'text-muted-foreground/60')}
+          />
+          {!isFrozen && (
+            <span className="bg-muted-foreground absolute top-1/2 left-1/2 h-px w-[120%] origin-center -translate-x-1/2 -translate-y-1/2 rotate-[40deg]" />
+          )}
         </span>
       </TooltipTrigger>
 
       <TooltipContent className="max-w-xs">
         <p>
-          This item has not been frozen by the item creator, they can still modify its properties,
-          including name, usage behavior, blueprint, and traits.
+          {isFrozen
+            ? 'This item has been frozen by the item creator, they cannot modify its properties.'
+            : 'This item has not been frozen by the item creator, they can still modify its properties, including name, usage behavior, blueprint, and traits.'}
         </p>
       </TooltipContent>
     </Tooltip>
