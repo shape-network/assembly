@@ -238,7 +238,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item }) => {
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p>Item is frozen</p>
+                          <p>Item is frozen already</p>
                         </TooltipContent>
                       </Tooltip>
                     ) : (
