@@ -50,42 +50,47 @@ export const AssemblyHandbook: FC = () => {
               <Section>
                 <ol className="list-decimal space-y-4 pl-5">
                   <li>
-                    decide if you’d like to make it fungible (this means all the items will have the
-                    same stats), or non-fungible (this means that each item is unique, and you can
-                    even have tiered items*)
+                    Decide if you’d like to make it fungible (this means all the items will have the
+                    same stats), or non-fungible (this means that each item is unique, and enables
+                    the posibility of tiered items*)
                   </li>
                   <li>
-                    pick a name for your item
-                    <ol className="mt-2 list-decimal pl-5">
-                      <li>this is the name that shows up on the NFT</li>
+                    Pick a name for your item
+                    <ol className="mt-2 list-[lower-alpha] pl-5">
+                      <li>This is the name that shows up on the NFT</li>
                     </ol>
                   </li>
                   <li>
-                    give it a good description
-                    <ol className="mt-2 list-decimal pl-5">
-                      <li>this will also show up on the NFT</li>
+                    Give it a good description
+                    <ol className="mt-2 list-[lower-alpha] pl-5">
+                      <li>This will also show up on the NFT</li>
                     </ol>
                   </li>
                   <li>
-                    make an image for your item
-                    <ol className="mt-2 list-decimal pl-5">
+                    Make an image for your item
+                    <ol className="mt-2 list-[lower-alpha] pl-5">
                       <li>
-                        this image shows up on the Assembly website, but it won’t show up on places
+                        The image shows up on the Assembly website, but it won’t show up on places
                         where you normally view NFTs
                       </li>
                     </ol>
                   </li>
                   <li>
-                    decide on a good cost for crafting this item
-                    <ol className="mt-2 list-decimal pl-5">
+                    Decide on a good cost for crafting this item
+                    <ol className="mt-2 list-[lower-alpha] pl-5">
                       <li>
-                        leave it at zero, or make high as you want. the fee will be directly
+                        Leave it at zero, or make high as you want. The fee will be directly
                         deposited into the address you’ve set
                       </li>
                       <li>
-                        if you added a fee, make sure to set the fee recipient address. this can be
+                        If you added a fee, make sure to set the fee recipient address. This can be
                         your personal address, or use a platform like{' '}
-                        <a href="https://splits.org/" className="text-blue-500 hover:underline">
+                        <a
+                          href="https://splits.org/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-500 hover:underline"
+                        >
                           splits
                         </a>{' '}
                         to split the fee between multiple addresses
@@ -93,8 +98,8 @@ export const AssemblyHandbook: FC = () => {
                     </ol>
                   </li>
                   <li>
-                    construct the perfect blueprint
-                    <ol className="mt-2 list-decimal pl-5">
+                    Construct the perfect blueprint
+                    <ol className="mt-2 list-[lower-alpha] pl-5">
                       <li>
                         <b>Otom:</b> good if you already have an idea of what otoms you’d like to
                         use
@@ -110,13 +115,24 @@ export const AssemblyHandbook: FC = () => {
                     </ol>
                   </li>
                   <li>
-                    give the items some traits
-                    <ol className="mt-2 list-decimal pl-5">
-                      <li>this could be a item stat or just useful information about the item</li>
+                    Give the items some traits
+                    <ol className="mt-2 list-[lower-alpha] pl-5">
+                      <li>This could be a item stat or just useful information about the item</li>
                       <li>
-                        these traits will show up in the attributes of the NFT where ever you view
-                        it. this means that someone could filter the Assembly Item collection for a
-                        particular trait on Opensea and find items with that trait
+                        These traits will show up as attributes on the NFT where ever you view it
+                      </li>
+                      <li>
+                        This means that someone could filter the Assembly Item collection for a
+                        particular trait on{' '}
+                        <a
+                          href="https://opensea.io/collection/assembly-items"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-500 hover:underline"
+                        >
+                          opensea
+                        </a>{' '}
+                        and find items with that trait
                       </li>
                     </ol>
                   </li>
