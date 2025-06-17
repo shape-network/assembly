@@ -51,8 +51,8 @@ export const FloatingInventory = () => {
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
 
-    const newX = Math.min(Math.max(0, rndPosition.x), windowWidth - rndSize.width - 150);
-    const newY = Math.min(Math.max(0, rndPosition.y), windowHeight - rndSize.height - 100);
+    const newX = Math.min(Math.max(0, rndPosition.x), windowWidth - rndSize.width - 200);
+    const newY = Math.min(Math.max(0, rndPosition.y), windowHeight - rndSize.height - 150);
 
     if (newX !== rndPosition.x || newY !== rndPosition.y) {
       setRndPosition({ x: newX, y: newY });
@@ -63,8 +63,8 @@ export const FloatingInventory = () => {
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
 
-    const xPos = windowWidth - rndSize.width - 155;
-    const yPos = windowHeight - rndSize.height - 100;
+    const xPos = windowWidth - rndSize.width - 205;
+    const yPos = windowHeight - rndSize.height - 150;
 
     setRndPosition({ x: Math.max(0, xPos), y: Math.max(0, yPos) });
   }, [rndSize, setRndPosition]);
@@ -145,7 +145,7 @@ export const FloatingInventory = () => {
               </DrawerDescription>
             )}
           </DrawerHeader>
-          <div className="h-full overflow-y-auto p-4 pt-0 -webkit-overflow-scrolling-touch">
+          <div className="-webkit-overflow-scrolling-touch h-full overflow-y-auto p-4 pt-0">
             <OtomsInventory usedCounts={usedCounts} />
           </div>
         </DrawerContent>
