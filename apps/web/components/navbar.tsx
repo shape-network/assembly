@@ -4,7 +4,6 @@ import { FloatingInventory, useFloatingInventory } from '@/components/floating-i
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { itemCreationBannerDismissedAtom, onboardingCompletedAtom } from '@/lib/atoms';
-import { config } from '@/lib/config';
 import { paths } from '@/lib/paths';
 import { cn } from '@/lib/utils';
 import { useAtom, useAtomValue } from 'jotai/react';
@@ -60,14 +59,12 @@ export const Navbar: FC<GameMenuProps> = ({ className }) => {
             isActive={isFloating}
             onClick={toggleInventory}
           />
-          {config.chain.testnet && (
-            <MenuButton
-              icon={<PencilRulerIcon className="size-5" />}
-              tooltip="Create an item"
-              isActive={pathname === paths.create}
-              onClick={onCreationClick}
-            />
-          )}
+          <MenuButton
+            icon={<PencilRulerIcon className="size-5" />}
+            tooltip="Create an item"
+            isActive={pathname === paths.create}
+            onClick={onCreationClick}
+          />
           <MenuButton
             icon={<HelpCircle className="size-5" />}
             tooltip="Help"

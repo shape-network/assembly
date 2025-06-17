@@ -5,11 +5,14 @@ const explorerUrl = config.chain.testnet
   ? 'https://sepolia.shapescan.xyz/'
   : 'https://shapescan.xyz';
 
+export const assemblyTestnetUrl = 'https://testnet.assembly.otom.xyz';
+
 export const paths = {
   home: '/',
   create: '/create',
   repo: 'https://github.com/shape-network/assembly',
   shape: 'https://shape.network',
+  assemblyTestnetUrl,
   otom: config.chain.testnet ? 'https://testnet.otom.xyz' : 'https://otom.xyz',
   docs: {
     assembly: 'https://docs.shape.network/building-on-shape/onchain-compatible/assembly',

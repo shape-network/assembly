@@ -29,7 +29,7 @@ import { otomItemsCore } from '@/lib/addresses';
 import { itemCreationBannerDismissedAtom } from '@/lib/atoms';
 import { config } from '@/lib/config';
 import { paths } from '@/lib/paths';
-import { ExclamationTriangleIcon } from '@radix-ui/react-icons';
+import { InfoCircledIcon } from '@radix-ui/react-icons';
 import { useAtom } from 'jotai';
 import { XIcon } from 'lucide-react';
 import Link from 'next/link';
@@ -709,10 +709,18 @@ export const ItemCreationForm: FC = () => {
       {step === 1 && (
         <div className="absolute inset-x-0 -bottom-20 mx-auto max-w-3xl rounded px-4 py-2">
           <div className="flex items-start gap-2">
-            <ExclamationTriangleIcon className="mt-0.5 size-4 shrink-0" />
+            <InfoCircledIcon className="mt-0.5 size-4 shrink-0" />
             <p className="text-sm text-pretty italic">
-              Item creation is only available on Shape Sepolia Testnet for now, we will roll it out
-              to Shape Mainnet very soon. Stay tuned!
+              Item creation is also available on <b>Shape Sepolia Testnet</b>. If you want to test
+              before releasing it to mainnet, you can go to{' '}
+              <Link
+                href={paths.assemblyTestnetUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline"
+              >
+                Assembly Testnet website
+              </Link>
             </p>
           </div>
         </div>
