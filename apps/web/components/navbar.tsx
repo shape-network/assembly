@@ -47,26 +47,26 @@ export const Navbar: FC<GameMenuProps> = ({ className }) => {
     <>
       <div
         className={cn(
-          'bg-card/95 fixed right-8 bottom-8 z-40 rounded-lg border p-1 shadow-lg backdrop-blur-sm',
+          'bg-card/95 fixed right-12 bottom-8 z-40 rounded-lg border p-1 shadow-lg backdrop-blur-sm',
           !bannerDismissed && pathname === paths.create && 'bottom-24',
           className
         )}
       >
         <div className="flex items-center gap-1">
           <MenuButton
-            icon={<BackpackIcon className="size-5" />}
+            icon={<BackpackIcon className="size-7" />}
             tooltip={isFloating ? 'Close Inventory' : 'Open Inventory'}
             isActive={isFloating}
             onClick={toggleInventory}
           />
           <MenuButton
-            icon={<PencilRulerIcon className="size-5" />}
+            icon={<PencilRulerIcon className="size-7" />}
             tooltip="Create an item"
             isActive={pathname === paths.create}
             onClick={onCreationClick}
           />
           <MenuButton
-            icon={<HelpCircle className="size-5" />}
+            icon={<HelpCircle className="size-7" />}
             tooltip="Help"
             onClick={() => {
               setOnboardingCompleted(false);
@@ -99,7 +99,7 @@ const MenuButton: FC<MenuButtonProps> = ({ icon, tooltip, onClick, isActive = nu
           variant={isActive ? 'default' : 'ghost'}
           size="icon"
           className={cn(
-            'size-10 rounded-lg transition-all',
+            'size-14 rounded-lg transition-all',
             isActive && 'bg-primary text-primary-foreground'
           )}
           onClick={onClick}
@@ -107,7 +107,9 @@ const MenuButton: FC<MenuButtonProps> = ({ icon, tooltip, onClick, isActive = nu
           {icon}
         </Button>
       </TooltipTrigger>
-      <TooltipContent side="top">{tooltip}</TooltipContent>
+      <TooltipContent side="top" className="text-lg text-pretty">
+        {tooltip}
+      </TooltipContent>
     </Tooltip>
   );
 };
