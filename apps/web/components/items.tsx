@@ -326,11 +326,12 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item }) => {
                 )}
               </div>
 
-              <div className="flex flex-wrap gap-1">
+              <div className="flex flex-wrap gap-2">
                 {requiredIndices.map((blueprintIndex) => {
                   const component = item.blueprint[blueprintIndex];
                   const dropId = `required-${item.id}-${blueprintIndex}`;
                   const isDropped = !!droppedItemsForThisCard[blueprintIndex];
+
                   return (
                     <RequiredDropZone
                       key={dropId}
@@ -1108,6 +1109,11 @@ const RequiredDropZone: FC<{
               )}
             >
               M
+            </span>
+          )}
+          {component.amount > 1 && (
+            <span className="text-muted-foreground bg-background absolute -top-2 -right-1.5 grid h-5 min-w-[18px] place-items-center rounded-full px-0.5 text-[9px] font-bold">
+              x{component.amount}
             </span>
           )}
         </CardContent>
