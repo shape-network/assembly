@@ -40,6 +40,7 @@ import { toast } from 'sonner';
 import { Address, parseEther, zeroAddress } from 'viem';
 import { useWaitForTransactionReceipt } from 'wagmi';
 import { z } from 'zod';
+import { AssemblyHandbook } from '../handbook';
 
 const defaultFungibleItemData: FungibleItemFormData = {
   name: '',
@@ -695,6 +696,7 @@ export const ItemCreationForm: FC = () => {
           <StepIndicator currentStep={step} totalSteps={4} setStep={setStep} />
         </div>
       </div>
+      <AssemblyHandbook />
 
       {step === 1 && (
         <div className="mx-auto flex w-full max-w-xl flex-col items-center gap-2">
