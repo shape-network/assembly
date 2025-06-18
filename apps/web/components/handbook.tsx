@@ -10,24 +10,25 @@ import {
 } from '@/components/ui/drawer';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ChevronRightIcon } from '@radix-ui/react-icons';
+import { BookOpenText } from 'lucide-react';
 import { CSSProperties, FC, ReactNode, useState } from 'react';
+import { useMediaQuery } from './hooks/useMediaQuery';
 
 export const AssemblyHandbook: FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const isMobile = useMediaQuery('sm');
 
   return (
-    <Drawer direction="right" open={isOpen} onOpenChange={setIsOpen}>
+    <Drawer direction={isMobile ? 'bottom' : 'right'} open={isOpen} onOpenChange={setIsOpen}>
       <DrawerTrigger asChild>
-        <Button size="sm">
-          <span className="hidden md:block">Creation Handbook</span>
+        <Button size={isMobile ? 'icon' : 'lg'}>
+          {isMobile ? <BookOpenText className="size-5" /> : 'Creation Handbook'}
         </Button>
       </DrawerTrigger>
       <DrawerContent
         style={
           {
             '--initial-transform': 'calc(100% + 0.5rem)',
-            maxWidth: '500px',
-            width: '100%',
           } as CSSProperties
         }
       >
@@ -46,7 +47,7 @@ export const AssemblyHandbook: FC = () => {
           </DrawerHeader>
 
           <ScrollArea className="flex-1 overflow-auto">
-            <div className="flex flex-col gap-16 p-5">
+            <div className="flex flex-1 flex-col gap-16 p-5">
               <Section>
                 <ol className="list-decimal space-y-4 pl-5">
                   <li>
