@@ -44,4 +44,7 @@ export const paths = {
     item: (itemId: bigint) =>
       `https://opensea.io/collection/assembly-items?traits=[{"traitType":"Item+ID","values":["${String(itemId)}"]}]`,
   },
+  stack: {
+    profile: (address: string) => `https://stack.shape.network/${address}`,
+  },
 } as const;
