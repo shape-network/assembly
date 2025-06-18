@@ -62,7 +62,7 @@ export type OwnedItem = Item & {
   usagesRemaining: number | null;
 };
 
-export type Trait = { name: string; value: string | number };
+export type Trait = { name: string; value: string | number; link?: string };
 
 export type OtomItem = Molecule & {
   universeHash: Hex;

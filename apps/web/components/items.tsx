@@ -58,7 +58,7 @@ import { usePostHog } from 'posthog-js/react';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { decodeEventLog, formatEther, toEventSelector } from 'viem';
-import { useAccount, useSwitchChain, useWaitForTransactionReceipt } from 'wagmi';
+import { useAccount, useEnsName, useSwitchChain, useWaitForTransactionReceipt } from 'wagmi';
 import { useMediaQuery } from './hooks/useMediaQuery';
 
 export const ItemsToCraft: FC = () => {
@@ -93,6 +93,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item }) => {
   const inventory = data?.pages.flatMap((page) => page.items) || [];
   const [droppedItemsState, setDroppedItemsState] = useAtom(droppedItemsStateAtom);
   const [freezeItemDialogOpen, setFreezeItemDialogOpen] = useState(false);
+  const creatorEns = useEnsName({ address: item.creator, chainId: config.chain.id });
 
   const freezeItemMutation = useWriteOtomItemsCoreContractFreezeItem();
   const freezeReceipt = useWaitForTransactionReceipt({
@@ -305,6 +306,11 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item }) => {
                   ...(item.ethCostInWei
                     ? [{ name: 'Price', value: formatEther(item.ethCostInWei) }]
                     : []),
+                  {
+                    name: 'Creator',
+                    value: creatorEns.data ?? abbreviateHash(item.creator),
+                    link: paths.stack.profile(item.creator),
+                  },
                 ]}
               />
             )}
@@ -963,7 +969,13 @@ const ItemTraits: FC<{ traits: Trait[] }> = ({ traits }) => {
           <div className="text-primary flex items-center gap-2">
             <span>{trait.name === 'Usages Remaining' ? 'Usages' : trait.name}</span>
             <span className="border-muted-foreground/15 flex-grow border-b border-dotted"></span>
-            <span className="font-medium">{trait.value}</span>
+            {trait.link ? (
+              <Link href={trait.link} target="_blank" rel="noopener noreferrer">
+                <span className="font-medium">{trait.value}</span>
+              </Link>
+            ) : (
+              <span className="font-medium">{trait.value}</span>
+            )}
           </div>
         </li>
       ))}
