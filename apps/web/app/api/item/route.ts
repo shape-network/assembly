@@ -71,6 +71,7 @@ async function getItem(itemTokenId: bigint, itemId: bigint): Promise<string> {
         }))
       : [],
     supply: craftCount,
+    balance: 0,
   };
 
   return superjson.stringify(item);
