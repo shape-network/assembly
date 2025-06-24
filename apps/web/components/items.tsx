@@ -451,7 +451,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item }) => {
 };
 
 type OtomItemCardProps = {
-  representativeItem: OtomItem;
+  representativeItem: OtomItem | OwnedItem;
   count: number;
   usedCounts: Map<string, number>;
 };
@@ -491,7 +491,7 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({ representativeItem, count,
 
       // Variable component with exact match criteria
       if (isExactMatchCriteria(b.criteria)) {
-        return checkCriteria(representativeItem, b.criteria);
+        return checkCriteria(representativeItem as OtomItem, b.criteria);
       }
 
       return false;
@@ -504,7 +504,7 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({ representativeItem, count,
       hoveredState.component.itemIdOrOtomTokenId.toString() === representativeItem.tokenId) ||
       (hoveredState.component.componentType === 'variable_otom' &&
         isExactMatchCriteria(hoveredState.component.criteria) &&
-        checkCriteria(representativeItem, hoveredState.component.criteria)));
+        checkCriteria(representativeItem as OtomItem, hoveredState.component.criteria)));
 
   function handleMouseEnter() {
     if (isRequiredInBlueprint && !areAllItemsUsed) {
@@ -517,8 +517,10 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({ representativeItem, count,
   }
 
   const mass =
-    representativeItem.giving_atoms.reduce((acc, atom) => acc + atom.mass, 0) +
-    representativeItem.receiving_atoms.reduce((acc, atom) => acc + atom.mass, 0);
+    'giving_atoms' in representativeItem
+      ? representativeItem.giving_atoms.reduce((acc, atom) => acc + atom.mass, 0) +
+        representativeItem.receiving_atoms.reduce((acc, atom) => acc + atom.mass, 0)
+      : 0;
 
   const isMolecule = !isOtomAtom(representativeItem);
 
@@ -597,11 +599,15 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({ representativeItem, count,
 
       <TooltipContent className="max-w-[300px]">
         <p className="text-base font-semibold">{representativeItem.name}</p>
-        <p className="mb-1">{isMolecule ? 'Molecule (M)' : 'Otom'}</p>
-        <p>Hardness: {representativeItem.hardness.toFixed(3)}</p>
-        <p>Toughness: {representativeItem.toughness.toFixed(3)}</p>
-        <p>Ductility: {representativeItem.ductility.toFixed(3)}</p>
-        <p>Mass: {mass}</p>
+        {'giving_atoms' in representativeItem && (
+          <>
+            <p className="mb-1">{isMolecule ? 'Molecule (M)' : 'Otom'}</p>
+            <p>Hardness: {representativeItem.hardness.toFixed(3)}</p>
+            <p>Toughness: {representativeItem.toughness.toFixed(3)}</p>
+            <p>Ductility: {representativeItem.ductility.toFixed(3)}</p>
+            <p>Mass: {mass}</p>
+          </>
+        )}
         <div className="flex items-center gap-2">
           <p>Token ID: {abbreviateHash(representativeItem.tokenId, 3, 4)}</p>
           <Button
@@ -623,7 +629,7 @@ export const OtomItemCard: FC<OtomItemCardProps> = ({ representativeItem, count,
   );
 };
 
-export const ElementName: FC<{ otom: OtomItem | Molecule; className?: string }> = ({
+export const ElementName: FC<{ otom: OtomItem | Molecule | OwnedItem; className?: string }> = ({
   otom,
   className,
 }) => {
@@ -632,7 +638,7 @@ export const ElementName: FC<{ otom: OtomItem | Molecule; className?: string }> 
   return (
     <div className={cn('relative p-0.5 select-none', className)}>
       <span className="flex items-center">
-        {isAtom && (
+        {isAtom && 'giving_atoms' in otom && (
           <span className="mr-0.5 inline-block text-right text-xs">
             <sup className="block leading-1.5 font-semibold">
               {otom.giving_atoms[0].nucleus.nucleons}
