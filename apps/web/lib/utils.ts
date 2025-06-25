@@ -18,11 +18,13 @@ export function abbreviateHash(
   } else if (typeof hash === 'string') {
     hashString = hash.startsWith('0x') ? hash.slice(2) : hash;
   } else {
-    throw new Error('Invalid hash format. Expected string or Buffer.');
+    console.error('Invalid hash format. Expected string or Buffer.');
+    return '';
   }
 
   if (hashString.length < prefixLength + suffixLength) {
-    throw new Error('Hash is too short to abbreviate.');
+    // Hash is too short to abbreviate
+    return hashString;
   }
 
   const prefix = hashString.slice(0, prefixLength);

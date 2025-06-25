@@ -1,9 +1,9 @@
-import { BlueprintComponent, OtomItem } from '@/lib/types';
+import { BlueprintComponent, OtomItem, OwnedItem } from '@/lib/types';
 import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
 
 export const hoveredOtomItemAtom = atom<{
-  item?: OtomItem | null;
+  item?: OtomItem | OwnedItem | null;
   component?: BlueprintComponent;
 } | null>(null);
 

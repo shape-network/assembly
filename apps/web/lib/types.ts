@@ -60,6 +60,7 @@ export type OwnedItem = Item & {
   tokenId: string;
   tier: number | null;
   usagesRemaining: number | null;
+  balance: number;
 };
 
 export type Trait = { name: string; value: string | number; link?: string };
@@ -67,6 +68,7 @@ export type Trait = { name: string; value: string | number; link?: string };
 export type OtomItem = Molecule & {
   universeHash: Hex;
   tokenId: string;
+  balance: number;
 };
 
 // Otom-related types
