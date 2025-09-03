@@ -109,4 +109,7 @@ export async function getBlueprintForItem(
 
 export const HIDDEN_ITEMS: bigint[] = [
   BigInt(1), // test pickaxe
+  BigInt(18), // spam
+  BigInt(19), // spam
+  BigInt(20), // spam
 ];
