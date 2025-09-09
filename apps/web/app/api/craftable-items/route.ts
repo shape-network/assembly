@@ -21,7 +21,7 @@ async function getCraftItems(): Promise<string> {
 
   const filteredResults = config.chain.testnet
     ? results
-    : results.filter((r) => !HIDDEN_ITEMS.includes(r.id));
+    : results.filter((r) => !HIDDEN_ITEMS.includes(Number(r.id)));
 
   const frozenResponses = await rpc.multicall({
     contracts: filteredResults.map((r) => ({

@@ -107,6 +107,21 @@ export async function getBlueprintForItem(
   };
 }
 
-export const HIDDEN_ITEMS: bigint[] = [
-  BigInt(1), // test pickaxe
+export const HIDDEN_ITEMS: number[] = [
+  1, // test pickaxe
+  9, // spam
+  10, // spam
+  11, // spam
+  15, // spam
+  16, // spam
+  17, // spam
+  18, // spam
+  19, // spam
+  20, // spam
+  22, // spam
+  23, // spam
+  24, // spam
+  25, // spam
+  26, // spam
+  27, // spam
 ];
