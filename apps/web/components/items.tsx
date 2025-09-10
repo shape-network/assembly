@@ -209,7 +209,7 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item }) => {
         </Badge>
       )}
 
-      <Card className="relative w-full">
+      <Card className="group relative w-full">
         <CraftItemButton
           droppedItemsState={droppedItemsState}
           isCraftable={isCraftable}
@@ -400,11 +400,9 @@ const ItemToCraftCard: FC<ItemToCraftCardProps> = ({ item }) => {
           </div>
         </CardContent>
 
-        {process.env.NODE_ENV === 'development' && (
-          <p className="text-muted-foreground/50 absolute right-2 bottom-1 text-xs">
-            dev itemId: {item.id}
-          </p>
-        )}
+        <p className="text-muted-foreground/50 absolute right-1 bottom-0.5 text-xs opacity-0 transition-opacity group-hover:opacity-100">
+          ID: {item.id}
+        </p>
       </Card>
 
       <Dialog open={freezeItemDialogOpen} onOpenChange={setFreezeItemDialogOpen}>
