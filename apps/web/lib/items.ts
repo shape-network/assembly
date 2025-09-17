@@ -132,4 +132,5 @@ export const HIDDEN_ITEMS: number[] = [
   32, //spam
   33, //spam
   34, //spam
+  35, //spam
 ];
