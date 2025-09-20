@@ -2,6 +2,7 @@ import {
   Atom,
   Molecule,
   OtomItem,
+  OwnedItem,
   SolidityCompatibleAtom,
   SolidityCompatibleMolecule,
 } from '@/lib/types';
@@ -61,6 +62,10 @@ function solidityAtomToAtom(a: SolidityCompatibleAtom): Atom {
   };
 }
 
-export function isOtomAtom(otom: OtomItem | Molecule): boolean {
+export function isOtomAtom(otom: OtomItem | Molecule | OwnedItem): boolean {
+  if (!('giving_atoms' in otom) || !('receiving_atoms' in otom)) {
+    return false;
+  }
+
   return (otom.giving_atoms?.length ?? 0) + (otom.receiving_atoms?.length ?? 0) === 1;
 }
