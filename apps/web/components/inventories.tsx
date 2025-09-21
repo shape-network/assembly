@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { isOtomAtom } from '@/lib/otoms';
 import { paths } from '@/lib/paths';
-import type { OtomItem } from '@/lib/types';
+import type { OtomItem, OwnedItem } from '@/lib/types';
 import { ExternalLinkIcon } from '@radix-ui/react-icons';
 import { usePathname } from 'next/navigation';
 import { useDeferredValue, useEffect, useMemo, useState, type FC } from 'react';
@@ -20,9 +20,9 @@ import { useInView } from 'react-intersection-observer';
 import { InlineLink } from './ui/link';
 
 type GroupedOtomItems = {
-  representativeItem: OtomItem;
+  representativeItem: OtomItem | OwnedItem;
   count: number;
-  allItems: OtomItem[];
+  allItems: (OtomItem | OwnedItem)[];
 };
 
 export const OtomsInventory: FC<{ usedCounts: Map<string, number> }> = ({ usedCounts }) => {
@@ -37,6 +37,8 @@ export const OtomsInventory: FC<{ usedCounts: Map<string, number> }> = ({ usedCo
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
     useGetOtomItemsForUser();
+
+  const { data: itemsData = [] } = useGetItemsForUser();
 
   useEffect(() => {
     if ((moleculesInView || otomsInView) && hasNextPage && !isFetchingNextPage) {
@@ -53,7 +55,7 @@ export const OtomsInventory: FC<{ usedCounts: Map<string, number> }> = ({ usedCo
     const molecules = filteredItems.filter((item) => !isOtomAtom(item));
     const otoms = filteredItems.filter((item) => isOtomAtom(item));
 
-    const groupItems = (items: OtomItem[]): GroupedOtomItems[] => {
+    const groupOtomItems = (items: OtomItem[]): GroupedOtomItems[] => {
       const groups = new Map<string, GroupedOtomItems>();
       for (const item of items) {
         if (groups.has(item.tokenId)) {
@@ -72,12 +74,32 @@ export const OtomsInventory: FC<{ usedCounts: Map<string, number> }> = ({ usedCo
         a.representativeItem.name.localeCompare(b.representativeItem.name)
       );
     };
+    const groupItems = (items: OwnedItem[]): GroupedOtomItems[] => {
+      const groups = new Map<string, GroupedOtomItems>();
+      for (const item of items) {
+        if (groups.has(item.tokenId)) {
+          const group = groups.get(item.tokenId)!;
+          group.count++;
+          group.allItems.push(item);
+        } else {
+          groups.set(item.tokenId, {
+            representativeItem: item,
+            count: 1 + (item?.balance ?? 0),
+            allItems: [item],
+          });
+        }
+      }
+      return Array.from(groups.values()).sort((a, b) =>
+        a.representativeItem.name.localeCompare(b.representativeItem.name)
+      );
+    };
 
     return {
-      molecules: groupItems(molecules),
-      otoms: groupItems(otoms),
+      molecules: groupOtomItems(molecules),
+      otoms: groupOtomItems(otoms),
+      items: groupItems(itemsData),
     };
-  }, [data?.pages, deferredSearchTerm]);
+  }, [data?.pages, deferredSearchTerm, itemsData]);
 
   if (isLoading) {
     return <InventorySkeleton />;
@@ -92,6 +114,7 @@ export const OtomsInventory: FC<{ usedCounts: Map<string, number> }> = ({ usedCo
 
   const moleculesAmount = inventory.molecules.reduce((acc, group) => acc + group.count, 0);
   const otomsAmount = inventory.otoms.reduce((acc, group) => acc + group.count, 0);
+  const itemsAmount = inventory.items.reduce((acc, group) => acc + group.count, 0);
   const isCreatePage = pathname === paths.create;
 
   return (
@@ -123,6 +146,25 @@ export const OtomsInventory: FC<{ usedCounts: Map<string, number> }> = ({ usedCo
           disabled={isInventoryEmpty}
         />
 
+        {itemsAmount > 0 && (
+          <div className="flex flex-col gap-2">
+            <h3 className="text-muted-foreground text-sm">Assembly Items ({itemsAmount})</h3>
+            <ul className="grid grid-cols-[repeat(auto-fill,minmax(64px,1fr))] items-start gap-2 rounded sm:flex sm:flex-wrap">
+              {inventory.items.map((group) => (
+                <OtomItemCard
+                  key={group.representativeItem.tokenId}
+                  representativeItem={group.representativeItem}
+                  count={group.count}
+                  usedCounts={usedCounts}
+                />
+              ))}
+            </ul>
+            <div ref={moleculesRef} className="text-muted-foreground text-xs">
+              {isFetchingNextPage && 'Loading more...'}
+            </div>
+          </div>
+        )}
+
         {moleculesAmount > 0 && (
           <div className="flex flex-col gap-2">
             <h3 className="text-muted-foreground text-sm">Molecules ({moleculesAmount})</h3>
@@ -130,7 +172,7 @@ export const OtomsInventory: FC<{ usedCounts: Map<string, number> }> = ({ usedCo
               {inventory.molecules.map((group) => (
                 <OtomItemCard
                   key={group.representativeItem.tokenId}
-                  representativeItem={group.representativeItem}
+                  representativeItem={group.representativeItem as OtomItem}
                   count={group.count}
                   usedCounts={usedCounts}
                 />
@@ -158,7 +200,7 @@ export const OtomsInventory: FC<{ usedCounts: Map<string, number> }> = ({ usedCo
               {inventory.otoms.map((group) => (
                 <OtomItemCard
                   key={group.representativeItem.tokenId}
-                  representativeItem={group.representativeItem}
+                  representativeItem={group.representativeItem as OtomItem}
                   count={group.count}
                   usedCounts={usedCounts}
                 />

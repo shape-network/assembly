@@ -1,4 +1,4 @@
-import { BlueprintComponent, OtomItem } from './types';
+import { BlueprintComponent, OtomItem, OwnedItem } from './types';
 
 // Maps the PropertyType enum values from IOtomItemsCore.sol
 // to the corresponding property path within the OtomItem/Atom types (lib/types.ts)
@@ -81,7 +81,10 @@ export function getNestedValue(obj: Record<string, unknown>, path: PropertyPath)
   }
 }
 
-export function checkCriteria(item: OtomItem, criteria: BlueprintComponent['criteria']): boolean {
+export function checkCriteria(
+  item: OtomItem | OwnedItem,
+  criteria: BlueprintComponent['criteria']
+): boolean {
   // Basic validation of inputs
   if (!item || !criteria || criteria.length === 0) {
     console.log('checkCriteria: Invalid item or criteria input.');
@@ -95,7 +98,11 @@ export function checkCriteria(item: OtomItem, criteria: BlueprintComponent['crit
     return mapping?.path?.[0] === 'giving_atoms';
   });
 
-  if (needsAtom && (!item.giving_atoms || item.giving_atoms.length === 0)) {
+  if (
+    needsAtom &&
+    'giving_atoms' in item &&
+    (!item.giving_atoms || item.giving_atoms.length === 0)
+  ) {
     console.warn('Criteria requires atom properties, but item has no giving_atoms.');
     return false;
   }

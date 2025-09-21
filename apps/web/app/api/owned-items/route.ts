@@ -103,6 +103,7 @@ export async function POST(request: Request) {
               }))
             : [],
           supply: craftCount,
+          balance: Number(nft.balance),
         };
       } catch (e) {
         console.error(e);
